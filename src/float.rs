@@ -1,0 +1,1 @@
+type Inner = f64;
