@@ -2,23 +2,21 @@ use ::std::ops::*;
 
 macro_rules! primitives {
     ($(
-        pub struct $Wrapper:ident {
-            wrapping $Inner:path;
-            $(try_from $($try_from:path ),+;);*
-            $(deriving $($deriving:path ),+;)*
-            $(operator $($trait:ident::$method:ident ),+;)*
+        pub struct $Wrapper:ident($Inner:path) {
+            $(from_any { $($from_any:path ),+ });*
+            $(from_some { $($from_some:path ),+ });*
+            $(rounded_from { $($rounded_from:path ),+ });*
+            $(rounded_from_some { $($rounded_from_some:path ),+ });*
+            $(derive { $($derive:path ),+ });*
+            $(derive_more { $($derive_more:ident ),+ });*
+            $(derive_unary_ops { $($unary_trait:ident::$unary_method:ident ),+ });*
+            $(derive_binary_ops { $($binary_trait:ident::$binary_method:ident ),+ });*
         }
     )+) => {$(
         #[derive(
-            Clone,
-            Copy,
-            PartialEq,
-            PartialOrd,
-            derive_more::Display,
-            derive_more::DebugCustom,
-            derive_more::From,
-            derive_more::Into
-            $($(, $deriving)*)*
+            Clone
+            $($(, $derive)*)*
+            $($(, derive_more::$derive_more)*)*
         )]
 
         pub struct $Wrapper(pub $Inner);
@@ -49,22 +47,21 @@ macro_rules! primitives {
         }
 
         $($(
-            impl From<$try_from> for $Wrapper {
-                fn from(other: $try_from) -> $Wrapper {
+            impl From<$from_any> for $Wrapper {
+                fn from(other: $from_any) -> $Wrapper {
                     $Wrapper::try_from(other).unwrap()
                 }
             }
         )*)*
 
         primitives_impl_operators_1!{
-            {wrapper=$Wrapper}
-            {try_from=$({
-                $($try_from);*
-            });*}
-            names_and_methods=[
+            wrapper = $Wrapper;
+            try_from = $(
+                $($from_any),*
+            ),*;
+            traits_and_methods = [
                 $($(
-                    $trait
-                    $method
+                    [$binary_trait $binary_method]
                 )*)*
             ]
         }
@@ -73,44 +70,45 @@ macro_rules! primitives {
 
 macro_rules! primitives_impl_operators_1 {
     {
-        {wrapper=$Wrapper:ident}
-        {try_from=$({
-            $($try_from:path);*
-        });*}
-        names_and_methods=[$TraitsAndMethods:tt]
+        wrapper = $Wrapper:ident;
+        try_from = $($try_from:path),*;
+        traits_and_methods = $TraitsAndMethods:tt
     } => {
         primitives_impl_operators_2!{
-            {wrapper=$Wrapper}
-            {try_from={
-                $($($try_from);*)*
-            }}
-            {names_and_methods=[
-                $TraitsAndMethods
-            ]}
+            wrapper = $Wrapper;
+            $(pairs = {
+                try_from = $try_from;
+                traits_and_methods = $TraitsAndMethods
+            }),*
         }
     }
 }
 
 macro_rules! primitives_impl_operators_2 {
     {
-        {wrapper=$Wrapper:ident}
-        {try_from={
-            $($try_from:path);*
-        }}
-        {names_and_methods=[
-            $(
-                $trait:ident
-                $method:ident
-            )*
-        ]}
+        wrapper = $Wrapper:ident;
+        $(pairs = {
+            try_from = $try_from:path;
+            traits_and_methods = [$([$trait:ident $method:ident])*]
+        }),*
     } => {
         $(
             $(
-                impl<T: Into<$Wrapper>> $try_from<T> for $Wrapper {
+                impl ::std::ops::$trait<$try_from> for $Wrapper {
                     type Output = $Wrapper;
 
-                    fn $method(self, other: T) -> $Wrapper {
-                        $Wrapper(self.0 + other.into().0)
+                    fn $method(self, other: $try_from) -> $Wrapper {
+                        let other: $Wrapper = other.into();
+                        $Wrapper(self.0.$method(other.0))
+                    }
+                }
+
+                impl ::std::ops::$trait<$Wrapper> for $try_from {
+                    type Output = $Wrapper;
+
+                    fn $method(self, other: $Wrapper) -> $Wrapper {
+                        let self_: $Wrapper = self.into();
+                        $Wrapper(self_.0.$method(other.0))
                     }
                 }
             )*
@@ -119,26 +117,52 @@ macro_rules! primitives_impl_operators_2 {
 }
 
 primitives! {
-    pub struct Int {
-        wrapping i128;
-        try_from usize, u8, u16, u32, u64, u128,
-                 isize, i8, i16, i32, i64;
-        deriving Eq, Ord, Hash;
-        operator Add::add, Sub::sub, Mul::mul, Div::div;
+    pub struct Int(i128) {
+        from_any { usize, u8, u16, u32, u64, isize, i8, i16, i32, i64 }
+        from_some { u128 }
+        rounded_from_some { f32, f64 }
+        derive { Copy, PartialEq, Eq, PartialOrd, Ord, Hash }
+        derive_more { Display, DebugCustom, From, Into }
+        derive_unary_ops {
+            Neg::neg,
+            Not::not
+        }
+        derive_binary_ops {
+            Add::add,
+            Sub::sub,
+            Mul::mul,
+            Div::div,
+            BitAnd::bitand,
+            BitOr::bitor,
+            BitXor::bitxor,
+            Rem::rem,
+            Shl::shl,
+            Shr::shr
+        }
     }
 
-    pub struct Offset {
-        wrapping isize;
-        try_from usize, u8, u16, u32, u64, u128,
-                        i8, i16, i32, i64, i128;
-        deriving Eq, Ord;
-        operator Add::add, Sub::sub, Mul::mul, Div::div;
+    pub struct Float(f64) {
+        from_any { f32 }
+        from_some { u8, u16, u32, i8, i16, i32 }
+        rounded_from { usize, u64, u128, isize, i64, i128 }
+        derive { Copy }
+        derive_more { Display, DebugCustom, From, Into }
+        derive_unary_ops {
+            Not::not
+        }
+        derive_binary_ops {
+            Add::add,
+            Sub::sub,
+            Mul::mul,
+            Div::div
+        }
     }
+}
 
-    pub struct Float {
-        wrapping f64;
-        try_from f32,
-                 i8, i16, i32,
-                 u8, u16, u32;
-    }
+pub trait IntParsable {
+    fn to_int(&self) -> Int;
+}
+
+pub fn int(n: impl IntParsable) -> Int {
+    n.to_int()
 }

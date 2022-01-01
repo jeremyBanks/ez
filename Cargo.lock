@@ -1275,7 +1275,7 @@ dependencies = [
  "serde_json",
  "serde_urlencoded",
  "slabmap",
- "slice-deque",
+ "slice-ring-buffer",
  "slotmap",
  "static-rc",
  "thousands",
@@ -1613,10 +1613,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d526e30fe57e8906c7810f029d691f20632e4debf1206a368c368dc04bc752dd"
 
 [[package]]
-name = "slice-deque"
-version = "0.3.0"
+name = "slice-ring-buffer"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31ef6ee280cdefba6d2d0b4b78a84a1c1a3f3a4cec98c2d4231c8bc225de0f25"
+checksum = "fcc8eb449302fd7a6672a999c6846311a43865aaec54083948b911829a20d893"
 dependencies = [
  "libc",
  "mach",
