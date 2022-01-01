@@ -1,13 +1,10 @@
-use ::{
-    derive_more::{self, DebugCustom, Display},
-    std::ops::*,
-};
+use ::std::ops::*;
 
 macro_rules! primitives {
     ($(
-        pub struct $name:ident {
-            wrapping $inner:path;
-            $(try_from $($try_from:path ),+;)*
+        pub struct $Wrapper:ident {
+            wrapping $Inner:path;
+            $(try_from $($try_from:path ),+;);*
             $(deriving $($deriving:path ),+;)*
             $(operator $($trait:ident::$method:ident ),+;)*
         }
@@ -24,65 +21,101 @@ macro_rules! primitives {
             $($(, $deriving)*)*
         )]
 
-        pub struct $name(pub $inner);
+        pub struct $Wrapper(pub $Inner);
 
-        impl Deref for $name {
-            type Target = $inner;
-            fn deref(&self) -> &$inner {
+        impl Deref for $Wrapper {
+            type Target = $Inner;
+            fn deref(&self) -> &$Inner {
                 &self.0
             }
         }
 
-        impl DerefMut for $name {
-            fn deref_mut(&mut self) -> &mut $inner {
+        impl DerefMut for $Wrapper {
+            fn deref_mut(&mut self) -> &mut $Inner {
                 &mut self.0
             }
         }
 
-        impl From<bool> for $name {
-            fn from(other: bool) -> $name {
-                $name(if other { 1u8.into() } else { 0u8.into() })
+        impl From<bool> for $Wrapper {
+            fn from(other: bool) -> $Wrapper {
+                $Wrapper(if other { 1u8.into() } else { 0u8.into() })
             }
         }
 
-        impl From<$name> for bool {
-            fn from(other: $name) -> bool {
+        impl From<$Wrapper> for bool {
+            fn from(other: $Wrapper) -> bool {
                 other.0 != 0u8.into()
             }
         }
 
-
         $($(
-            impl<T: Into<$name>> $trait<T> for $name {
-                type Output = $name;
-
-                fn $method(self, other: T) -> $name {
-                    $name(self.0 + other.into().0)
+            impl From<$try_from> for $Wrapper {
+                fn from(other: $try_from) -> $Wrapper {
+                    $Wrapper::try_from(other).unwrap()
                 }
             }
         )*)*
 
-        $($(
-            impl From<$try_from> for $name {
-                fn from(other: $try_from) -> $name {
-                    $name::try_from(other).unwrap()
-                }
-            }
-        )*)*
+        primitives_impl_operators_1!{
+            {wrapper=$Wrapper}
+            {try_from=$({
+                $($try_from);*
+            });*}
+            names_and_methods=[
+                $($(
+                    $trait
+                    $method
+                )*)*
+            ]
+        }
     )+};
+}
 
-    (@trait_impl $trait:ident @ ($($try_from:path),*)) => {
-        $($(
-            impl $trait<$try_from> for $name {
-                type Output = $name;
+macro_rules! primitives_impl_operators_1 {
+    {
+        {wrapper=$Wrapper:ident}
+        {try_from=$({
+            $($try_from:path);*
+        });*}
+        names_and_methods=[$TraitsAndMethods:tt]
+    } => {
+        primitives_impl_operators_2!{
+            {wrapper=$Wrapper}
+            {try_from={
+                $($($try_from);*)*
+            }}
+            {names_and_methods=[
+                $TraitsAndMethods
+            ]}
+        }
+    }
+}
 
-                fn $method(self, other: $try_from) -> $name {
-                    let other: $name = other.into();
-                    $name(self.0.add(other.0))
+macro_rules! primitives_impl_operators_2 {
+    {
+        {wrapper=$Wrapper:ident}
+        {try_from={
+            $($try_from:path);*
+        }}
+        {names_and_methods=[
+            $(
+                $trait:ident
+                $method:ident
+            )*
+        ]}
+    } => {
+        $(
+            $(
+                impl<T: Into<$Wrapper>> $try_from<T> for $Wrapper {
+                    type Output = $Wrapper;
+
+                    fn $method(self, other: T) -> $Wrapper {
+                        $Wrapper(self.0 + other.into().0)
+                    }
                 }
-            }
-        )*)*
-    };
+            )*
+        )*
+    }
 }
 
 primitives! {
