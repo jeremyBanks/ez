@@ -322,6 +322,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "crunchy"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
+
+[[package]]
 name = "ctor"
 version = "0.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -359,6 +365,67 @@ name = "dotenv"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
+
+[[package]]
+name = "easy_as_py"
+version = "0.0.0"
+dependencies = [
+ "ambassador",
+ "boolinator",
+ "bytes",
+ "clap",
+ "color-eyre",
+ "crossbeam",
+ "derive_more",
+ "dotenv",
+ "educe",
+ "erased-serde",
+ "eyre",
+ "getset",
+ "ghost-cell",
+ "image",
+ "indexmap",
+ "inherent",
+ "itertools",
+ "lazy-regex",
+ "lazy_static",
+ "log",
+ "macro_rules_attribute",
+ "num-bigint",
+ "num-traits",
+ "once_cell",
+ "parking_lot",
+ "paste",
+ "prost",
+ "qcell",
+ "rand",
+ "rayon",
+ "re",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_urlencoded",
+ "slabmap",
+ "slice-ring-buffer",
+ "slotmap",
+ "static-rc",
+ "thousands",
+ "threadstack",
+ "time",
+ "tokio",
+ "tracing",
+ "tracing-error",
+ "tracing-futures",
+ "tracing-log",
+ "tracing-serde",
+ "tracing-subscriber",
+ "tracing-unwrap",
+ "typed-arena",
+ "typetag",
+ "uint",
+]
 
 [[package]]
 name = "educe"
@@ -587,6 +654,12 @@ checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "http"
@@ -1236,64 +1309,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pyelude"
-version = "0.0.0"
-dependencies = [
- "ambassador",
- "boolinator",
- "bytes",
- "clap",
- "color-eyre",
- "crossbeam",
- "derive_more",
- "dotenv",
- "educe",
- "erased-serde",
- "eyre",
- "getset",
- "ghost-cell",
- "image",
- "indexmap",
- "inherent",
- "itertools",
- "lazy-regex",
- "lazy_static",
- "log",
- "macro_rules_attribute",
- "once_cell",
- "parking_lot",
- "paste",
- "prost",
- "qcell",
- "rand",
- "rayon",
- "re",
- "regex",
- "reqwest",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_urlencoded",
- "slabmap",
- "slice-ring-buffer",
- "slotmap",
- "static-rc",
- "thousands",
- "threadstack",
- "time",
- "tokio",
- "tracing",
- "tracing-error",
- "tracing-futures",
- "tracing-log",
- "tracing-serde",
- "tracing-subscriber",
- "tracing-unwrap",
- "typed-arena",
- "typetag",
-]
-
-[[package]]
 name = "qcell"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1655,6 +1670,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "83b7d8e792a05af115e097af2513e1c28ac1b993bcc553e56bcf14d1e954e8ff"
 
 [[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
 name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1972,6 +1993,18 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "uint"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6470ab50f482bde894a037a57064480a246dbfdd5960bd65a44824693f08da5f"
+dependencies = [
+ "byteorder",
+ "crunchy",
+ "hex",
+ "static_assertions",
 ]
 
 [[package]]

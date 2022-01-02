@@ -3,14 +3,14 @@ use ::std::ops::*;
 macro_rules! primitives {
     ($(
         pub struct $Wrapper:ident($Inner:path) {
-            $(from_any { $($from_any:path ),+ });*
-            $(from_some { $($from_some:path ),+ });*
-            $(rounded_from { $($rounded_from:path ),+ });*
-            $(rounded_from_some { $($rounded_from_some:path ),+ });*
-            $(derive { $($derive:path ),+ });*
-            $(derive_more { $($derive_more:ident ),+ });*
-            $(derive_unary_ops { $($unary_trait:ident::$unary_method:ident ),+ });*
-            $(derive_binary_ops { $($binary_trait:ident::$binary_method:ident ),+ });*
+            $(from_any { $($from_any:path ),* });*
+            $(from_some { $($from_some:path ),* });*
+            $(rounded_from { $($rounded_from:path ),* });*
+            $(rounded_from_some { $($rounded_from_some:path ),* });*
+            $(derive { $($derive:path ),* });*
+            $(derive_more { $($derive_more:ident ),* });*
+            $(derive_unary_ops { $($unary_trait:ident::$unary_method:ident ),* });*
+            $(derive_binary_ops { $($binary_trait:ident::$binary_method:ident ),* });*
         }
     )+) => {$(
         #[derive(
@@ -42,17 +42,9 @@ macro_rules! primitives {
 
         impl From<$Wrapper> for bool {
             fn from(other: $Wrapper) -> bool {
-                other.0 != 0u8.into()
+                other.0
             }
         }
-
-        $($(
-            impl From<$from_any> for $Wrapper {
-                fn from(other: $from_any) -> $Wrapper {
-                    $Wrapper::try_from(other).unwrap()
-                }
-            }
-        )*)*
 
         primitives_impl_operators_1!{
             wrapper = $Wrapper;
@@ -118,15 +110,29 @@ macro_rules! primitives_impl_operators_2 {
 
 primitives! {
     pub struct Int(i128) {
+        // All values of these types can be exactly represented by an Int.
+        // Implements From<each of these types> for Self.
         from_any { usize, u8, u16, u32, u64, isize, i8, i16, i32, i64 }
+        // Some values of these types can be represented exactly by an Int.
+        // Other values are out-of-bounds and can not be represented.
+        // Implements TryFrom<each of these types> for Self.
         from_some { u128 }
-        rounded_from_some { f32, f64 }
+        // All values of these types can be approximately represented by an Int.
+        // They may experience rounding, but they will not be out-of-bounds.
+        rounded_from { }
+        // Some values of these types can be approximately represented by an Int.
+        // Some may experience rounding, and some will be out-of-bounds.
+        rounded_from_some { }
+        // Derive these traits using std.
         derive { Copy, PartialEq, Eq, PartialOrd, Ord, Hash }
+        // Derive these traits using the derive_more crate.
         derive_more { Display, DebugCustom, From, Into }
+        // Derive these traits delegating standard unary operators.
         derive_unary_ops {
             Neg::neg,
             Not::not
         }
+        // Derive these traits delegating standard binary operators.
         derive_binary_ops {
             Add::add,
             Sub::sub,
@@ -144,7 +150,7 @@ primitives! {
     pub struct Float(f64) {
         from_any { f32 }
         from_some { u8, u16, u32, i8, i16, i32 }
-        rounded_from { usize, u64, u128, isize, i64, i128 }
+        rounded_from { Int, usize, u64, u128, isize, i64, i128 }
         derive { Copy }
         derive_more { Display, DebugCustom, From, Into }
         derive_unary_ops {
