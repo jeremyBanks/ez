@@ -135,9 +135,35 @@ pub fn int(value: impl CoerceToInt) -> Int {
 }
 
 fn main() {
-    dotenv::dotenv().ok();
-    color_eyre::install().ok();
+    global_init();
 
     println!("{:?}", int(2) * *int(8));
     println!("{:?}", int(2) * 1e100.try_to_int());
+}
+
+fn global_init() {
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    ONCE.call_once(|| {
+        if let Err(err) = dotenv::dotenv() {
+            tracing::error!("Failed to initialize dotenv (.env file loading): {}", err);
+        }
+        if let Err(err) = color_eyre::install() {
+            tracing::error!("Failed to initialize eyre (error formatting): {}", err);
+        }
+        if let Err(err) = tracing_subscriber::util::SubscriberInitExt::try_init(
+            tracing_subscriber::Layer::with_subscriber(
+                tracing_error::ErrorLayer::default(),
+                tracing_subscriber::fmt()
+                    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+                    .with_target(false)
+                    .with_span_events(
+                        tracing_subscriber::fmt::format::FmtSpan::NEW
+                            | tracing_subscriber::fmt::format::FmtSpan::CLOSE,
+                    )
+                    .finish(),
+            ),
+        ) {
+            tracing::error!("Failed to initialize tracing (logging): {}", err);
+        }
+    })
 }

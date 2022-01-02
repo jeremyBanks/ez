@@ -62,6 +62,7 @@ num-bigint = "0.4.3"
 num-traits = "0.2.14"
 uint = "0.9.1"
 ordered-float = "2.8.0"
+use = "0.0.0"
 
 [profile.dev.package.backtrace]
 opt-level = 3

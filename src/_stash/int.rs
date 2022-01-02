@@ -1,4 +1,91 @@
-use ::std::ops::*;
+use ::core::ops::*;
+use ::paste::paste;
+use ::eyre::{bail as throw, eyre as error, ensure as assert, WrapErr as _};
+
+pub type Fallible<T> = Result<T, ::eyre::Report>;
+
+trait ToExact<T> {
+    fn to_exact(&self) -> T;
+}
+
+trait ToApproximate<T> {
+    fn to_approximate(&self) -> T;
+}
+
+trait TryToExact<T> {
+    fn try_to_exact(&self) -> Fallible<T>;
+}
+
+trait TryToApproximate<T> {
+    fn try_to_approximate(&self) -> Fallible<T>;
+}
+
+def! {
+    name = Int;
+
+    inner_type = i128;
+
+    implicit_from = {
+        bool, u8, u16, u32, u64, usize,
+        i8, i16, i32, i64, i128, isize,
+    };
+    // Gives us int(true), int(10usize)
+    // Gives us int(3).unwrap_u8() (panicking)
+    // Gives us int(3).u8() (result, like TryInto but shorter)
+    // Gives us u8::try_from(int(3)).unwrap()
+
+    // Should we implicitly cast *TO* usize when operating with it?
+    // Would that give us 0+some int as a valid index? Probably would confuse inference
+
+    implicit_try_from = {
+        u128,
+    };
+
+    explicit_from = {};
+
+    explicit_try_from = {
+        f32, f64, Float,
+    };
+
+    explicit_parse_from = {
+        &str,
+        String,
+    };
+
+    derive_std = {
+        Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
+    };
+
+    derive_more = {
+        Display, DebugCustom, From, Into,
+    };
+
+    derive_unary_operations = {
+        Neg::neg,
+        Not::not,
+    };
+
+    derive_binary_operations = {
+        Add::add,
+        Sub::sub,
+        Mul::mul,
+        Div::div,
+        BitAnd::bitand,
+        BitOr::bitor,
+        BitXor::bitxor,
+        Rem::rem,
+        Shl::shl,
+        Shr::shr,
+    };
+}
+
+pub trait IntParsable {
+    fn to_int(&self) -> Int;
+}
+
+pub fn int(n: impl IntParsable) -> Int {
+    n.to_int()
+}
 
 macro_rules! primitives {
     ($(
@@ -94,69 +181,4 @@ macro_rules! primitives_impl_operators_2 {
             )*
         )*
     }
-}
-
-primitives! {
-    pub struct Int(i128) {
-        // All values of these types can be exactly represented by an Int.
-        // Implements From<each of these types> for Self.
-        From { usize, u8, u16, u32, u64, isize, i8, i16, i32, i64, i128 }
-        // Some values of these types can be represented exactly by an Int.
-        // Other values are out-of-bounds and can not be represented.
-        // Implements TryFrom<each of these types> for Self.
-        TryFrom { u128 }
-        // All values of these types can be approximately represented by an Int.
-        // They may experience rounding, but they will not be out-of-bounds.
-        ApproximateFrom { }
-        // Some values of these types can be approximately represented by an Int.
-        // Some may experience rounding, and some will be out-of-bounds.
-        TryApproximateFrom { f32, f64 }
-        // Derive these traits using std.
-        derive { Copy, PartialEq, Eq, PartialOrd, Ord, Hash }
-        // Derive these traits using the derive_more crate.
-        derive_more { Display, DebugCustom, From, Into }
-        // Derive these traits delegating standard unary operators.
-        derive_unary_ops {
-            Neg::neg,
-            Not::not
-        }
-        // Derive these traits delegating standard binary operators.
-        derive_binary_ops {
-            Add::add,
-            Sub::sub,
-            Mul::mul,
-            Div::div,
-            BitAnd::bitand,
-            BitOr::bitor,
-            BitXor::bitxor,
-            Rem::rem,
-            Shl::shl,
-            Shr::shr
-        }
-    }
-
-    pub struct Float(f64) {
-        from_any { f32 }
-        from_some { u8, u16, u32, i8, i16, i32 }
-        rounded_from { Int, usize, u64, u128, isize, i64, i128 }
-        derive { Copy }
-        derive_more { Display, DebugCustom, From, Into }
-        derive_unary_ops {
-            Not::not
-        }
-        derive_binary_ops {
-            Add::add,
-            Sub::sub,
-            Mul::mul,
-            Div::div
-        }
-    }
-}
-
-pub trait IntParsable {
-    fn to_int(&self) -> Int;
-}
-
-pub fn int(n: impl IntParsable) -> Int {
-    n.to_int()
 }
