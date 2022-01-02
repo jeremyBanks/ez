@@ -14,25 +14,13 @@ macro_rules! primitives {
         }
     )+) => {$(
         #[derive(
+            Default,
             Clone
             $($(, $derive)*)*
             $($(, derive_more::$derive_more)*)*
         )]
 
         pub struct $Wrapper(pub $Inner);
-
-        impl Deref for $Wrapper {
-            type Target = $Inner;
-            fn deref(&self) -> &$Inner {
-                &self.0
-            }
-        }
-
-        impl DerefMut for $Wrapper {
-            fn deref_mut(&mut self) -> &mut $Inner {
-                &mut self.0
-            }
-        }
 
         impl From<bool> for $Wrapper {
             fn from(other: bool) -> $Wrapper {
@@ -112,17 +100,17 @@ primitives! {
     pub struct Int(i128) {
         // All values of these types can be exactly represented by an Int.
         // Implements From<each of these types> for Self.
-        from_any { usize, u8, u16, u32, u64, isize, i8, i16, i32, i64 }
+        From { usize, u8, u16, u32, u64, isize, i8, i16, i32, i64, i128 }
         // Some values of these types can be represented exactly by an Int.
         // Other values are out-of-bounds and can not be represented.
         // Implements TryFrom<each of these types> for Self.
-        from_some { u128 }
+        TryFrom { u128 }
         // All values of these types can be approximately represented by an Int.
         // They may experience rounding, but they will not be out-of-bounds.
-        rounded_from { }
+        ApproximateFrom { }
         // Some values of these types can be approximately represented by an Int.
         // Some may experience rounding, and some will be out-of-bounds.
-        rounded_from_some { }
+        TryApproximateFrom { f32, f64 }
         // Derive these traits using std.
         derive { Copy, PartialEq, Eq, PartialOrd, Ord, Hash }
         // Derive these traits using the derive_more crate.

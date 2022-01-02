@@ -1,1 +1,6 @@
+__*cache__
+.*_cache
+*.log
+*.pyc
+/.env
 /target
