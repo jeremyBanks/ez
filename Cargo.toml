@@ -61,6 +61,7 @@ slice-ring-buffer = "0.3.2"
 num-bigint = "0.4.3"
 num-traits = "0.2.14"
 uint = "0.9.1"
+fstrings = "0.2.3"
 
 [profile.dev.package.backtrace]
 opt-level = 3

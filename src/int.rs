@@ -14,11 +14,14 @@ macro_rules! primitives {
         }
     )+) => {$(
         #[derive(
-            Clone
+            Clone,
+            serde_derive::Serialize,
+            serde_derive::Deserialize
             $($(, $derive)*)*
             $($(, derive_more::$derive_more)*)*
         )]
-
+        #[serde(transparent)]
+        #[repr(transparent)]
         pub struct $Wrapper(pub $Inner);
 
         impl Deref for $Wrapper {
@@ -42,7 +45,7 @@ macro_rules! primitives {
 
         impl From<$Wrapper> for bool {
             fn from(other: $Wrapper) -> bool {
-                other.0
+                todo!()
             }
         }
 
@@ -163,12 +166,4 @@ primitives! {
             Div::div
         }
     }
-}
-
-pub trait IntParsable {
-    fn to_int(&self) -> Int;
-}
-
-pub fn int(n: impl IntParsable) -> Int {
-    n.to_int()
 }
