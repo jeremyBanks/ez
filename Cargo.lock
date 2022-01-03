@@ -158,9 +158,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.0.0"
+version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d17bf219fcd37199b9a29e00ba65dfb8cd5b2688b7297ec14ff829c40ac50ca9"
+checksum = "b1121e32687f7f90b905d4775273305baa4f32cd418923e9b0fa726533221857"
 dependencies = [
  "atty",
  "bitflags",
@@ -365,69 +365,6 @@ name = "dotenv"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
-
-[[package]]
-name = "easy_as_py"
-version = "0.0.0"
-dependencies = [
- "ambassador",
- "boolinator",
- "bytes",
- "clap",
- "color-eyre",
- "crossbeam",
- "derive_more",
- "dotenv",
- "educe",
- "erased-serde",
- "eyre",
- "getset",
- "ghost-cell",
- "image",
- "indexmap",
- "inherent",
- "itertools",
- "lazy-regex",
- "lazy_static",
- "log",
- "macro_rules_attribute",
- "num-bigint",
- "num-traits",
- "once_cell",
- "ordered-float",
- "parking_lot",
- "paste",
- "prost",
- "qcell",
- "rand",
- "rayon",
- "re",
- "regex",
- "reqwest",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_urlencoded",
- "slabmap",
- "slice-ring-buffer",
- "slotmap",
- "static-rc",
- "thousands",
- "threadstack",
- "time",
- "tokio",
- "tracing",
- "tracing-error",
- "tracing-futures",
- "tracing-log",
- "tracing-serde",
- "tracing-subscriber",
- "tracing-unwrap",
- "typed-arena",
- "typetag",
- "uint",
- "use",
-]
 
 [[package]]
 name = "educe"
@@ -838,6 +775,68 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aab8fc367588b89dcee83ab0fd66b72b50b72fa1904d7095045ace2b0c81c35"
 
 [[package]]
+name = "jeb"
+version = "0.0.0-2022.0.0"
+dependencies = [
+ "ambassador",
+ "boolinator",
+ "bytes",
+ "clap",
+ "color-eyre",
+ "crossbeam",
+ "derive_more",
+ "dotenv",
+ "educe",
+ "erased-serde",
+ "eyre",
+ "getset",
+ "ghost-cell",
+ "image",
+ "indexmap",
+ "inherent",
+ "itertools",
+ "lazy-regex",
+ "lazy_static",
+ "log",
+ "macro_rules_attribute",
+ "num-bigint",
+ "num-traits",
+ "once_cell",
+ "ordered-float",
+ "parking_lot",
+ "paste",
+ "prost",
+ "qcell",
+ "rand",
+ "rayon",
+ "re",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_urlencoded",
+ "slabmap",
+ "slice-ring-buffer",
+ "slotmap",
+ "static-rc",
+ "thousands",
+ "threadstack",
+ "time",
+ "tokio",
+ "tracing",
+ "tracing-error",
+ "tracing-futures",
+ "tracing-log",
+ "tracing-serde",
+ "tracing-subscriber",
+ "tracing-unwrap",
+ "typed-arena",
+ "typetag",
+ "uint",
+]
+
+[[package]]
 name = "jpeg-decoder"
 version = "0.1.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1148,9 +1147,9 @@ dependencies = [
 
 [[package]]
 name = "ordered-float"
-version = "2.8.0"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97c9d06878b3a851e8026ef94bf7fef9ba93062cd412601da4d9cf369b1cc62d"
+checksum = "8aa3d135650b150c29f0c3e385896f9d3ceb42d2d87b02f0d7a8cbd0fc7e19a6"
 dependencies = [
  "num-traits",
 ]
@@ -1209,18 +1208,18 @@ checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "pin-project"
-version = "1.0.9"
+version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1622113ce508488160cff04e6abc60960e676d330e1ca0f77c0b8df17c81438f"
+checksum = "58ad3879ad3baf4e44784bc6a718a8698867bb991f8ce24d1bcbe2cfb4c3a75e"
 dependencies = [
  "pin-project-internal",
 ]
 
 [[package]]
 name = "pin-project-internal"
-version = "1.0.9"
+version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b95af56fee93df76d721d356ac1ca41fccf168bc448eb14049234df764ba3e76"
+checksum = "744b6f092ba29c3650faf274db506afd39944f48420f6c86b17cfe0ee1cb36bb"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1229,9 +1228,9 @@ dependencies = [
 
 [[package]]
 name = "pin-project-lite"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d31d11c69a6b52a174b42bdc0c30e5e11670f90788b2c471c31c1d17d449443"
+checksum = "e280fbe77cc62c91527259e9442153f4688736748d24660126286329742b4c6c"
 
 [[package]]
 name = "pin-utils"
@@ -1567,18 +1566,18 @@ checksum = "568a8e6258aa33c13358f81fd834adb854c6f7c9468520910a9b1e8fac068012"
 
 [[package]]
 name = "serde"
-version = "1.0.132"
+version = "1.0.133"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b9875c23cf305cd1fd7eb77234cbb705f21ea6a72c637a5c6db5fe4b8e7f008"
+checksum = "97565067517b60e2d1ea8b268e59ce036de907ac523ad83a0475da04e818989a"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.132"
+version = "1.0.133"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecc0db5cb2556c0e558887d9bbdcf6ac4471e83ff66cf696e5419024d1606276"
+checksum = "ed201699328568d8d08208fdd080e3ff594e6c422e438b6705905da01005d537"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1587,9 +1586,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.73"
+version = "1.0.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcbd0344bc6533bc7ec56df11d42fb70f1b912351c0825ccb7211b59d8af7cf5"
+checksum = "ee2bb9cd061c5865d345bb02ca49fcef1391741b672b54a0bf7b679badec3142"
 dependencies = [
  "itoa 1.0.1",
  "ryu",
@@ -2071,12 +2070,6 @@ dependencies = [
  "matches",
  "percent-encoding",
 ]
-
-[[package]]
-name = "use"
-version = "0.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89452352a9cec4cf2d44c40f96d3696e09866e922b1fa28bccfe77b803055e66"
 
 [[package]]
 name = "vcpkg"

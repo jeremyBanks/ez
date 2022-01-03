@@ -4,6 +4,7 @@ use ::eyre::{bail as throw, eyre as error, ensure as assert, WrapErr as _};
 
 pub type Fallible<T> = Result<T, ::eyre::Report>;
 
+// This is just Into?
 trait ToExact<T> {
     fn to_exact(&self) -> T;
 }
@@ -29,7 +30,7 @@ trait TryToApproximate<T> {
 // Would that give us 0+some int as a valid index? Probably would confuse inference
 
 def! {
-    pub fn int(x: _) -> pub struct Int(i128);
+    pub struct Int(i128);
 
     implicit_from { bool, u8, u16, u32, u64, usize, i8, i16, i32, i64, i128, isize };
 
@@ -61,32 +62,40 @@ def! {
     };
 }
 
-def! {
-    pub fn float(...) -> pub struct Float(f64);
+macro_rules! def {
+    {
+        pub struct $Outer:ident($Inner:ident);
+    } => {
+        def! { @desugared { paste! {
+            Outer = [<$Outer>],
+            outer = [<$Outer::snake>],
+            ToOuter = [<To $Outer>]
+            to_outer = [<to_ $Outer::snake>],
+            Inner = [<$Inner>],
+            inner = [<$inner::snake>],
+        } } }
+    },
 
-    implicit_from { f32, f64 };
+    { @desugared { paste! {
+        Outer = $Outer:ident,
+        outer = $outer:ident,
+        ToOuter = $ToOuter:ident,
+        to_outer = $to_outer:ident,
+        Inner = $Inner:ident;
+        inner = $inner:ident;
+    } } } => {
+        pub struct $Outer($Inner);
 
-    implicit_try_from { u128 };
+        pub trait $ToOuter {
+            fn $to_outer(&self) -> $Outer;
+        }
 
-    explicit_from {};
-
-    explicit_try_from { f32, f64, Float };
-
-    explicit_parse_from { &str, String };
-
-    derive_std { Copy, PartialEq, Eq, PartialOrd, Ord, Hash };
-
-    derive_more { Display, DebugCustom, From, Into };
-
-    derive_unary_operations { Neg::neg, Not::not };
-
-    derive_binary_operations {
-        Add::add,
-        Sub::sub,
-        Mul::mul,
-        Div::div,
-        Rem::rem,
-    };
+        impl $ToOuter for $Outer {
+            fn $to_outer(&self) -> $Outer {
+                *self
+            }
+        }
+    },
 }
 
 pub trait IntParsable {
