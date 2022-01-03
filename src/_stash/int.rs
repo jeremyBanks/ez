@@ -20,62 +20,72 @@ trait TryToApproximate<T> {
     fn try_to_approximate(&self) -> Fallible<T>;
 }
 
+// Gives us int(true), int(10usize)
+// Gives us int(3).unwrap_u8() (panicking)
+// Gives us int(3).u8() (result, like TryInto but shorter)
+// Gives us u8::try_from(int(3)).unwrap()
+
+// Should we implicitly cast *TO* usize when operating with it?
+// Would that give us 0+some int as a valid index? Probably would confuse inference
+
 def! {
-    name = Int;
+    pub fn int(x: _) -> pub struct Int(i128);
 
-    inner_type = i128;
+    implicit_from { bool, u8, u16, u32, u64, usize, i8, i16, i32, i64, i128, isize };
 
-    implicit_from = {
-        bool, u8, u16, u32, u64, usize,
-        i8, i16, i32, i64, i128, isize,
-    };
-    // Gives us int(true), int(10usize)
-    // Gives us int(3).unwrap_u8() (panicking)
-    // Gives us int(3).u8() (result, like TryInto but shorter)
-    // Gives us u8::try_from(int(3)).unwrap()
+    implicit_try_from { u128 };
 
-    // Should we implicitly cast *TO* usize when operating with it?
-    // Would that give us 0+some int as a valid index? Probably would confuse inference
+    explicit_from {};
 
-    implicit_try_from = {
-        u128,
-    };
+    explicit_try_from { f32, f64, Float };
 
-    explicit_from = {};
+    explicit_parse_from { &str, String };
 
-    explicit_try_from = {
-        f32, f64, Float,
-    };
+    derive_std { Copy, PartialEq, Eq, PartialOrd, Ord, Hash };
 
-    explicit_parse_from = {
-        &str,
-        String,
-    };
+    derive_more { Display, DebugCustom, From, Into };
 
-    derive_std = {
-        Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
-    };
+    derive_unary_operations { Neg::neg, Not::not };
 
-    derive_more = {
-        Display, DebugCustom, From, Into,
-    };
-
-    derive_unary_operations = {
-        Neg::neg,
-        Not::not,
-    };
-
-    derive_binary_operations = {
+    derive_binary_operations {
         Add::add,
         Sub::sub,
         Mul::mul,
         Div::div,
+        Rem::rem,
         BitAnd::bitand,
         BitOr::bitor,
         BitXor::bitxor,
-        Rem::rem,
         Shl::shl,
         Shr::shr,
+    };
+}
+
+def! {
+    pub fn float(...) -> pub struct Float(f64);
+
+    implicit_from { f32, f64 };
+
+    implicit_try_from { u128 };
+
+    explicit_from {};
+
+    explicit_try_from { f32, f64, Float };
+
+    explicit_parse_from { &str, String };
+
+    derive_std { Copy, PartialEq, Eq, PartialOrd, Ord, Hash };
+
+    derive_more { Display, DebugCustom, From, Into };
+
+    derive_unary_operations { Neg::neg, Not::not };
+
+    derive_binary_operations {
+        Add::add,
+        Sub::sub,
+        Mul::mul,
+        Div::div,
+        Rem::rem,
     };
 }
 
