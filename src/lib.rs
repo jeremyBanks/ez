@@ -194,6 +194,7 @@ implicint! {
     impl IntoApproximate { f32, f64, }
 
     impl<T> Index<usize> for { &[T], Vec<T> }
+    // Do we just want to coerce to usize, or do we want more magic (probably not), such as:
     // When slicing a string, we should round each index backwards to the nearest valid character break
     // instead of panicking.
     // When indexing with negative values, they should be measured from .len().
