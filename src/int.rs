@@ -8,17 +8,15 @@ macro_rules! def {
     {
         $(#$attributes:tt)*
         pub struct $Outer:ident($Inner:ident);
-        impl From $From:tt;
-        impl TryFrom $TryFrom:tt;
-        explicit_from $explicit_from:tt;
-        explicit_from_approximate $explicit_from_approximate:tt;
-        impl Into $Into:tt;
-        impl TryInto $TryInto:tt;
-        explicit_parse_from $explicit_parse_from:tt;
-        index_as_usize <$T:ident> $index_as_usize:tt;
-        impl fn(self) $delegate_unary_operators:tt;
-        impl fn(self, Self) $delegate_binary_operators:tt;
-        impl fn(self, u32::try_from(Self)) $delegate_binary_u32_operators:tt;
+        impl From $From:tt
+        impl TryFrom $TryFrom:tt
+        impl FromApproximate $explicit_from_approximate:tt
+        impl Into $Into:tt
+        impl TryInto $TryInto:tt
+        impl<$T:ident> Index<Self> for $index_as_usize:tt
+        impl fn(self) $delegate_unary_operators:tt
+        impl fn(self, Self) $delegate_binary_operators:tt
+        impl fn(self, u32::try_from(Self)) $delegate_binary_u32_operators:tt
     } => {
         ::paste::paste! {
             def! {
@@ -32,9 +30,7 @@ macro_rules! def {
                     inner { [<$Inner:snake>] };
                     from $From;
                     try_from $TryFrom;
-                    explicit_from $explicit_from;
                     explicit_from_approximate $explicit_from_approximate;
-                    explicit_parse_from $explicit_parse_from;
                     index_as_usize<$T> $index_as_usize;
                     delegate_unary_operators $delegate_unary_operators;
                     delegate_binary_operators $delegate_binary_operators;
@@ -55,9 +51,7 @@ macro_rules! def {
             inner { $inner:ident };
             from $From:tt;
             try_from $TryFrom:tt;
-            explicit_from $explicit_from:tt;
             explicit_from_approximate $explicit_from_approximate:tt;
-            explicit_parse_from $explicit_parse_from:tt;
             index_as_usize<$T:ident> $index_as_usize:tt;
             delegate_unary_operators $delegate_unary_operators:tt;
             delegate_binary_operators $delegate_binary_operators:tt;
@@ -67,17 +61,17 @@ macro_rules! def {
         $(#$attributes)*
         pub struct $Outer($Inner);
 
-        def! {
-            @delegate_from {
-                Outer { $Outer };
-                from $From;
+        impl ::core::str::FromStr for $Outer {
+            type Err = Report;
+            fn from_str(s: &str) -> Fallible<$Outer> {
+                Ok($Outer($Inner::from_str(s)?))
             }
         }
 
         def! {
             @delegate_from {
                 Outer { $Outer };
-                from $explicit_from;
+                from $From;
             }
         }
 
@@ -110,18 +104,6 @@ macro_rules! def {
                 delegate_binary_u32_operators $delegate_binary_u32_operators;
             }
         }
-
-
-
-
-        // def! {
-        //     @delegate_operators_for_implicit {
-        //         Outer { $Outer };
-        //         impl From $From;
-        //         impl TryFrom $TryFrom;
-        //         delegate_binary_operators $delegate_binary_operators;
-        //     }
-        // }
     };
 
     { @delegate_from {
@@ -191,7 +173,7 @@ macro_rules! def {
                 type Output = $Outer;
                 fn $binary_method(self, other: $Other) -> $Outer {
                     let other = u32::try_from(other).unwrap();
-                    $Outer(self.0.$binary_method(other.0))
+                    $Outer(self.0.$binary_method(other))
                 }
             }
         )*
@@ -215,18 +197,16 @@ def! {
     #[repr(transparent)]
     #[serde(transparent)]
     pub struct Int(i128);
-    impl From { bool, u8, u16, u32, u64, i8, i16, i32, i64, i128, };
-    impl TryFrom { u128, usize, isize, };
-    explicit_from {};
-    explicit_from_approximate { f32, f64, };
-    impl Into { i128, };
-    impl TryInto { u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, isize, };
-    explicit_parse_from { &str, String, };
-    index_as_usize<T> { &[T], Vec<T>, };
+    impl From { bool, u8, u16, u32, u64, i8, i16, i32, i64, i128, }
+    impl TryFrom { u128, usize, isize, }
+    impl FromApproximate { f32, f64, }
+    impl Into { i128, }
+    impl TryInto { u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, isize, }
+    impl<T> Index<Self> for { &[T], Vec<T>, }
     impl fn(self) {
         [::core::ops::Neg]::neg,
         [::core::ops::Not]::not,
-    };
+    }
     impl fn(self, Self) {
         [::core::ops::Add]::add,
         [::core::ops::Sub]::sub,
@@ -236,10 +216,10 @@ def! {
         [::core::ops::BitAnd]::bitand,
         [::core::ops::BitOr]::bitor,
         [::core::ops::BitXor]::bitxor,
-    };
+    }
     impl fn(self, u32::try_from(Self)) {
         [::core::ops::Shl]::shl,
         [::core::ops::Shr]::shr,
         [::num::traits::Pow]::pow,
-    };
+    }
 }
