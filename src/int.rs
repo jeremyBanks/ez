@@ -6,66 +6,71 @@ use crate::{
 
 macro_rules! def {
     {
+        $(#$attributes:tt)*
         pub struct $Outer:ident($Inner:ident);
-        implicit_from $implicit_from:tt;
-        implicit_try_from $implicit_try_from:tt;
+        impl From $From:tt;
+        impl TryFrom $TryFrom:tt;
         explicit_from $explicit_from:tt;
         explicit_from_approximate $explicit_from_approximate:tt;
+        impl Into $Into:tt;
+        impl TryInto $TryInto:tt;
         explicit_parse_from $explicit_parse_from:tt;
         index_as_usize <$T:ident> $index_as_usize:tt;
-        attributes $attributes:tt;
-        delegate_unary_operators $delegate_unary_operators:tt;
-        delegate_binary_operators $delegate_binary_operators:tt;
+        impl fn(self) $delegate_unary_operators:tt;
+        impl fn(self, Self) $delegate_binary_operators:tt;
+        impl fn(self, u32::try_from(Self)) $delegate_binary_u32_operators:tt;
     } => {
         ::paste::paste! {
             def! {
-                @with_pasted_idents {
+                @desugared {
+                    attributes { $(#$attributes)* };
                     Outer { [<$Outer>] };
                     outer { [<$Outer:snake>] };
                     ToOuter { [<To $Outer>] };
                     to_outer { [<to_ $Outer:snake>] };
                     Inner { [<$Inner>] };
                     inner { [<$Inner:snake>] };
-                    implicit_from $implicit_from;
-                    implicit_try_from $implicit_try_from;
+                    from $From;
+                    try_from $TryFrom;
                     explicit_from $explicit_from;
                     explicit_from_approximate $explicit_from_approximate;
                     explicit_parse_from $explicit_parse_from;
                     index_as_usize<$T> $index_as_usize;
-                    attributes $attributes;
                     delegate_unary_operators $delegate_unary_operators;
                     delegate_binary_operators $delegate_binary_operators;
+                    delegate_binary_u32_operators $delegate_binary_u32_operators;
                 }
             }
         }
     };
 
     {
-        @with_pasted_idents {
+        @desugared {
+            attributes { $(#$attributes:tt)* };
             Outer { $Outer:ident };
             outer { $outer:ident };
             ToOuter { $ToOuter:ident };
             to_outer { $to_outer:ident };
             Inner { $Inner:ident };
             inner { $inner:ident };
-            implicit_from $implicit_from:tt;
-            implicit_try_from $implicit_try_from:tt;
+            from $From:tt;
+            try_from $TryFrom:tt;
             explicit_from $explicit_from:tt;
             explicit_from_approximate $explicit_from_approximate:tt;
             explicit_parse_from $explicit_parse_from:tt;
             index_as_usize<$T:ident> $index_as_usize:tt;
-            attributes { $(#$Attributes:tt)* };
             delegate_unary_operators $delegate_unary_operators:tt;
             delegate_binary_operators $delegate_binary_operators:tt;
+            delegate_binary_u32_operators $delegate_binary_u32_operators:tt;
         }
     } => {
-        $(#$Attributes)*
+        $(#$attributes)*
         pub struct $Outer($Inner);
 
         def! {
             @delegate_from {
                 Outer { $Outer };
-                from $implicit_from;
+                from $From;
             }
         }
 
@@ -79,14 +84,14 @@ macro_rules! def {
         def! {
             @delegate_try_from {
                 Outer { $Outer };
-                try_from $implicit_try_from;
+                try_from $TryFrom;
             }
         }
 
         def! {
             @delegate_unary_operators {
                 Outer { $Outer };
-                delegate_unary_operators $delegate_unary_operators;
+                impl fn(self) $delegate_unary_operators;
             }
         }
 
@@ -98,14 +103,22 @@ macro_rules! def {
             }
         }
 
+        def! {
+            @delegate_binary_u32_operators {
+                Outer { $Outer };
+                Other { $Outer };
+                delegate_binary_u32_operators $delegate_binary_u32_operators;
+            }
+        }
+
 
 
 
         // def! {
         //     @delegate_operators_for_implicit {
         //         Outer { $Outer };
-        //         implicit_from $implicit_from;
-        //         implicit_try_from $implicit_try_from;
+        //         impl From $From;
+        //         impl TryFrom $TryFrom;
         //         delegate_binary_operators $delegate_binary_operators;
         //     }
         // }
@@ -140,7 +153,7 @@ macro_rules! def {
 
     { @delegate_unary_operators {
         Outer { $Outer:ident };
-        delegate_unary_operators { $([$($UnaryTrait:tt)+]::$unary_method:ident),* $(,)? };
+        impl fn(self) { $([$($UnaryTrait:tt)+]::$unary_method:ident),* $(,)? };
     } } => {
         $(
             impl $($UnaryTrait)+ for $Outer {
@@ -167,50 +180,66 @@ macro_rules! def {
             }
         )*
     };
+
+    { @delegate_binary_u32_operators {
+        Outer { $Outer:ident };
+        Other { $Other:ident };
+        delegate_binary_u32_operators { $([$($BinaryTrait:tt)+]::$binary_method:ident),* $(,)? };
+    } } => {
+        $(
+            impl $($BinaryTrait)*::<$Other> for $Outer {
+                type Output = $Outer;
+                fn $binary_method(self, other: $Other) -> $Outer {
+                    let other = u32::try_from(other).unwrap();
+                    $Outer(self.0.$binary_method(other.0))
+                }
+            }
+        )*
+    };
 }
 
 def! {
+    #[derive(
+        Copy,
+        Clone,
+        PartialEq,
+        Eq,
+        PartialOrd,
+        Ord,
+        Hash,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::derive_more::Display,
+        ::derive_more::DebugCustom,
+    )]
+    #[repr(transparent)]
+    #[serde(transparent)]
     pub struct Int(i128);
-    implicit_from {
-        bool, u8, u16, u32, u64, i8, i16, i32, i64, i128,
-    };
-    implicit_try_from { u128, usize, isize };
+    impl From { bool, u8, u16, u32, u64, i8, i16, i32, i64, i128, };
+    impl TryFrom { u128, usize, isize, };
     explicit_from {};
-    explicit_from_approximate { f32, f64 };
+    explicit_from_approximate { f32, f64, };
+    impl Into { i128, };
+    impl TryInto { u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, isize, };
     explicit_parse_from { &str, String, };
     index_as_usize<T> { &[T], Vec<T>, };
-    attributes {
-        #[derive(
-            Copy,
-            Clone,
-            PartialEq,
-            Eq,
-            PartialOrd,
-            Ord,
-            Hash,
-            ::serde::Serialize,
-            ::serde::Deserialize,
-            ::derive_more::Display,
-            ::derive_more::DebugCustom,
-        )]
-        #[repr(transparent)]
-        #[serde(transparent)]
-    };
-    delegate_unary_operators {
+    impl fn(self) {
         [::core::ops::Neg]::neg,
         [::core::ops::Not]::not,
     };
-    delegate_binary_operators {
+    impl fn(self, Self) {
         [::core::ops::Add]::add,
         [::core::ops::Sub]::sub,
         [::core::ops::Mul]::mul,
         [::core::ops::Div]::div,
         [::core::ops::Rem]::rem,
-        // [::core::ops::BitAnd]::bitand,
-        // [::core::ops::BitOr]::bitor,
-        // [::core::ops::BitXor]::bitxor,
-        // [::core::ops::Shl]::shl,
-        // [::core::ops::Shr]::shr,
-        // [::num::traits::Pow]::pow,
+        [::core::ops::BitAnd]::bitand,
+        [::core::ops::BitOr]::bitor,
+        [::core::ops::BitXor]::bitxor,
+    };
+    impl fn(self, u32::try_from(Self)) {
+        [::core::ops::Shl]::shl,
+        [::core::ops::Shr]::shr,
+        [::num::traits::Pow]::pow,
     };
 }
