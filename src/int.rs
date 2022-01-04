@@ -12,7 +12,7 @@ macro_rules! jeb {
         impl FromApproximate $explicit_from_approximate:tt
         impl Into $Into:tt
         impl TryInto $TryInto:tt
-        impl<$T:ident> Index<Self> for $index_as_usize:tt
+        impl<$T:ident> Index<usize::try_from(Self)> for $index_as_usize:tt
         impl fn() $delegate_nullary_traits:tt
         impl fn(self) $delegate_unary_traits:tt
         impl fn(self, Self) $delegate_binary_traits:tt
@@ -138,6 +138,7 @@ macro_rules! jeb {
         impl fn(self) { $([$($UnaryTrait:tt)+]::$unary_method:ident),* $(,)? };
     } } => {
         $(
+            #[::inherent::inherent]
             impl $($UnaryTrait)+ for $Outer {
                 type Output = $Outer;
                 fn $unary_method(self) -> $Outer {
@@ -202,7 +203,7 @@ jeb! {
     impl FromApproximate { f32, f64, }
     impl Into { i128, }
     impl TryInto { u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, isize, }
-    impl<T> Index<Self> for { &[T], Vec<T>, }
+    impl<T> Index<usize::try_from(Self)> for { &[T], Vec<T>, }
     impl fn() {
         [::num::traits::Zero]::zero,
         [::num::traits::One]::one,
