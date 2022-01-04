@@ -1,9 +1,7 @@
-
 #![allow(unused)]
 
-use ::eyre::{bail as throw, ensure, eyre as error, Report, Result as Fallible, WrapErr};
-
 use {
+    ::eyre::{bail as throw, ensure, eyre as error, Report, Result as Fallible, WrapErr},
     num_derive::{FromPrimitive, ToPrimitive},
 };
 
