@@ -1,169 +1,230 @@
-use ::std::ops::*;
+use crate::{
+    Fallible,
+    Report,
+};
 
-macro_rules! primitives {
-    ($(
-        pub struct $Wrapper:ident($Inner:path) {
-            $(from_any { $($from_any:path ),* });*
-            $(from_some { $($from_some:path ),* });*
-            $(rounded_from { $($rounded_from:path ),* });*
-            $(rounded_from_some { $($rounded_from_some:path ),* });*
-            $(derive { $($derive:path ),* });*
-            $(derive_more { $($derive_more:ident ),* });*
-            $(derive_unary_ops { $($unary_trait:ident::$unary_method:ident ),* });*
-            $(derive_binary_ops { $($binary_trait:ident::$binary_method:ident ),* });*
-        }
-    )+) => {$(
-        #[derive(
-            Clone,
-            serde_derive::Serialize,
-            serde_derive::Deserialize
-            $($(, $derive)*)*
-            $($(, derive_more::$derive_more)*)*
-        )]
-        #[serde(transparent)]
-        #[repr(transparent)]
-        pub struct $Wrapper(pub $Inner);
-
-        impl Deref for $Wrapper {
-            type Target = $Inner;
-            fn deref(&self) -> &$Inner {
-                &self.0
-            }
-        }
-
-        impl DerefMut for $Wrapper {
-            fn deref_mut(&mut self) -> &mut $Inner {
-                &mut self.0
-            }
-        }
-
-        impl From<bool> for $Wrapper {
-            fn from(other: bool) -> $Wrapper {
-                $Wrapper(if other { 1u8.into() } else { 0u8.into() })
-            }
-        }
-
-        impl From<$Wrapper> for bool {
-            fn from(other: $Wrapper) -> bool {
-                todo!()
-            }
-        }
-
-        primitives_impl_operators_1!{
-            wrapper = $Wrapper;
-            try_from = $(
-                $($from_any),*
-            ),*;
-            traits_and_methods = [
-                $($(
-                    [$binary_trait $binary_method]
-                )*)*
-            ]
-        }
-    )+};
-}
-
-macro_rules! primitives_impl_operators_1 {
+macro_rules! jeb {
     {
-        wrapper = $Wrapper:ident;
-        try_from = $($try_from:path),*;
-        traits_and_methods = $TraitsAndMethods:tt
+        $(#$attributes:tt)*
+        pub struct $Outer:ident($Inner:ident);
+        impl From $From:tt
+        impl TryFrom $TryFrom:tt
+        impl FromApproximate $explicit_from_approximate:tt
+        impl Into $Into:tt
+        impl TryInto $TryInto:tt
+        impl<$T:ident> Index<usize::try_from(Self)> for $index_as_usize:tt
+        impl fn() $delegate_nullary_traits:tt
+        impl fn(self) $delegate_unary_traits:tt
+        impl fn(self, Self) $delegate_binary_traits:tt
+        impl fn(self, u32::try_from(Self)) $delegate_binary_u32_traits:tt
     } => {
-        primitives_impl_operators_2!{
-            wrapper = $Wrapper;
-            $(pairs = {
-                try_from = $try_from;
-                traits_and_methods = $TraitsAndMethods
-            }),*
+        ::paste::paste! {
+            jeb! {
+                @desugared {
+                    attributes { $(#$attributes)* };
+                    Outer { [<$Outer>] };
+                    outer { [<$Outer:snake>] };
+                    ToOuter { [<To $Outer>] };
+                    to_outer { [<to_ $Outer:snake>] };
+                    Inner { [<$Inner>] };
+                    inner { [<$Inner:snake>] };
+                    from $From;
+                    try_from $TryFrom;
+                    explicit_from_approximate $explicit_from_approximate;
+                    index_as_usize<$T> $index_as_usize;
+                    delegate_unary_traits $delegate_unary_traits;
+                    delegate_binary_traits $delegate_binary_traits;
+                    delegate_binary_u32_traits $delegate_binary_u32_traits;
+                }
+            }
         }
-    }
-}
+    };
 
-macro_rules! primitives_impl_operators_2 {
     {
-        wrapper = $Wrapper:ident;
-        $(pairs = {
-            try_from = $try_from:path;
-            traits_and_methods = [$([$trait:ident $method:ident])*]
-        }),*
+        @desugared {
+            attributes { $(#$attributes:tt)* };
+            Outer { $Outer:ident };
+            outer { $outer:ident };
+            ToOuter { $ToOuter:ident };
+            to_outer { $to_outer:ident };
+            Inner { $Inner:ident };
+            inner { $inner:ident };
+            from $From:tt;
+            try_from $TryFrom:tt;
+            explicit_from_approximate $explicit_from_approximate:tt;
+            index_as_usize<$T:ident> $index_as_usize:tt;
+            delegate_unary_traits $delegate_unary_traits:tt;
+            delegate_binary_traits $delegate_binary_traits:tt;
+            delegate_binary_u32_traits $delegate_binary_u32_traits:tt;
+        }
     } => {
+        $(#$attributes)*
+        pub struct $Outer($Inner);
+
+        impl ::core::str::FromStr for $Outer {
+            type Err = Report;
+            fn from_str(s: &str) -> Fallible<$Outer> {
+                Ok($Outer($Inner::from_str(s)?))
+            }
+        }
+
+        jeb! {
+            @delegate_from {
+                Outer { $Outer };
+                from $From;
+            }
+        }
+
+        jeb! {
+            @delegate_try_from {
+                Outer { $Outer };
+                try_from $TryFrom;
+            }
+        }
+
+        jeb! {
+            @delegate_unary_traits {
+                Outer { $Outer };
+                impl fn(self) $delegate_unary_traits;
+            }
+        }
+
+        jeb! {
+            @delegate_binary_traits {
+                Outer { $Outer };
+                Other { $Outer };
+                delegate_binary_traits $delegate_binary_traits;
+            }
+        }
+
+        jeb! {
+            @delegate_binary_u32_traits {
+                Outer { $Outer };
+                Other { $Outer };
+                delegate_binary_u32_traits $delegate_binary_u32_traits;
+            }
+        }
+    };
+
+    { @delegate_from {
+        Outer { $Outer:ident };
+        from { $($Type:ty),* $(,)? };
+    } } => {
         $(
-            $(
-                impl ::std::ops::$trait<$try_from> for $Wrapper {
-                    type Output = $Wrapper;
-
-                    fn $method(self, other: $try_from) -> $Wrapper {
-                        let other: $Wrapper = other.into();
-                        $Wrapper(self.0.$method(other.0))
-                    }
+            impl From<$Type> for $Outer {
+                fn from(other: $Type) -> $Outer {
+                    $Outer(other.into())
                 }
-
-                impl ::std::ops::$trait<$Wrapper> for $try_from {
-                    type Output = $Wrapper;
-
-                    fn $method(self, other: $Wrapper) -> $Wrapper {
-                        let self_: $Wrapper = self.into();
-                        $Wrapper(self_.0.$method(other.0))
-                    }
-                }
-            )*
+            }
         )*
-    }
+    };
+
+    { @delegate_try_from {
+        Outer { $Outer:ident };
+        try_from { $($Type:ty),* $(,)? };
+    } } => {
+        $(
+            impl TryFrom<$Type> for $Outer {
+                type Error = Report;
+                fn try_from(other: $Type) -> Fallible<$Outer> {
+                    Ok($Outer(other.try_into()?))
+                }
+            }
+        )+
+    };
+
+    { @delegate_unary_traits {
+        Outer { $Outer:ident };
+        impl fn(self) { $([$($UnaryTrait:tt)+]::$unary_method:ident),* $(,)? };
+    } } => {
+        $(
+            #[::inherent::inherent]
+            impl $($UnaryTrait)+ for $Outer {
+                type Output = $Outer;
+                fn $unary_method(self) -> $Outer {
+                    $Outer(self.0.$unary_method())
+                }
+            }
+        )*
+    };
+
+    { @delegate_binary_traits {
+        Outer { $Outer:ident };
+        Other { $Other:ident };
+        delegate_binary_traits { $([$($BinaryTrait:tt)+]::$binary_method:ident),* $(,)? };
+    } } => {
+        $(
+            impl $($BinaryTrait)*::<$Other> for $Outer {
+                type Output = $Outer;
+                fn $binary_method(self, other: $Other) -> $Outer {
+                    let other = $Outer::from(other);
+                    $Outer(self.0.$binary_method(other.0))
+                }
+            }
+        )*
+    };
+
+    { @delegate_binary_u32_traits {
+        Outer { $Outer:ident };
+        Other { $Other:ident };
+        delegate_binary_u32_traits { $([$($BinaryTrait:tt)+]::$binary_method:ident),* $(,)? };
+    } } => {
+        $(
+            impl $($BinaryTrait)*::<$Other> for $Outer {
+                type Output = $Outer;
+                fn $binary_method(self, other: $Other) -> $Outer {
+                    let other = u32::try_from(other).unwrap();
+                    $Outer(self.0.$binary_method(other))
+                }
+            }
+        )*
+    };
 }
 
-primitives! {
-    pub struct Int(i128) {
-        // All values of these types can be exactly represented by an Int.
-        // Implements From<each of these types> for Self.
-        from_any { usize, u8, u16, u32, u64, isize, i8, i16, i32, i64 }
-        // Some values of these types can be represented exactly by an Int.
-        // Other values are out-of-bounds and can not be represented.
-        // Implements TryFrom<each of these types> for Self.
-        from_some { u128 }
-        // All values of these types can be approximately represented by an Int.
-        // They may experience rounding, but they will not be out-of-bounds.
-        rounded_from { }
-        // Some values of these types can be approximately represented by an Int.
-        // Some may experience rounding, and some will be out-of-bounds.
-        rounded_from_some { }
-        // Derive these traits using std.
-        derive { Copy, PartialEq, Eq, PartialOrd, Ord, Hash }
-        // Derive these traits using the derive_more crate.
-        derive_more { Display, DebugCustom, From, Into }
-        // Derive these traits delegating standard unary operators.
-        derive_unary_ops {
-            Neg::neg,
-            Not::not
-        }
-        // Derive these traits delegating standard binary operators.
-        derive_binary_ops {
-            Add::add,
-            Sub::sub,
-            Mul::mul,
-            Div::div,
-            BitAnd::bitand,
-            BitOr::bitor,
-            BitXor::bitxor,
-            Rem::rem,
-            Shl::shl,
-            Shr::shr
-        }
+jeb! {
+    #[derive(
+        Copy,
+        Clone,
+        PartialEq,
+        Eq,
+        PartialOrd,
+        Ord,
+        Hash,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::derive_more::Display,
+        ::derive_more::DebugCustom,
+    )]
+    #[repr(transparent)]
+    #[serde(transparent)]
+    pub struct Int(i128);
+    impl From { bool, u8, u16, u32, u64, i8, i16, i32, i64, i128, }
+    impl TryFrom { u128, usize, isize, }
+    impl FromApproximate { f32, f64, }
+    impl Into { i128, }
+    impl TryInto { u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, isize, }
+    impl<T> Index<usize::try_from(Self)> for { &[T], Vec<T>, }
+    impl fn() {
+        [::num::traits::Zero]::zero,
+        [::num::traits::One]::one,
     }
-
-    pub struct Float(f64) {
-        from_any { f32 }
-        from_some { u8, u16, u32, i8, i16, i32 }
-        rounded_from { Int, usize, u64, u128, isize, i64, i128 }
-        derive { Copy }
-        derive_more { Display, DebugCustom, From, Into }
-        derive_unary_ops {
-            Not::not
-        }
-        derive_binary_ops {
-            Add::add,
-            Sub::sub,
-            Mul::mul,
-            Div::div
-        }
+    impl fn(self) {
+        [::core::ops::Neg]::neg,
+        [::core::ops::Not]::not,
+    }
+    impl fn(self, Self) {
+        [::core::ops::Add]::add,
+        [::core::ops::Sub]::sub,
+        [::core::ops::Mul]::mul,
+        [::core::ops::Div]::div,
+        [::core::ops::Rem]::rem,
+        [::core::ops::BitAnd]::bitand,
+        [::core::ops::BitOr]::bitor,
+        [::core::ops::BitXor]::bitxor,
+    }
+    impl fn(self, u32::try_from(Self)) {
+        [::core::ops::Shl]::shl,
+        [::core::ops::Shr]::shr,
+        [::num::traits::Pow]::pow,
     }
 }

@@ -1,6 +1,5 @@
-mod error;
-mod float;
-mod int;
-mod str;
+pub use ::eyre::{bail as throw, ensure, eyre as error, Report, Result as Fallible, WrapErr};
 
-pub use int::*;
+mod int;
+
+pub use self::int::*;

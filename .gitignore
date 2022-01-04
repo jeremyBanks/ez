@@ -1,1 +1,5 @@
+__*cache__
+.*_cache
+*.log
+*.pyc
 /target
