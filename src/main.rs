@@ -1,4 +1,4 @@
-use ::core::ops::*;
+use {::core::ops::*, jeb::*};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Int(i128);

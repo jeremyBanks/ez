@@ -1,10 +1,8 @@
-use ::core::ops::*;
-use ::paste::paste;
-use ::eyre::{bail as throw, eyre as error, ensure as assert, WrapErr as _};
+#![allow(unused)]
 
-pub type Fallible<T> = Result<T, ::eyre::Report>;
+use {crate::*, ::core::ops::*, ::num_traits::*, ::paste::paste};
 
-// This is just Into?
+// This is Into<T>
 trait ToExact<T> {
     fn to_exact(&self) -> T;
 }
@@ -17,73 +15,63 @@ trait TryToExact<T> {
     fn try_to_exact(&self) -> Fallible<T>;
 }
 
+// This is similar to num_traits::NumCast
 trait TryToApproximate<T> {
     fn try_to_approximate(&self) -> Fallible<T>;
-}
-
-// Gives us int(true), int(10usize)
-// Gives us int(3).unwrap_u8() (panicking)
-// Gives us int(3).u8() (result, like TryInto but shorter)
-// Gives us u8::try_from(int(3)).unwrap()
-
-// Should we implicitly cast *TO* usize when operating with it?
-// Would that give us 0+some int as a valid index? Probably would confuse inference
-
-def! {
-    pub struct Int(i128);
-
-    implicit_from { bool, u8, u16, u32, u64, usize, i8, i16, i32, i64, i128, isize };
-
-    implicit_try_from { u128 };
-
-    explicit_from {};
-
-    explicit_try_from { f32, f64, Float };
-
-    explicit_parse_from { &str, String };
-
-    derive_std { Copy, PartialEq, Eq, PartialOrd, Ord, Hash };
-
-    derive_more { Display, DebugCustom, From, Into };
-
-    derive_unary_operations { Neg::neg, Not::not };
-
-    derive_binary_operations {
-        Add::add,
-        Sub::sub,
-        Mul::mul,
-        Div::div,
-        Rem::rem,
-        BitAnd::bitand,
-        BitOr::bitor,
-        BitXor::bitxor,
-        Shl::shl,
-        Shr::shr,
-    };
 }
 
 macro_rules! def {
     {
         pub struct $Outer:ident($Inner:ident);
-    } => {
-        def! { @desugared { paste! {
-            Outer = [<$Outer>],
-            outer = [<$Outer::snake>],
-            ToOuter = [<To $Outer>]
-            to_outer = [<to_ $Outer::snake>],
-            Inner = [<$Inner>],
-            inner = [<$inner::snake>],
-        } } }
-    },
 
-    { @desugared { paste! {
-        Outer = $Outer:ident,
-        outer = $outer:ident,
-        ToOuter = $ToOuter:ident,
-        to_outer = $to_outer:ident,
-        Inner = $Inner:ident;
-        inner = $inner:ident;
-    } } } => {
+        implicit_from $implicit_from:tt;
+        implicit_try_from $implicit_try_from:tt;
+        explicit_from $explicit_from:tt;
+        explicit_try_from $explicit_try_from:tt;
+        explicit_parse_from $explicit_parse_from:tt;
+        index_as_usize <$T:ident> $index_as_usize:tt;
+        derive_std $derive_std:tt;
+        derive_more $derive_more:tt;
+        derive_unary_operators $derive_unary_operators:tt;
+        derive_binary_operators $derive_binary_operators:tt;
+    } => { paste! { def! { @with_pasted_idents {
+        Outer { [<$Outer>] };
+        outer { [<$Outer:snake>] };
+        ToOuter { [<To $Outer>] };
+        to_outer { [<to_ $Outer:snake>] };
+        Inner { [<$Inner>] };
+        inner { [<$Inner:snake>] };
+        implicit_from $implicit_from;
+        implicit_try_from $implicit_try_from;
+        explicit_from $explicit_from;
+        explicit_try_from $explicit_try_from;
+        explicit_parse_from $explicit_parse_from;
+        index_as_usize <$T> $index_as_usize;
+        derive_std $derive_std;
+        derive_more $derive_more;
+        derive_unary_operators $derive_unary_operators;
+        derive_binary_operators $derive_binary_operators;
+    } } } };
+
+    { @with_pasted_idents {
+        Outer { $Outer:ident };
+        outer { $outer:ident };
+        ToOuter { $ToOuter:ident };
+        to_outer { $to_outer:ident };
+        Inner { $Inner:ident };
+        inner { $inner:ident };
+        implicit_from $implicit_from:tt;
+        implicit_try_from $implicit_try_from:tt;
+        explicit_from $explicit_from:tt;
+        explicit_try_from $explicit_try_from:tt;
+        explicit_parse_from $explicit_parse_from:tt;
+        index_as_usize <$T:ident> $index_as_usize:tt;
+        derive_std $derive_std:tt;
+        derive_more $derive_more:tt;
+        derive_unary_operators $derive_unary_operators:tt;
+        derive_binary_operators $derive_binary_operators:tt;
+    } } => {
+        #[derive(Copy, Clone, Debug)]
         pub struct $Outer($Inner);
 
         pub trait $ToOuter {
@@ -95,15 +83,102 @@ macro_rules! def {
                 *self
             }
         }
-    },
+
+        def! { @derive_from {
+            Outer { $Outer };
+            from $implicit_from;
+        } }
+
+        def! { @derive_from {
+            Outer { $Outer };
+            from $explicit_from;
+        } }
+
+        def! { @derive_try_from {
+            Outer { $Outer };
+            try_from $implicit_try_from;
+        } }
+
+        def! { @derive_try_from {
+            Outer { $Outer };
+            try_from $explicit_try_from;
+        } }
+
+        def! { @derive_operators_for_self {
+            Outer { $Outer };
+            derive_unary_operators $derive_unary_operators;
+            derive_binary_operators $derive_binary_operators;
+        } }
+
+        def! { @derive_operators_for_implicit {
+            Outer { $Outer };
+            implicit_from $implicit_from;
+            implicit_try_from $implicit_try_from;
+            derive_binary_operators $derive_binary_operators;
+        } }
+    };
+
+    { @derive_from {
+        Outer { $Outer:ident };
+        from { $($Type:ty),* $(,)? };
+    } } => {
+        $(
+            impl From<$Type> for $Outer {
+                fn from(other: $Type) -> $Outer {
+                    $Outer(other.into())
+                }
+            }
+        )*
+    };
+
+    { @derive_try_from {
+        Outer { $Outer:ident };
+        try_from { $($Type:ty),* $(,)? };
+    } } => {
+        $(
+            impl TryFrom<$Type> for $Outer {
+                type Error = Report;
+                fn try_from(other: $Type) -> Fallible<$Outer> {
+                    Ok($Outer(other.try_into()?))
+                }
+            }
+        )+
+    };
+
+    { @derive_operators_for_self $($_tt:tt)* } => {};
+
+    { @derive_operators_for_implicit $($_tt:tt)* } => {};
 }
 
-pub trait IntParsable {
-    fn to_int(&self) -> Int;
-}
-
-pub fn int(n: impl IntParsable) -> Int {
-    n.to_int()
+def! {
+    pub struct Int(i128);
+    implicit_from {
+        bool, u8, u16, u32, u64, i8, i16, i32, i64, i128,
+    };
+    implicit_try_from { u128, usize, isize };
+    explicit_from {};
+    explicit_try_from { f32, f64 };
+    explicit_parse_from { &str, String, };
+    index_as_usize<T> { &[T], Vec<T>, };
+    derive_std { Copy, PartialEq, Eq, PartialOrd, Ord, Hash, };
+    derive_more { Display, DebugCustom, From, Into, };
+    derive_unary_operators {
+        ::core::ops::Neg::neg,
+        ::core::ops::Not::not,
+    };
+    derive_binary_operators {
+        ::core::ops::Add.add,
+        ::core::ops::Sub.sub,
+        ::core::ops::Mul.mul,
+        ::core::ops::Div.div,
+        ::core::ops::Rem.rem,
+        ::core::ops::BitAnd.bitand,
+        ::core::ops::BitOr.bitor,
+        ::core::ops::BitXor.bitxor,
+        ::core::ops::Shl.shl,
+        ::core::ops::Shr.shr,
+        ::num_traits::Pow.pow,
+    };
 }
 
 macro_rules! primitives {
