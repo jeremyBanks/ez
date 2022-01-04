@@ -1,10 +1,9 @@
-#![allow(unused)]
 use crate::{
     Fallible,
     Report,
 };
 
-macro_rules! def {
+macro_rules! jeb {
     {
         $(#$attributes:tt)*
         pub struct $Outer:ident($Inner:ident);
@@ -14,12 +13,13 @@ macro_rules! def {
         impl Into $Into:tt
         impl TryInto $TryInto:tt
         impl<$T:ident> Index<Self> for $index_as_usize:tt
-        impl fn(self) $delegate_unary_operators:tt
-        impl fn(self, Self) $delegate_binary_operators:tt
-        impl fn(self, u32::try_from(Self)) $delegate_binary_u32_operators:tt
+        impl fn() $delegate_nullary_traits:tt
+        impl fn(self) $delegate_unary_traits:tt
+        impl fn(self, Self) $delegate_binary_traits:tt
+        impl fn(self, u32::try_from(Self)) $delegate_binary_u32_traits:tt
     } => {
         ::paste::paste! {
-            def! {
+            jeb! {
                 @desugared {
                     attributes { $(#$attributes)* };
                     Outer { [<$Outer>] };
@@ -32,9 +32,9 @@ macro_rules! def {
                     try_from $TryFrom;
                     explicit_from_approximate $explicit_from_approximate;
                     index_as_usize<$T> $index_as_usize;
-                    delegate_unary_operators $delegate_unary_operators;
-                    delegate_binary_operators $delegate_binary_operators;
-                    delegate_binary_u32_operators $delegate_binary_u32_operators;
+                    delegate_unary_traits $delegate_unary_traits;
+                    delegate_binary_traits $delegate_binary_traits;
+                    delegate_binary_u32_traits $delegate_binary_u32_traits;
                 }
             }
         }
@@ -53,9 +53,9 @@ macro_rules! def {
             try_from $TryFrom:tt;
             explicit_from_approximate $explicit_from_approximate:tt;
             index_as_usize<$T:ident> $index_as_usize:tt;
-            delegate_unary_operators $delegate_unary_operators:tt;
-            delegate_binary_operators $delegate_binary_operators:tt;
-            delegate_binary_u32_operators $delegate_binary_u32_operators:tt;
+            delegate_unary_traits $delegate_unary_traits:tt;
+            delegate_binary_traits $delegate_binary_traits:tt;
+            delegate_binary_u32_traits $delegate_binary_u32_traits:tt;
         }
     } => {
         $(#$attributes)*
@@ -68,40 +68,40 @@ macro_rules! def {
             }
         }
 
-        def! {
+        jeb! {
             @delegate_from {
                 Outer { $Outer };
                 from $From;
             }
         }
 
-        def! {
+        jeb! {
             @delegate_try_from {
                 Outer { $Outer };
                 try_from $TryFrom;
             }
         }
 
-        def! {
-            @delegate_unary_operators {
+        jeb! {
+            @delegate_unary_traits {
                 Outer { $Outer };
-                impl fn(self) $delegate_unary_operators;
+                impl fn(self) $delegate_unary_traits;
             }
         }
 
-        def! {
-            @delegate_binary_operators {
+        jeb! {
+            @delegate_binary_traits {
                 Outer { $Outer };
                 Other { $Outer };
-                delegate_binary_operators $delegate_binary_operators;
+                delegate_binary_traits $delegate_binary_traits;
             }
         }
 
-        def! {
-            @delegate_binary_u32_operators {
+        jeb! {
+            @delegate_binary_u32_traits {
                 Outer { $Outer };
                 Other { $Outer };
-                delegate_binary_u32_operators $delegate_binary_u32_operators;
+                delegate_binary_u32_traits $delegate_binary_u32_traits;
             }
         }
     };
@@ -133,7 +133,7 @@ macro_rules! def {
         )+
     };
 
-    { @delegate_unary_operators {
+    { @delegate_unary_traits {
         Outer { $Outer:ident };
         impl fn(self) { $([$($UnaryTrait:tt)+]::$unary_method:ident),* $(,)? };
     } } => {
@@ -147,10 +147,10 @@ macro_rules! def {
         )*
     };
 
-    { @delegate_binary_operators {
+    { @delegate_binary_traits {
         Outer { $Outer:ident };
         Other { $Other:ident };
-        delegate_binary_operators { $([$($BinaryTrait:tt)+]::$binary_method:ident),* $(,)? };
+        delegate_binary_traits { $([$($BinaryTrait:tt)+]::$binary_method:ident),* $(,)? };
     } } => {
         $(
             impl $($BinaryTrait)*::<$Other> for $Outer {
@@ -163,10 +163,10 @@ macro_rules! def {
         )*
     };
 
-    { @delegate_binary_u32_operators {
+    { @delegate_binary_u32_traits {
         Outer { $Outer:ident };
         Other { $Other:ident };
-        delegate_binary_u32_operators { $([$($BinaryTrait:tt)+]::$binary_method:ident),* $(,)? };
+        delegate_binary_u32_traits { $([$($BinaryTrait:tt)+]::$binary_method:ident),* $(,)? };
     } } => {
         $(
             impl $($BinaryTrait)*::<$Other> for $Outer {
@@ -180,7 +180,7 @@ macro_rules! def {
     };
 }
 
-def! {
+jeb! {
     #[derive(
         Copy,
         Clone,
@@ -203,6 +203,10 @@ def! {
     impl Into { i128, }
     impl TryInto { u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, isize, }
     impl<T> Index<Self> for { &[T], Vec<T>, }
+    impl fn() {
+        [::num::traits::Zero]::zero,
+        [::num::traits::One]::one,
+    }
     impl fn(self) {
         [::core::ops::Neg]::neg,
         [::core::ops::Not]::not,

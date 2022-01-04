@@ -33,6 +33,7 @@ serde = { version = "1.0.132", features = ["derive"] }
 macro_rules_attribute = "0.0.2"
 num = { version = "0.4.0", features = ["std", "serde", "rand"] }
 thiserror = "1.0.30"
+num-derive = "0.3.3"
 
 [profile.dev.package.backtrace]
 opt-level = 3
