@@ -10,9 +10,26 @@ name = "weak"
 repository = "https://github.com/jeremyBanks/weak"
 version = "0.0.0-dev.1"
 
+[features]
+default = []
+unstable-float = []
+
 [dependencies]
-num-derive = ">=0"
-num-traits = ">=0"
+boolinator = "2.4.0"
+bytes = "1.1.0"
+derive_more = "0.99.17"
+eyre = "0.6.6"
+inherent = "1.0.0"
+itertools = "0.10.3"
+macro_rules_attribute = "0.0.2"
+num-derive = "0.3.3"
+num-traits = "0.2.14"
+paste = "1.0.6"
+rand = "0.8.4"
+remain = "0.2.2"
+serde = { version = "1.0.136", features = ["derive"] }
+thiserror = "1.0.30"
+thousands = "0.2.0"
 weak-build-macros = { path = "./macros", version = "0.0.0-dev.1"}
 
 [workspace.metadata.release]
