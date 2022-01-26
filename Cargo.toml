@@ -8,12 +8,12 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "weak"
 repository = "https://github.com/jeremyBanks/weak"
-version = "0.0.0-dev.0"
+version = "0.0.0-dev.1"
 
 [dependencies]
 num-derive = ">=0"
 num-traits = ">=0"
-weak-build-macros = { path = "./macros", version = "0.0.0-dev.0"}
+weak-build-macros = { path = "./macros", version = "0.0.0-dev.1"}
 
 [workspace.metadata.release]
 allow-branch = ["trunk", "main", "master"]
