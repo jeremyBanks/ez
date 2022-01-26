@@ -1,4 +1,6 @@
+#![feature(doc_cfg, never_type)]
 #![allow(unused)]
+#![doc = include_str!("../README.md")]
 
 use {
     ::eyre::{bail as throw, ensure, eyre as error, Report, Result as Fallible, WrapErr},
@@ -230,3 +232,13 @@ fn test_implicint() -> Fallible<()> {
 
     Ok(())
 }
+
+#[cfg(any(feature = "unstable-float", doc))]
+#[doc(cfg(feature = "unstable-float"))]
+pub fn float(_: !) -> Float {
+    todo!()
+}
+
+#[cfg(any(feature = "unstable-float", doc))]
+#[doc(cfg(feature = "unstable-float"))]
+pub struct Float(!);
