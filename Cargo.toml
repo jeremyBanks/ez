@@ -3,12 +3,12 @@ members = [".", "macros"]
 
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
-description = "ez"
+description = "A collection of easy-to-use, beginner-friendly utilities for Rust"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-name = "weak"
-repository = "https://github.com/jeremyBanks/weak"
-version = "0.0.0-dev.1"
+name = "ez"
+repository = "https://github.com/jeremyBanks/ez"
+version = "0.0.2-dev.1"
 
 [features]
 default = []
@@ -19,6 +19,9 @@ boolinator = "2.4.0"
 bytes = "1.1.0"
 derive_more = "0.99.17"
 eyre = "0.6.6"
+ez-internal = { path = "./macros", version = "0.0.2-dev.1" }
+ezio = "0.1.2"
+fehler = "1.0.0"
 inherent = "1.0.0"
 itertools = "0.10.3"
 macro_rules_attribute = "0.0.2"
@@ -30,7 +33,6 @@ remain = "0.2.2"
 serde = { version = "1.0.136", features = ["derive"] }
 thiserror = "1.0.30"
 thousands = "0.2.0"
-weak-build-macros = { path = "./macros", version = "0.0.0-dev.1"}
 
 [workspace.metadata.release]
 allow-branch = ["trunk", "main", "master"]

@@ -1,20 +1,22 @@
 #![feature(doc_cfg)]
 #![doc = include_str!("../README.md")]
 
-use std::convert::Infallible as never;
+pub(crate) use ez_internal as internal;
 
-pub fn int(_: never) -> Int {
-    todo!()
+pub mod int;
+mod traits;
+
+#[doc(inline)]
+/// A re-export of the (unaffiliated) [`::ezio`] crate.
+///
+/// ---
+pub use ezio as io;
+
+#[doc(inline)]
+pub use crate::traits::*;
+
+/// Re-exports the most widely-useful features from this crate.
+pub mod prelude {
+    #[doc(no_inline)]
+    pub use crate::io::prelude::*;
 }
-
-pub struct Int(never);
-
-#[cfg(any(feature = "unstable-float", doc))]
-#[doc(cfg(feature = "unstable-float"))]
-pub fn float(_: never) -> Float {
-    todo!()
-}
-
-#[cfg(any(feature = "unstable-float", doc))]
-#[doc(cfg(feature = "unstable-float"))]
-pub struct Float(never);

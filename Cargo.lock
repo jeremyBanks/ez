@@ -62,6 +62,63 @@ dependencies = [
 ]
 
 [[package]]
+name = "ez"
+version = "0.0.2-dev.1"
+dependencies = [
+ "boolinator",
+ "bytes",
+ "derive_more",
+ "eyre",
+ "ez-internal",
+ "ezio",
+ "fehler",
+ "inherent",
+ "itertools",
+ "macro_rules_attribute",
+ "num-derive",
+ "num-traits",
+ "paste",
+ "rand",
+ "remain",
+ "serde",
+ "thiserror",
+ "thousands",
+]
+
+[[package]]
+name = "ez-internal"
+version = "0.0.2-dev.1"
+
+[[package]]
+name = "ezio"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb50dff20c889eb35cf19c662e19abab40f6dd85aea097fa97c8559b1b1dbca7"
+dependencies = [
+ "rand",
+]
+
+[[package]]
+name = "fehler"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5729fe49ba028cd550747b6e62cd3d841beccab5390aa398538c31a2d983635"
+dependencies = [
+ "fehler-macros",
+]
+
+[[package]]
+name = "fehler-macros"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccb5acb1045ebbfa222e2c50679e392a71dd77030b78fb0189f2d9c5974400f9"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -309,29 +366,3 @@ name = "wasi"
 version = "0.10.2+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
-
-[[package]]
-name = "weak"
-version = "0.0.0-dev.1"
-dependencies = [
- "boolinator",
- "bytes",
- "derive_more",
- "eyre",
- "inherent",
- "itertools",
- "macro_rules_attribute",
- "num-derive",
- "num-traits",
- "paste",
- "rand",
- "remain",
- "serde",
- "thiserror",
- "thousands",
- "weak-build-macros",
-]
-
-[[package]]
-name = "weak-build-macros"
-version = "0.0.0-dev.1"
