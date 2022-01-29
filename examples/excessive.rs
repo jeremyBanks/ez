@@ -170,8 +170,10 @@ pub fn main() {
             let name = name
                 .to_str()
                 .or_else(|| {
+                    let lossy = name.to_string_lossy();
                     tracing::warn!(
-                        "Invalid UTF-8 in an environment variable name. It has been skipped."
+                        "Invalid UTF-8 in an environment variable name ({lossy:?}). It has been \
+                         skipped."
                     );
                     None
                 })?
