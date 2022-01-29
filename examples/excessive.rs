@@ -19,10 +19,12 @@ use {
 
 // }
 
-trait Main: Fn(Self::Args, Self::Env) -> Self::ExitStatus {
+trait Main {
     type Args: MainArgs;
     type Env: MainEnv;
     type ExitStatus: MainExitStatus;
+
+    fn call(&self, args: Self::Args, env: Self::Env) -> Self::ExitStatus;
 }
 
 impl<Args, Env, ExitStatus> Main for fn(Args, Env) -> ExitStatus
@@ -34,6 +36,10 @@ where
     type Args = Args;
     type Env = Env;
     type ExitStatus = ExitStatus;
+
+    fn call(&self, args: Self::Args, env: Self::Env) -> Self::ExitStatus {
+        self(args, env)
+    }
 }
 
 trait MainArgs: FromIterator<String> {}
@@ -74,7 +80,7 @@ pub fn main() {
     .into_iter();
     HashMap::<String, String>::from_iter(i);
 
-    fn inner_main(args: Vec<String>, env: HashMap<String, String>) -> i32 {
+    fn inner_main(args: Vec<String>, env: HashMap<String, String>) -> u8 {
         return 0;
     }
 
