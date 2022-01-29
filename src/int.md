@@ -6,8 +6,8 @@ primitive integer operations, but they may be suitable for non-CPU-bound
 prototyping or scripting. We also provide corresponding [`int()`] and
 [`float()`] functions which will lossily convert or parse their argument with
 similar semantics to Python's [`int()`][PY-INT] and [`float()`][PY-FLOAT]
-functions. We rely on [`::num-traits`] for many method implementations, with
-our own macros to generate additional coercions.
+functions. We rely on [`::num-traits`] for many method implementations, with our
+own macros to generate additional coercions.
 
 ```rust
 let x = [1, 2, 3];
@@ -23,10 +23,10 @@ println!("{}", x[index]);
 ```
 
 [`Int`] isn't an unbounded "big" integer like in Python. However, it is an
-[`i128`], so it can fit a value from any of the widely-used integer sizes
-(if we used `[i64]` we couldn't fit `[u64]`), and the result of almost any
-operation operation on two 64-bit values without overflowing. Operations are
-checked: if they overflow, we panic.
+[`i128`], so it can fit a value from any of the widely-used integer sizes (if we
+used `[i64]` we couldn't fit `[u64]`), and the result of almost any operation
+operation on two 64-bit values without overflowing. Operations are checked: if
+they overflow, we panic.
 
 [`Float`] is an [`f64`], as that's the largest widely-used float size and the
 largest type natively supported by Rust.
