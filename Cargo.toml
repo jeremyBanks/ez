@@ -11,12 +11,12 @@ repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.2-dev.1"
 
 [features]
-default = []
-unstable-float = []
+std = []
 
 [dependencies]
 boolinator = "2.4.0"
 bytes = "1.1.0"
+color-eyre = { version = "0.6.0" }
 derive_more = "0.99.17"
 eyre = "0.6.6"
 ez-internal = { path = "./macros", version = "0.0.2-dev.1" }
@@ -27,12 +27,19 @@ itertools = "0.10.3"
 macro_rules_attribute = "0.0.2"
 num-derive = "0.3.3"
 num-traits = "0.2.14"
+ordered-float = "2.10.0"
 paste = "1.0.6"
 rand = "0.8.4"
 remain = "0.2.2"
 serde = { version = "1.0.136", features = ["derive"] }
 thiserror = "1.0.30"
 thousands = "0.2.0"
+tokio = { version = "1.16.1", features = ["rt"] }
+tracing = { version = "0.1.29" }
+
+[dev-dependencies]
+compiletest_rs = { version = "0.7.1", features = ["tmp"] }
+rustc_version = "0.4.0"
 
 [workspace.metadata.release]
 allow-branch = ["trunk", "main", "master"]
