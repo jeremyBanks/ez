@@ -1,11 +1,3 @@
-use {
-    indexmap::IndexMap,
-    std::{
-        collections::{BTreeMap, HashMap},
-        fmt::Debug,
-    },
-};
-
 // #[ez::main]
 // fn main(args: &[&str], env: &OrderedMap<String, String>) {
 
@@ -18,6 +10,16 @@ use {
 // }, env: &OrderedMap<String, String>) -> u8 {
 
 // }
+use {
+    eyre::WrapErr,
+    indexmap::IndexMap,
+    std::{
+        borrow::Cow,
+        collections::{BTreeMap, HashMap},
+        ffi::OsStr,
+        fmt::Debug,
+    },
+};
 
 trait Main {
     type Args: MainArgs;
@@ -42,26 +44,155 @@ where
     }
 }
 
+impl<Args, ExitStatus> Main for fn(Args) -> ExitStatus
+where
+    Args: MainArgs,
+    ExitStatus: MainExitStatus,
+{
+    type Args = Args;
+    type Env = CollectNothing;
+    type ExitStatus = ExitStatus;
+
+    fn call(&self, args: Self::Args, _: Self::Env) -> Self::ExitStatus {
+        self(args)
+    }
+}
+
+impl<ExitStatus> Main for fn() -> ExitStatus
+where
+    ExitStatus: MainExitStatus,
+{
+    type Args = CollectNothing;
+    type Env = CollectNothing;
+    type ExitStatus = ExitStatus;
+
+    fn call(&self, _: Self::Args, _: Self::Env) -> Self::ExitStatus {
+        self()
+    }
+}
+
+struct CollectNothing;
+impl<T> FromIterator<T> for CollectNothing {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        drop(iter);
+        CollectNothing
+    }
+}
+
 trait MainArgs: FromIterator<String> {}
 impl<T> MainArgs for T where T: FromIterator<String> {}
 
 trait MainEnv: FromIterator<(String, String)> {}
 impl<T> MainEnv for T where T: FromIterator<(String, String)> {}
 
-trait MainExitStatus: Into<i32> {}
-impl<T> MainExitStatus for T where T: Into<i32> {}
+trait MainExitStatus {
+    fn into_i32(self) -> i32;
+}
+
+impl<T, E> MainExitStatus for Result<T, E>
+where
+    T: MainExitStatus,
+{
+    fn into_i32(self) -> i32 {
+        match self {
+            Ok(status) => status.into_i32(),
+            Err(_) => 101,
+        }
+    }
+}
+
+impl<T> MainExitStatus for Option<T>
+where
+    T: MainExitStatus,
+{
+    fn into_i32(self) -> i32 {
+        match self {
+            Some(status) => status.into_i32(),
+            None => 0,
+        }
+    }
+}
+
+impl MainExitStatus for i32 {
+    fn into_i32(self) -> i32 {
+        self
+    }
+}
+
+impl MainExitStatus for u8 {
+    fn into_i32(self) -> i32 {
+        self.into()
+    }
+}
+
+impl MainExitStatus for i8 {
+    fn into_i32(self) -> i32 {
+        self.into()
+    }
+}
+
+impl MainExitStatus for u16 {
+    fn into_i32(self) -> i32 {
+        self.into()
+    }
+}
+
+impl MainExitStatus for i16 {
+    fn into_i32(self) -> i32 {
+        self.into()
+    }
+}
+
+impl MainExitStatus for () {
+    fn into_i32(self) -> i32 {
+        0
+    }
+}
 
 pub fn main() {
     fn run_main<F: Main>(f: F) {
-        // TODO: don't panic on UTF-8 errors
-        let args = std::env::args().skip(1).map(|s| s.to_string());
+        let args = std::env::args_os()
+            .skip(1)
+            .map(|s| match s.to_string_lossy() {
+                Cow::Borrowed(lossless) => lossless.to_owned(),
+                Cow::Owned(lossy) => {
+                    tracing::warn!(
+                        "Invalid UTF-8 in command-line argument. Invalid sequences have been \
+                         replaced with '�':\n  {:?}",
+                        lossy
+                    );
+                    lossy
+                },
+            });
         let args = F::Args::from_iter(args);
 
-        // TODO: don't panic on UTF-8 errors
-        let env = std::env::vars().map(|(a, b)| (a.to_string(), b.to_string()));
+        let env = std::env::vars_os().filter_map(|(name, value)| {
+            let name = name
+                .to_str()
+                .or_else(|| {
+                    tracing::warn!(
+                        "Invalid UTF-8 in an environment variable name. It has been skipped."
+                    );
+                    None
+                })?
+                .to_owned();
+            let value = value
+                .to_str()
+                .or_else(|| {
+                    tracing::warn!(
+                        "Invalid UTF-8 in the value of the environment variable {name:?}. It has \
+                         been skipped."
+                    );
+                    None
+                })?
+                .to_owned();
+            Some((name, value))
+        });
         let env = F::Env::from_iter(env);
 
-        let status = f(args, env).into();
+        let status = f.call(args, env).into_i32();
+
+        std::process::exit(status);
     }
 
     let i = vec![
@@ -80,9 +211,27 @@ pub fn main() {
     .into_iter();
     HashMap::<String, String>::from_iter(i);
 
-    fn inner_main(args: Vec<String>, env: HashMap<String, String>) -> u8 {
-        return 0;
+    fn inner_main(args: Vec<String>) -> Result<(), eyre::Report> {
+        Ok(())
     }
 
-    run_main(inner_main as fn(_, _) -> _);
+    fn run_main_0<ExitStatus: MainExitStatus>(inner_main: fn() -> ExitStatus) {
+        run_main(inner_main as fn() -> _);
+    }
+
+    fn run_main_1<Args: MainArgs, ExitStatus: MainExitStatus>(inner_main: fn(Args) -> ExitStatus) {
+        run_main(inner_main as fn(_) -> _);
+    }
+
+    fn run_main_2<Args: MainArgs, Env: MainEnv, ExitStatus: MainExitStatus>(
+        inner_main: fn(Args, Env) -> ExitStatus,
+    ) {
+        run_main(inner_main as fn(_, _) -> _);
+    }
+
+    run_main_0(|| {});
+    run_main_1(|args: Vec<_>| {});
+    run_main_2(|args: Vec<_>, env: Vec<_>| {});
+
+    run_main((|| {}) as fn() -> _)
 }
