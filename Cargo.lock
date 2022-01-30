@@ -227,6 +227,7 @@ dependencies = [
  "indexmap",
  "inherent",
  "itertools",
+ "lazy_static",
  "macro_rules_attribute",
  "num-derive",
  "num-traits",
