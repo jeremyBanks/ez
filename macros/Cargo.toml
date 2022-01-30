@@ -11,3 +11,7 @@ version = "0.0.2-dev.1"
 [lib]
 proc-macro = true
 path = "./lib.rs"
+
+[dependencies]
+quote = "1.0.15"
+syn = "1.0.86"

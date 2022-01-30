@@ -1,25 +1,23 @@
-// #[ez::main]
-// fn main(args: &[&str], env: &OrderedMap<String, String>) {
-
-// }
-
-// #[ez::main]
-// async fn main_2(args: {
-//     /// Turns the thing on.
-//     flag: boolean = false,
-// }, env: &OrderedMap<String, String>) -> u8 {
-
-// }
 use {
     eyre::WrapErr,
     indexmap::IndexMap,
     std::{
         borrow::Cow,
         collections::{BTreeMap, HashMap},
+        convert::Infallible,
         ffi::OsStr,
         fmt::Debug,
     },
 };
+
+mod xxx {
+    #[ez::main {
+        struct Args {
+            rest: Vec<String>,
+        }
+    }]
+    fn main(args: Args) -> () {}
+}
 
 trait Main {
     type Args: MainArgs;
@@ -150,7 +148,49 @@ impl MainExitStatus for () {
 }
 
 pub fn main() {
-    fn run_main<F: Main>(f: F) {
+    fn run_main<F: Main>(f: F) -> ! {
+        // Load environment variables from the nearest `.env` file, if one exists.
+        dotenv::dotenv().ok();
+
+        if std::env::var("RUST_LOG").unwrap_or_default().is_empty() {
+            std::env::set_var("RUST_LOG", "trace");
+        }
+
+        if std::env::var("RUST_BACKTRACE")
+            .unwrap_or_default()
+            .is_empty()
+        {
+            if cfg!(debug_assertions) {
+                std::env::set_var("RUST_BACKTRACE", "1");
+            } else {
+                std::env::set_var("RUST_BACKTRACE", "0");
+            }
+        }
+
+        if std::env::var("RUST_SPANTRACE")
+            .unwrap_or_default()
+            .is_empty()
+        {
+            std::env::set_var("RUST_SPANTRACE", "1");
+        }
+
+        // Add fancier backtraces to errors.
+        color_eyre::install().unwrap();
+
+        tracing_subscriber::util::SubscriberInitExt::init(
+            tracing_subscriber::Layer::with_subscriber(
+                tracing_error::ErrorLayer::default(),
+                tracing_subscriber::fmt()
+                    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+                    .with_target(false)
+                    .with_span_events(
+                        tracing_subscriber::fmt::format::FmtSpan::NEW
+                            | tracing_subscriber::fmt::format::FmtSpan::CLOSE,
+                    )
+                    .finish(),
+            ),
+        );
+
         let args = std::env::args_os()
             .skip(1)
             .map(|s| match s.to_string_lossy() {
@@ -194,7 +234,7 @@ pub fn main() {
 
         let status = f.call(args, env).into_i32();
 
-        std::process::exit(status);
+        std::process::exit(status)
     }
 
     fn run_main_0<ExitStatus: MainExitStatus>(inner_main: fn() -> ExitStatus) {
@@ -211,15 +251,7 @@ pub fn main() {
         run_main(inner_main as fn(_, _) -> _);
     }
 
-    // should 4 be a top-level crossbeam scope?
-    // will that be useful for pariter? Seems like it.
-    // But this in particular should only happen if the parameter is actually present, and explicitly requesting Scope.
-    // but note that this is incompatible with async! I think you're getting way too complicated here. Punt on
-    // anything regarding concurrency or async.
-
     run_main_0(|| {});
-    run_main_1(|args: Vec<_>| {});
-    run_main_2(|args: Vec<_>, env: Vec<_>| {});
-
-    run_main((|| {}) as fn() -> _)
+    run_main_1(|_args: Vec<_>| {});
+    run_main_2(|_args: Vec<_>, _env: IndexMap<_, _>| {});
 }

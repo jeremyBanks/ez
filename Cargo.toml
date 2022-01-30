@@ -16,8 +16,10 @@ std = []
 [dependencies]
 boolinator = "2.4.0"
 bytes = "1.1.0"
+clap = { version = "3.0.13", features = ["derive"] }
 color-eyre = { version = "0.6.0" }
 derive_more = "0.99.17"
+dotenv = "0.15.0"
 eyre = "0.6.6"
 ez-internal = { path = "./macros", version = "0.0.2-dev.1" }
 ezio = "0.1.2"
@@ -36,7 +38,12 @@ serde = { version = "1.0.136", features = ["derive"] }
 thiserror = "1.0.30"
 thousands = "0.2.0"
 tokio = { version = "1.16.1", features = ["rt"] }
-tracing = { version = "0.1.29" }
+tracing = { features = ["log"], version = "0.1.29" }
+tracing-error = { features = ["traced-error"], version = "0.2.0" }
+tracing-subscriber = { features = ["env-filter"], version = "0.3.6" }
+
+[profile.dev.package.backtrace]
+opt-level = 3
 
 [dev-dependencies]
 compiletest_rs = { version = "0.7.1", features = ["tmp"] }
