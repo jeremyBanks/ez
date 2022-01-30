@@ -10,15 +10,6 @@ use {
     },
 };
 
-mod xxx {
-    #[ez::main {
-        struct Args {
-            rest: Vec<String>,
-        }
-    }]
-    fn main(args: Args) -> () {}
-}
-
 trait Main {
     type Args: MainArgs;
     type Env: MainEnv;

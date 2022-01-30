@@ -16,7 +16,6 @@ std = []
 [dependencies]
 boolinator = "2.4.0"
 bytes = "1.1.0"
-clap = { version = "3.0.13", features = ["derive"] }
 color-eyre = { version = "0.6.0" }
 derive_more = "0.99.17"
 dotenv = "0.15.0"
@@ -60,3 +59,6 @@ pre-release-commit-message = "v{{version}}"
 shared-version = true
 tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
 tag-name = "{{version}}"
+
+[package.metadata.docs.rs]
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples=examples"]
