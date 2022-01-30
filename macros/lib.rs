@@ -7,6 +7,11 @@ use {
 /// Adds a panicking alternative to a fallible function.
 #[proc_macro_attribute]
 pub fn throws(attribute: TokenStream, input: TokenStream) -> TokenStream {
+    // Actually calling the other function is tricky if we don't know whether
+    // it's a free function or a method. the only case where we can affirmatively
+    // know is when we see `self` or `Self` in the signature. So instead of calling
+    // the fallible variant, we'' just duplicate the code.
+
     let function: syn::ImplItemMethod = parse_macro_input!(input);
 
     let attrs = function.attrs.clone();
