@@ -197,26 +197,6 @@ pub fn main() {
         std::process::exit(status);
     }
 
-    let i = vec![
-        "foo".to_string(),
-        "bar".to_string(),
-        "baz".to_string(),
-        "qux".to_string(),
-    ]
-    .into_iter();
-    Vec::<String>::from_iter(i);
-
-    let i = vec![
-        ("foo".to_string(), "bar".to_string()),
-        ("baz".to_string(), "qux".to_string()),
-    ]
-    .into_iter();
-    HashMap::<String, String>::from_iter(i);
-
-    fn inner_main(args: Vec<String>) -> Result<(), eyre::Report> {
-        Ok(())
-    }
-
     fn run_main_0<ExitStatus: MainExitStatus>(inner_main: fn() -> ExitStatus) {
         run_main(inner_main as fn() -> _);
     }
@@ -230,6 +210,12 @@ pub fn main() {
     ) {
         run_main(inner_main as fn(_, _) -> _);
     }
+
+    // should 4 be a top-level crossbeam scope?
+    // will that be useful for pariter? Seems like it.
+    // But this in particular should only happen if the parameter is actually present, and explicitly requesting Scope.
+    // but note that this is incompatible with async! I think you're getting way too complicated here. Punt on
+    // anything regarding concurrency or async.
 
     run_main_0(|| {});
     run_main_1(|args: Vec<_>| {});
