@@ -1,14 +1,4 @@
-use {
-    eyre::WrapErr,
-    indexmap::IndexMap,
-    std::{
-        borrow::Cow,
-        collections::{BTreeMap, HashMap},
-        convert::Infallible,
-        ffi::OsStr,
-        fmt::Debug,
-    },
-};
+use {indexmap::IndexMap, std::borrow::Cow};
 
 trait Main {
     type Args: MainArgs;

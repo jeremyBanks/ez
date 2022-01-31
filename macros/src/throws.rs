@@ -1,11 +1,9 @@
 use {
-    proc_macro::{Ident, TokenStream},
-    quote::{quote, quote_spanned, ToTokens},
+    proc_macro::TokenStream,
+    quote::{quote_spanned, ToTokens},
     syn::{parse_macro_input, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned},
 };
 
-/// Adds a panicking alternative to a fallible function.
-#[proc_macro_attribute]
 pub fn throws(attribute: TokenStream, input: TokenStream) -> TokenStream {
     // Actually calling the other function is tricky if we don't know whether
     // it's a free function or a method. the only case where we can affirmatively
@@ -103,41 +101,4 @@ pub fn throws(attribute: TokenStream, input: TokenStream) -> TokenStream {
         #vis
         #fallible_signature #fallible_block
     })
-}
-
-#[proc_macro_attribute]
-pub fn main(attributes: TokenStream, function: TokenStream) -> TokenStream {
-    let function: syn::ImplItemMethod = parse_macro_input!(function);
-
-    let args_item = if !attributes.is_empty() {
-        let attributes: syn::ItemStruct = parse_macro_input!(attributes);
-        quote_spanned! {
-            attributes.span() =>
-            #[derive(clap::Parser)]
-            #attributes
-        }
-    } else {
-        quote! {}
-    };
-
-    let fn_item = quote_spanned! {
-        function.span() =>
-        #function
-    };
-
-    quote! {
-        #args_item
-        #fn_item
-    }
-    .into()
-}
-
-#[proc_macro_derive(Int)]
-pub fn derive_int(_int_struct: TokenStream) -> TokenStream {
-    "fn answer() -> u32 { 42 }".parse().unwrap()
-}
-
-#[proc_macro_derive(Float)]
-pub fn derive_float(_int_struct: TokenStream) -> TokenStream {
-    "fn answer() -> u32 { 42 }".parse().unwrap()
 }

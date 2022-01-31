@@ -1,9 +1,4 @@
-use {
-    eyre::{eyre, WrapErr},
-    ez::throws,
-    lazy_static::lazy_static,
-    std::{cell::Cell, panic::PanicInfo},
-};
+use ez::throws;
 
 #[throws]
 fn main() {
@@ -29,7 +24,7 @@ fn main() {
         .unwrap_or_default()
         .is_empty()
     {
-        std::env::set_var("RUST_SPANTRACE", "1");
+        std::env::set_var("RUST_SPANTRACE", "full");
     }
 
     // Add fancier backtraces to errors.
@@ -47,21 +42,13 @@ fn main() {
             .finish(),
     ));
 
-    install_hook_suppressor();
+    let _a = alice();
+    let _a = try_alice()?;
+    let _f = try_alice();
 
-    // let _a = alice();
-    // let _a = try_alice()?;
-    // let _f = try_alice();
-
-    // let _b = bob("1");
-    // let _b = try_bob("threeve")?;
-    // let _b = try_bob("3");
-
-    let result = catch_unhandled!(Bar.foo());
-
-    println!("I'm still standing! Despite: {:?}\n\n\n", result);
-
-    result.unwrap();
+    let _b = bob("1");
+    let _b = try_bob("threeve")?;
+    let _b = try_bob("3");
 }
 
 /// This is Alice.
