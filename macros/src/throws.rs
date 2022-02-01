@@ -65,9 +65,11 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
             Self::#try_ident(#args).expect("error in #[ez::panics] function")
         } };
 
-        try_function.block = parse_quote! { {
-            #try_block
-        } };
+        if has_body {
+            try_function.block = parse_quote! { {
+                #try_block
+            } };
+        }
     } else {
         let try_block = try_block(&function.block, &error_type);
 
@@ -117,9 +119,11 @@ pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
 fn try_block(block: &syn::Block, error_type: &syn::ExprPath) -> syn::Expr {
     parse_quote_spanned! {
         block.span() => {
-            let inner = || ::core::result::Result::Ok({#block});
-            let result: ::core::result::Result<_, #error_type> = inner();
-            result
+            let inner = || {
+                let value = #block;
+                ::core::result::Result::<_, #error_type>::Ok(value)
+            };
+            inner()
         }
     }
 }

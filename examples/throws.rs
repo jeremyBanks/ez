@@ -64,6 +64,7 @@ pub fn bob(n: &str) -> i64 {
 }
 
 trait Foo {
+    // we're not detecting the missing block correctly?
     #[try_or_panics]
     fn foo(&self) -> i64;
 }
