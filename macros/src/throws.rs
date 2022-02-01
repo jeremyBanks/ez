@@ -44,6 +44,7 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
     };
     let try_name = format!("try_{}", function.sig.ident);
     try_function.sig.ident = syn::Ident::new(&try_name, try_function.sig.ident.span());
+    let try_ident = try_function.sig.ident.clone();
 
     if has_receiver {
         let args = Punctuated::<syn::Ident, syn::Token![,]>::from_iter(
@@ -61,7 +62,7 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
         let try_block = try_block(&function.block, &error_type);
 
         function.block = parse_quote! { {
-            Self::#try_name(#args).expect("error in #[ez::panics] function")
+            Self::#try_ident(#args).expect("error in #[ez::panics] function")
         } };
 
         try_function.block = parse_quote! { {
@@ -116,9 +117,10 @@ pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
 fn try_block(block: &syn::Block, error_type: &syn::ExprPath) -> syn::Expr {
     parse_quote_spanned! {
         block.span() => {
-        (|| -> ::core::result::Result<_, #error_type> {
-            ::core::result::Result::Ok({#block})
-        })() }
+            let inner = || ::core::result::Result::Ok({#block});
+            let result: ::core::result::Result<_, #error_type> = inner();
+            result
+        }
     }
 }
 

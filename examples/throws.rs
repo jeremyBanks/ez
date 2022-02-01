@@ -16,21 +16,23 @@ pub fn alice() -> i64 {
     ("s").parse()?
 }
 
-// #[throws]
-// /// This is Bob.
-// pub fn bob(n: &str) -> i64 {
-//     n.parse()?
-// }
+#[throws]
+/// This is Bob.
+pub fn bob(n: &str) -> i64 {
+    n.parse()?
+}
 
-// trait Foo {
-//     #[throws]
-//     fn foo(&self) -> i64;
-// }
+trait Foo {
+    #[try_or_panics]
+    fn foo(&self, n: i64) -> i64 {
+        n
+    }
+}
 
-// struct Bar;
+struct Bar;
 
-// impl Foo for Bar {
-//     fn try_foo(&self) -> Result<i64, eyre::Report> {
-//         try_alice()
-//     }
-// }
+impl Foo for Bar {
+    fn try_foo(&self, n: i64) -> Result<i64, eyre::Report> {
+        try_alice()
+    }
+}
