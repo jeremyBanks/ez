@@ -20,7 +20,7 @@ color-eyre = { version = "0.6.0" }
 derive_more = "0.99.17"
 dotenv = "0.15.0"
 eyre = "0.6.6"
-ez-internal = { path = "./macros", version = "0.0.2-dev.1" }
+ez-internal = { path = "./macros", version = "=0.0.2-dev.1" }
 ezio = "0.1.2"
 fehler = "1.0.0"
 indexmap = "1.8.0"

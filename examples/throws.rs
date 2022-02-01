@@ -1,33 +1,52 @@
-#![warn(dead_code)]
+use std::collections::HashMap;
 
-use ez::try_or_panics;
-
-#[try_or_panics]
-fn main() {
+#[ez::main]
+fn main(args: Vec<String>, b: Vec<(String, String)>) {
     // let _a = alice();
     // let _a = try_alice()?;
     // let _f = try_alice();
 
-    // let _b = bob("1");
-    // let _b = try_bob("threeve")?;
-    // let _b = try_bob("3");
+    let _b = bob("1");
+    let _b = try_bob("threeve")?;
+    let _b = try_bob("3");
+
+    // 32
+    // Is there some dumb thing we can do with impl trait to make
+    // explicit or implicit returns both work, without requiring the
+    // manual use of Ok()?
+}
+
+fn foo() -> impl ez::errors::IntoResult<i32, eyre::Report> {
+    if 1 % 2 == 3 {
+        1
+    } else {
+        return 2
+    }
+}
+
+#[ez::throws]
+fn zzzz() -> impl ez::errors::IntoResult<i32, eyre::Report> {
+    if 1 % 2 == 3 {
+        1
+    } else {
+        return 2
+    }
 }
 
 /// This is Alice.
-#[try_or_panics]
+#[ez::try_or_panics]
 fn alice() -> i64 {
     try_bob("s")?
 }
 
-#[try_or_panics(std::num::ParseIntError)]
+#[ez::try_or_panics(std::num::ParseIntError)]
 /// This is Bob.
 fn bob(n: &str) -> i64 {
     n.parse()?
 }
 
 trait Foo {
-    // we're not detecting the missing block correctly?
-    #[try_or_panics(std::num::ParseIntError)]
+    #[ez::try_or_panics(std::num::ParseIntError)]
     fn foo(&self) -> i64;
 }
 
