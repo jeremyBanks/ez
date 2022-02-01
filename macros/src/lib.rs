@@ -1,11 +1,15 @@
-use proc_macro::TokenTree;
-use syn::{Expr, Token};
-
 use {
-    proc_macro::TokenStream,
+    proc_macro::{TokenStream, TokenTree},
     quote::{quote, ToTokens},
-    syn::{parse_quote, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned},
+    syn::{
+        parse_quote, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Expr, Token,
+    },
 };
+
+/*
+if we want to use impl Trait in return position, we need to come up with some common
+patterns for converting functions to wrappers.
+*/
 
 #[proc_macro_attribute]
 pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
@@ -17,17 +21,18 @@ pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> Tok
     };
 
     let mut inner_function = function.clone();
-    inner_function.sig.output = parse_quote!{ -> impl ::ez::errors::IntoResult<#output_type, #error_type> };
+    inner_function.sig.output =
+        parse_quote! { -> impl ::ez::errors::IntoResult<#output_type, #error_type> };
     let inner_try = try_block(&*inner_function.block, &output_type, &error_type);
-    inner_function.block = parse_quote!{ #inner_try };
+    inner_function.block = parse_quote! { #inner_try };
     let inner_ident = inner_function.sig.ident.clone();
 
-
     let mut wrapped_function = function.clone();
-    wrapped_function.sig.inputs = parse_quote!{};
-    wrapped_function.sig.output = parse_quote!{ -> ::core::result::Result<core::convert::Infallible, #error_type> };
+    wrapped_function.sig.inputs = parse_quote! {};
+    wrapped_function.sig.output =
+        parse_quote! { -> ::core::result::Result<core::convert::Infallible, #error_type> };
 
-    let mut fn_type: syn::TypeBareFn = parse_quote!{ fn(_) -> _ };
+    let mut fn_type: syn::TypeBareFn = parse_quote! { fn(_) -> _ };
     let mut fn_type_inputs = Punctuated::new();
     if function.sig.inputs.len() > 2 {
         return quote! { compile_error!("#[ez::main] function must take 0 to 2 arguments"); }
@@ -35,7 +40,7 @@ pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> Tok
             .into();
     }
     for _ in 0..function.sig.inputs.len() {
-        fn_type_inputs.push(parse_quote!{ _ });
+        fn_type_inputs.push(parse_quote! { _ });
     }
     fn_type.inputs = fn_type_inputs;
 
@@ -47,7 +52,6 @@ pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> Tok
 
     wrapped_function.to_token_stream().into()
 }
-
 
 #[proc_macro_attribute]
 pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
@@ -130,17 +134,7 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
         // If we see a `self` or `Self` in the signature, we know this is an associated
         // function/method, so we know that we can call the fallible function
         // from the panicking function through `Self::`.
-        let args = Punctuated::<syn::Ident, syn::Token![,]>::from_iter(
-            try_function.sig.inputs.iter().map(|arg| match arg {
-                syn::FnArg::Receiver(receiver) => syn::Ident::new("self", receiver.span()),
-                syn::FnArg::Typed(arg) => match &*arg.pat {
-                    syn::Pat::Ident(pat) => pat.ident.clone(),
-                    _ => panic!(
-                        "#[ez::try_or_panics] doesn't support complicated patterns in arguments"
-                    ),
-                },
-            }),
-        );
+        let args = parameters_to_arguments(&try_function.sig.inputs);
 
         let try_block = try_block(&function.block, &output_type, &error_type);
 
@@ -181,10 +175,25 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
     .into()
 }
 
+fn parameters_to_arguments(
+    parameters: &Punctuated<syn::FnArg, syn::Token![,]>,
+) -> Punctuated<syn::Ident, syn::Token![,]> {
+    parameters
+        .iter()
+        .map(|arg| match arg {
+            syn::FnArg::Receiver(receiver) => syn::Ident::new("self", receiver.span()),
+            syn::FnArg::Typed(arg) => match &*arg.pat {
+                syn::Pat::Ident(pat) => pat.ident.clone(),
+                _ => panic!("unsupported pattern in arguments"),
+            },
+        })
+        .collect()
+}
+
 fn try_block(block: &syn::Block, output_type: &syn::Type, error_type: &syn::ExprPath) -> syn::Expr {
     parse_quote_spanned! {
         block.span() => {
-            let ez_unhygienic_inner = || {
+            fn ez_unhygienic_inner = || {
                 let ez_unhygienic_value: #output_type = #block;
                 ::core::result::Result::<_, #error_type>::Ok(ez_unhygienic_value)
             };

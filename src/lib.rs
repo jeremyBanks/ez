@@ -20,7 +20,8 @@ pub mod main {
     /// - `main()` can optionally be defined with primitive integer return type.
     ///   if so, the process will use this value as its exit status, as in C.
     ///   (This ensures that all destructors on the stack have had a chance to
-    ///   run, which is not the case when calling `std::process::exit()` directly.)
+    ///   run, which is not the case when calling `std::process::exit()`
+    ///   directly.)
     /// - `main()` can optionally be defined to take one or two arguments:
     ///   - `args`
     ///   - `env`
@@ -30,7 +31,9 @@ pub mod main {
     #[doc(hidden)]
     /// Implements the runtime behaviour [`#[main]`] wraps around the inner
     /// function.
-    pub fn run_main<F: Main>(f: F) -> ::core::result::Result<core::convert::Infallible,::eyre::Report> {
+    pub fn run_main<F: Main>(
+        f: F,
+    ) -> ::core::result::Result<core::convert::Infallible, ::eyre::Report> {
         // Load environment variables from the nearest `.env` file, if one exists.
         dotenv::dotenv().ok();
 
@@ -180,12 +183,8 @@ pub mod main {
         }
     }
 
-    pub trait MainEnv: FromIterator<(String, String)> {
-    }
-    impl<T> MainEnv for T
-    where
-        T: FromIterator<(String, String)>,
-    {}
+    pub trait MainEnv: FromIterator<(String, String)> {}
+    impl<T> MainEnv for T where T: FromIterator<(String, String)> {}
 
     pub trait MainArgs: FromIterator<String> {}
     impl<T> MainArgs for T where T: FromIterator<String> {}

@@ -20,7 +20,7 @@ fn foo() -> impl ez::errors::IntoResult<i32, eyre::Report> {
     if 1 % 2 == 3 {
         1
     } else {
-        return 2
+        return 2;
     }
 }
 
@@ -29,7 +29,7 @@ fn zzzz() -> impl ez::errors::IntoResult<i32, eyre::Report> {
     if 1 % 2 == 3 {
         1
     } else {
-        return 2
+        return 2;
     }
 }
 
