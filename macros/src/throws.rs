@@ -8,9 +8,13 @@ pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
     let error_type = error_type_for_attribute(attribute_tokens);
     let has_body = function_has_body(function_tokens.clone());
     let mut function: syn::ImplItemMethod = must_parse(function_tokens);
+    let output_type = match &function.sig.output {
+        syn::ReturnType::Default => parse_quote! { () },
+        syn::ReturnType::Type(_, output) => output.clone(),
+    };
 
     if has_body {
-        let try_block = try_block(&function.block, &error_type);
+        let try_block = try_block(&function.block, &output_type, &error_type);
         function.block = parse_quote! { {
             #try_block.expect("error in #[ez::panics] function")
         } };
@@ -28,7 +32,7 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
     let has_body = function_has_body(function_tokens.clone());
     let mut function: syn::ImplItemMethod = must_parse(function_tokens);
     let has_receiver = function.sig.receiver().is_some();
-    let function_output = match &function.sig.output {
+    let output_type = match &function.sig.output {
         syn::ReturnType::Default => parse_quote! { () },
         syn::ReturnType::Type(_, output) => output.clone(),
     };
@@ -40,7 +44,7 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
     let mut try_function = function.clone();
     try_function.sig.output = parse_quote_spanned! {
         try_function.sig.output.span() =>
-        -> ::core::result::Result<#function_output, #error_type>
+        -> ::core::result::Result<#output_type, #error_type>
     };
     let try_name = format!("try_{}", function.sig.ident);
     try_function.sig.ident = syn::Ident::new(&try_name, try_function.sig.ident.span());
@@ -59,7 +63,7 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
             }),
         );
 
-        let try_block = try_block(&function.block, &error_type);
+        let try_block = try_block(&function.block, &output_type, &error_type);
 
         function.block = parse_quote! { {
             Self::#try_ident(#args).expect("error in #[ez::panics] function")
@@ -71,7 +75,7 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
             } };
         }
     } else {
-        let try_block = try_block(&function.block, &error_type);
+        let try_block = try_block(&function.block, &output_type, &error_type);
 
         function.block = parse_quote! { {
             #try_block.expect("error in #[ez::panics] function")
@@ -95,13 +99,13 @@ pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
     let error_type = error_type_for_attribute(attribute_tokens);
     let has_body = function_has_body(function_tokens.clone());
     let mut function: syn::ImplItemMethod = must_parse(function_tokens);
-    let function_output = match &function.sig.output {
+    let output_type = match &function.sig.output {
         syn::ReturnType::Default => parse_quote! { () },
         syn::ReturnType::Type(_, output) => output.clone(),
     };
 
     if has_body {
-        let try_block = try_block(&function.block, &error_type);
+        let try_block = try_block(&function.block, &output_type, &error_type);
 
         function.block = parse_quote! { {
             #try_block
@@ -110,20 +114,20 @@ pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
 
     function.sig.output = parse_quote_spanned! {
         function.sig.output.span() =>
-        -> ::core::result::Result<#function_output, #error_type>
+        -> ::core::result::Result<#output_type, #error_type>
     };
 
     function.to_token_stream().into()
 }
 
-fn try_block(block: &syn::Block, error_type: &syn::ExprPath) -> syn::Expr {
+fn try_block(block: &syn::Block, output_type: &syn::Type, error_type: &syn::ExprPath) -> syn::Expr {
     parse_quote_spanned! {
         block.span() => {
-            let inner = || {
-                let value = #block;
-                ::core::result::Result::<_, #error_type>::Ok(value)
+            let ez_unhygienic_inner = || {
+                let ez_unhygienic_value: #output_type = #block;
+                ::core::result::Result::<#output_type, #error_type>::Ok(value)
             };
-            inner()
+            ez_unhygienic_inner()
         }
     }
 }

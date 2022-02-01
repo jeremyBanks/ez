@@ -24,7 +24,7 @@ pub mod errors {
     pub use ez_internal::throws;
     #[doc(inline)]
     /// Applied to a function to create two versions, one that panics on error
-    /// (as [`panics`]), and a copy with `try_` prefixed to the name which
-    /// returns a [`Result`] instead.
+    /// (like [`panics`]), and a copy with `try_` prefixed to the name which
+    /// returns a [`Result`] instead (like [`throws`]).
     pub use ez_internal::try_or_panics;
 }
