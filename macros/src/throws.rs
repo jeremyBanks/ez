@@ -8,9 +8,9 @@ pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
     let error_type = error_type_for_attribute(attribute_tokens);
     let has_body = function_has_body(function_tokens.clone());
     let mut function: syn::ImplItemMethod = must_parse(function_tokens);
-    let output_type = match &function.sig.output {
+    let output_type: syn::Type = match &function.sig.output {
         syn::ReturnType::Default => parse_quote! { () },
-        syn::ReturnType::Type(_, output) => output.clone(),
+        syn::ReturnType::Type(_, output) => *output.clone(),
     };
 
     if has_body {
@@ -31,13 +31,16 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
     let error_type = error_type_for_attribute(attribute_tokens);
     let has_body = function_has_body(function_tokens.clone());
     let mut function: syn::ImplItemMethod = must_parse(function_tokens);
-    let has_receiver = function.sig.receiver().is_some();
+    let mut has_self = function.sig.receiver().is_some();
     let output_type = match &function.sig.output {
         syn::ReturnType::Default => parse_quote! { () },
         syn::ReturnType::Type(_, output) => output.clone(),
     };
+    if output_type.to_token_stream().to_string() == "Self" {
+        has_self = true;
+    }
 
-    if !has_body && !has_receiver {
+    if !has_body && !has_self {
         return quote! { compile_error!("#[ez::try_or_panics] function must have a body or a receiver (`self` parameter)"); }.to_token_stream().into();
     }
 
@@ -50,7 +53,10 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
     try_function.sig.ident = syn::Ident::new(&try_name, try_function.sig.ident.span());
     let try_ident = try_function.sig.ident.clone();
 
-    if has_receiver {
+    if has_self {
+        // If we see a `self` or `Self` in the signature, we know this is an associated
+        // function/method, so we know that we can call the fallible function
+        // from the panicking function through `Self::`.
         let args = Punctuated::<syn::Ident, syn::Token![,]>::from_iter(
             try_function.sig.inputs.iter().map(|arg| match arg {
                 syn::FnArg::Receiver(receiver) => syn::Ident::new("self", receiver.span()),
@@ -75,6 +81,13 @@ pub fn try_or_panics(attribute_tokens: TokenStream, function_tokens: TokenStream
             } };
         }
     } else {
+        // If we don't see `Self` or `self` in the signature, we can't tell whether this
+        // is a free function or an associated function/method just happens not
+        // to use `self`. We don't know how to call one function from the other
+        // reliably, so we need to duplicate the body. In most cases this should
+        // be okay, but there may be some cases around use of static or global
+        // data that could cause errors.
+
         let try_block = try_block(&function.block, &output_type, &error_type);
 
         function.block = parse_quote! { {
@@ -125,7 +138,7 @@ fn try_block(block: &syn::Block, output_type: &syn::Type, error_type: &syn::Expr
         block.span() => {
             let ez_unhygienic_inner = || {
                 let ez_unhygienic_value: #output_type = #block;
-                ::core::result::Result::<#output_type, #error_type>::Ok(value)
+                ::core::result::Result::<_, #error_type>::Ok(ez_unhygienic_value)
             };
             ez_unhygienic_inner()
         }
