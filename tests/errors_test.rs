@@ -58,49 +58,29 @@ mod throws {
             Ok(())
         }
 
-        #[ez::throws]
-        fn dynamic_ok() -> i64 {
-            if 1 % 2 == 3 {
-                success()?
-            }
-            if 1 % 2 == 3 {
-                return success()?;
-            }
-            if 1 % 2 == 3 {
-                ez::throw!(failure().unwrap_err());
-            }
-            if 1 % 2 == 3 {
-                return failure()?;
-            }
-            Default::default()
-        }
+        // #[ez::throws]
+        // fn dynamic_ok() -> i64 {
+        //     if 1 % 2 == 3 {
+        //         success()?
+        //     }
+        //     if 1 % 2 == 3 {
+        //         return success()?;
+        //     }
+        //     if 1 % 2 == 3 {
+        //         ez::throw!(failure().unwrap_err());
+        //     }
+        //     if 1 % 2 == 3 {
+        //         return failure()?;
+        //     }
+        //     Default::default()
+        // }
 
-        trait Trait {
-            fn two() -> i64 { 2 }
-            fn dynamic_ok(&mut self, a: i64, b: &str, c: String) -> Result<&str, eyre::Report> {
-                // How(can) we preserve references to `Self` and `self`?
-
-                trait FnMut3 {
-                    fn call_mut(&mut self, a: i64, b: &str, c: String) -> Result<&str, eyre::Report>;
+        fn dynamic_ok(a: i64, b: &str, c: String) -> Result<&str, eyre::Report> {
+            {
+                fn ez_unhygienic_dynamic_ok(a: i64, b: &str, c: String) -> impl ez::IntoResult<&str, eyre::Report> {
+                    b
                 }
-                impl FnMut3 for Self {
-                    fn call_mut(&mut self, a: i64, b: &str, c: String) -> Result<&str, eyre::Report> {
-                        if 1 % 2 == 3 {
-                            return success()?
-                        }
-                        if 1 % 2 == 3 {
-                            ez::throw!(failure().unwrap_err());
-                        }
-                        if 1 % 2 == 3 {
-                            return failure()?;
-                        }
-                        if 1 % 2 == 3 {
-                            return dynamic_ok();
-                        }
-                        success()?;
-                        Self::two();
-                    }
-                }
+                ez::IntoResult::into_result(ez_unhygienic_dynamic_ok(a, b, c))
             }
         }
 
