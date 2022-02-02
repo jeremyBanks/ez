@@ -6,11 +6,6 @@ use {
     },
 };
 
-/*
-if we want to use impl Trait in return position, we need to come up with some common
-patterns for converting functions to wrappers.
-*/
-
 #[proc_macro_attribute]
 pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
     let error_type: syn::ExprPath = parse_quote! { ::eyre::Report };
@@ -193,7 +188,7 @@ fn parameters_to_arguments(
 fn try_block(block: &syn::Block, output_type: &syn::Type, error_type: &syn::ExprPath) -> syn::Expr {
     parse_quote_spanned! {
         block.span() => {
-            fn ez_unhygienic_inner = || {
+            let ez_unhygienic_inner = || {
                 let ez_unhygienic_value: #output_type = #block;
                 ::core::result::Result::<_, #error_type>::Ok(ez_unhygienic_value)
             };
