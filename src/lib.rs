@@ -1,4 +1,17 @@
+#![feature(total_cmp)]
 #![doc = include_str!("../README.md")]
+
+#[doc(no_inline)]
+pub use noisy_float::types::{
+    r64 as float,
+    R64 as Float,
+};
+
+pub use num_traits::{
+    Float as _,
+    PrimInt as _,
+    Num as _,
+};
 
 pub mod main {
     //! This module provides a `#[main]` macro, intended for use on your
@@ -7,7 +20,7 @@ pub mod main {
     use std::borrow::Cow;
 
     /// A `#[main]` macro adding reasonable defaults for a `main` entry point
-    /// function.
+    /// function. 
     ///
     /// - enables [`::color-eyre`] for nicely-formatted colored error
     ///   backtraces.
@@ -25,6 +38,8 @@ pub mod main {
     /// - `main()` can optionally be defined to take one or two arguments:
     ///   - `args`
     ///   - `env`
+    /// THIS DOESn"T NEED TO BE DYNAMIC YOU IDIOT.
+    ///
     #[doc(inline)]
     pub use ez_internal::main;
 

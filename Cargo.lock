@@ -229,6 +229,7 @@ dependencies = [
  "itertools",
  "lazy_static",
  "macro_rules_attribute",
+ "noisy_float",
  "num-derive",
  "num-traits",
  "ordered-float",
@@ -464,6 +465,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9f1c5b025cda876f66ef43a113f91ebc9f4ccef34843000e0adf6ebbab84e21"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "noisy_float"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "978fe6e6ebc0bf53de533cd456ca2d9de13de13856eda1518a285d7705a213af"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]

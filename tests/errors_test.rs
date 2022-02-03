@@ -58,31 +58,31 @@ mod throws {
             Ok(())
         }
 
-        // #[ez::throws]
-        // fn dynamic_ok() -> i64 {
-        //     if 1 % 2 == 3 {
-        //         success()?
-        //     }
-        //     if 1 % 2 == 3 {
-        //         return success()?;
-        //     }
-        //     if 1 % 2 == 3 {
-        //         ez::throw!(failure().unwrap_err());
-        //     }
-        //     if 1 % 2 == 3 {
-        //         return failure()?;
-        //     }
-        //     Default::default()
-        // }
-
-        fn dynamic_ok(a: i64, b: &str, c: String) -> Result<&str, eyre::Report> {
-            {
-                fn ez_unhygienic_dynamic_ok(a: i64, b: &str, c: String) -> impl ez::IntoResult<&str, eyre::Report> {
-                    b
-                }
-                ez::IntoResult::into_result(ez_unhygienic_dynamic_ok(a, b, c))
+        #[ez::throws]
+        fn dynamic_ok() -> i64 {
+            if 1 % 2 == 3 {
+                success()?;
             }
+            // if 1 % 2 == 3 {
+            //     return success()?;
+            // }
+            // if 1 % 2 == 3 {
+            //     ez::throw!(failure().unwrap_err());
+            // }
+            // if 1 % 2 == 3 {
+            //     return failure()?;
+            // }
+            Default::default()
         }
+
+        // fn dynamic_ok(a: i64, b: &str, c: String) -> Result<&str, eyre::Report> {
+        //     {
+        //         fn ez_unhygienic_dynamic_ok(a: i64, b: &str, c: String) -> impl ez::IntoResult<&str, eyre::Report> {
+        //             b
+        //         }
+        //         ez::IntoResult::into_result(ez_unhygienic_dynamic_ok(a, b, c))
+        //     }
+        // }
 
         #[ez::throws]
         fn dynamic_err() -> i64 {

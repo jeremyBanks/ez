@@ -27,21 +27,10 @@ pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> Tok
     wrapped_function.sig.output =
         parse_quote! { -> ::core::result::Result<core::convert::Infallible, #error_type> };
 
-    let mut fn_type: syn::TypeBareFn = parse_quote! { fn(_) -> _ };
-    let mut fn_type_inputs = Punctuated::new();
-    if function.sig.inputs.len() > 2 {
-        return quote! { compile_error!("#[ez::main] function must take 0 to 2 arguments"); }
-            .to_token_stream()
-            .into();
-    }
-    for _ in 0..function.sig.inputs.len() {
-        fn_type_inputs.push(parse_quote! { _ });
-    }
-    fn_type.inputs = fn_type_inputs;
-
     wrapped_function.block = parse_quote! { {
         #inner_function
-        let ez_unhygienic_fn: #fn_type = #inner_ident;
+        // I what (does?) this do for methods? 
+        let ez_unhygienic_fn = ::core::ptr::addr_of!(#inner_ident);
         ::ez::main::run_main(ez_unhygienic_fn)
     } };
 
