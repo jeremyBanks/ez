@@ -9,7 +9,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "ez"
 repository = "https://github.com/jeremyBanks/ez"
-version = "0.0.2-dev.2"
+version = "0.0.2-dev.3"
 
 [features]
 default = ["std"]
@@ -27,7 +27,7 @@ derive_more = "0.99.17"
 dotenv = "0.15.0"
 dpc-pariter = "0.4.0"
 eyre = "0.6.6"
-ez-internal = { path = "./macros", version = "=0.0.2-dev.2" }
+ez-internal = { path = "./macros", version = "=0.0.2-dev.3" }
 indexmap = "1.8.0"
 itertools = "0.10.3"
 num-traits = "0.2.14"
