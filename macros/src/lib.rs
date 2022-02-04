@@ -1,8 +1,21 @@
 use {
     proc_macro::TokenStream,
-    quote::{quote_spanned, ToTokens},
+    quote::{quote, quote_spanned, ToTokens},
     syn::{parse_macro_input, parse_quote, spanned::Spanned, ReturnType},
 };
+
+#[proc_macro_attribute]
+pub fn pz(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+    let main = main(attribute_tokens, function_tokens);
+    let main: syn::ItemFn = parse_macro_input!(main);
+    quote! {
+        use ::ez::pz::*;
+
+        #main
+    }
+    .to_token_stream()
+    .into()
+}
 
 #[proc_macro_attribute]
 pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
@@ -15,17 +28,17 @@ pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> Tok
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::main::Ignored,));
+                .push(parse_quote!(_: ::ez::main::Ignored));
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::main::Ignored,));
+                .push(parse_quote!(_: ::ez::main::Ignored));
         },
         1 => {
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::main::Ignored,));
+                .push(parse_quote!(_: ::ez::main::Ignored));
         },
         2 => {},
         _ => {

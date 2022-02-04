@@ -12,12 +12,14 @@ repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.2-dev.3"
 
 [features]
-default = ["std"]
+default = ["std", "pz"]
 std = ["alloc"]
 alloc = ["core"]
 core = []
+pz = []
 
 [dependencies]
+atty = "0.2.14"
 boolinator = "2.4.0"
 bytes = "1.1.0"
 clap = "3.0.14"
@@ -30,10 +32,16 @@ eyre = "0.6.6"
 ez-internal = { path = "./macros", version = "=0.0.2-dev.3" }
 indexmap = "1.8.0"
 itertools = "0.10.3"
+lazy_static = "1.4.0"
 num-traits = "0.2.14"
 parking_lot = "0.12.0"
+paste = "1.0.6"
+rand = "0.8.4"
 rayon = "1.5.1"
+regex = "1.5.4"
+reqwest = { version = "0.11.9", features = ["default", "deflate", "blocking", "gzip", "brotli", "json"] }
 serde = { version = "1.0.136", features = ["derive"] }
+serde_json = "1.0.78"
 socket2 = "0.4.4"
 thiserror = "1.0.30"
 tokio = { version = "1.16.1", features = ["rt"] }
