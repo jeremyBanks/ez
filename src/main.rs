@@ -1,8 +1,9 @@
-//! This module provides a `#[main]` macro, intended for use on your
+//! This module provides a `#[main]` macro intended for use on your
 //! entry-point `main` function.
 
 use std::borrow::Cow;
 
+/// `#[ez::main]` macro for use on your entry-point `main` function.
 pub use ez_internal::main;
 
 #[doc(hidden)]

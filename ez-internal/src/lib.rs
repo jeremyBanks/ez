@@ -9,7 +9,7 @@ pub fn pz(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenS
     let main = main(attribute_tokens, function_tokens);
     let main: syn::ItemFn = parse_macro_input!(main);
     quote! {
-        use ::ez::pz::*;
+        pub(crate) use ::ez::pz::*;
 
         #main
     }

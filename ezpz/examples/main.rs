@@ -1,4 +1,4 @@
-#[ez::pz]
+#[ezpz::pz]
 fn main() -> eyre::Result<()> {
     // Dynamic JSON data
 

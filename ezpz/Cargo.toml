@@ -1,0 +1,13 @@
+[package]
+authors = ["Jeremy Banks <_@jeremy.ca>"]
+autobins = false
+description = "ez::pz"
+documentation = "https://docs.rs/ez"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+name = "ezpz"
+repository = "https://github.com/jeremyBanks/ez"
+version = "0.0.2-dev.4"
+
+[dependencies]
+ez = { path = "../", version = "=0.0.2-dev.4", features = ["pz"] }
