@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
+use ez::prelude::*;
 
 #[ez::main]
-fn main(args: Vec<String>, env: BTreeMap<String, String>) -> eyre::Result<()> {
-    tracing::debug!("args: {args:?}");
-    log::debug!("env: {env:#?}");
+fn main(args: Vec<String>, env: OrderedMap<String, String>) -> eyre::Result<()> {
+    debug!("args: {args:?}");
+    debug!("env: {env:#?}");
 }

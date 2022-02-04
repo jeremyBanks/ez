@@ -12,14 +12,31 @@ repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.2-dev.2"
 
 [features]
-std = []
+default = ["std"]
+std = ["alloc"]
+alloc = ["core"]
+core = []
 
 [dependencies]
+boolinator = "2.4.0"
+bytes = "1.1.0"
+clap = "3.0.14"
 color-eyre = "0.6.0"
+crossbeam = "0.8.1"
+derive_more = "0.99.17"
 dotenv = "0.15.0"
+dpc-pariter = "0.4.0"
 eyre = "0.6.6"
 ez-internal = { path = "./macros", version = "=0.0.2-dev.2" }
-log = "0.4.14"
+indexmap = "1.8.0"
+itertools = "0.10.3"
+num-traits = "0.2.14"
+parking_lot = "0.12.0"
+rayon = "1.5.1"
+serde = { version = "1.0.136", features = ["derive"] }
+socket2 = "0.4.4"
+thiserror = "1.0.30"
+tokio = { version = "1.16.1", features = ["rt"] }
 tracing = { features = ["log"], version = "0.1.30" }
 tracing-error = { features = ["traced-error"], version = "0.2.0" }
 tracing-subscriber = { features = ["env-filter"], version = "0.3.7" }
