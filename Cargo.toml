@@ -3,6 +3,7 @@ members = [".", "macros"]
 
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
+autobins = false
 description = "A collection of easy-to-use, beginner-friendly utilities for Rust"
 edition = "2021"
 license = "MIT OR Apache-2.0"
