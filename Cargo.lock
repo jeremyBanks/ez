@@ -175,7 +175,7 @@ dependencies = [
 
 [[package]]
 name = "ez"
-version = "0.0.2-dev.1"
+version = "0.0.2-dev.2"
 dependencies = [
  "color-eyre",
  "compiletest_rs",
@@ -191,7 +191,7 @@ dependencies = [
 
 [[package]]
 name = "ez-internal"
-version = "0.0.2-dev.1"
+version = "0.0.2-dev.2"
 dependencies = [
  "quote",
  "syn",
