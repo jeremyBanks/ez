@@ -53,7 +53,6 @@ tracing-subscriber = { features = ["env-filter"], version = "0.3.7" }
 opt-level = 3
 
 [workspace.metadata.release]
-allow-branch = ["trunk", "main", "master"]
 consolidate-commits = true
 consolidate-pushes = true
 dev-version = true
