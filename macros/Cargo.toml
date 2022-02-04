@@ -1,5 +1,6 @@
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
+autobins = false
 description = "ಠ_ಠ"
 documentation = "https://docs.rs/ez"
 edition = "2021"
@@ -7,7 +8,6 @@ license = "MIT OR Apache-2.0"
 name = "ez-internal"
 repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.2-dev.1"
-autobins = false
 
 [lib]
 proc-macro = true
