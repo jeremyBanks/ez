@@ -15,35 +15,14 @@ version = "0.0.2-dev.1"
 std = []
 
 [dependencies]
-boolinator = "2.4.0"
-bytes = "1.1.0"
 color-eyre = { version = "0.6.0" }
-derive_more = "0.99.17"
 dotenv = "0.15.0"
 eyre = "0.6.6"
 ez-internal = { path = "./macros", version = "=0.0.2-dev.1" }
-ezio = "0.1.2"
-fehler = "1.0.0"
-indexmap = "1.8.0"
-inherent = "1.0.0"
-itertools = "0.10.3"
-lazy_static = "1.4.0"
-macro_rules_attribute = "0.0.2"
-noisy_float = "0.2.0"
-num-derive = "0.3.3"
-num-traits = "0.2.14"
-ordered-float = "2.10.0"
-paste = "1.0.6"
-rand = "0.8.4"
-remain = "0.2.2"
-serde = { version = "1.0.136", features = ["derive"] }
-thiserror = "1.0.30"
-thousands = "0.2.0"
-tokio = { version = "1.16.1", features = ["rt"] }
+log = "0.4.14"
 tracing = { features = ["log"], version = "0.1.29" }
 tracing-error = { features = ["traced-error"], version = "0.2.0" }
 tracing-subscriber = { features = ["env-filter"], version = "0.3.6" }
-try-catch = "0.2.2"
 
 [profile.dev.package.backtrace]
 opt-level = 3
