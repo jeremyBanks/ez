@@ -4,7 +4,7 @@ members = [".", "macros"]
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
 autobins = false
-description = "A collection of easy-to-use, beginner-friendly utilities for Rust"
+description = "ez? wip."
 edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "ez"
