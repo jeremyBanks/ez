@@ -1,26 +1,9 @@
 //! Simplified error propagation.
 
-use std::{convert::Infallible, fmt::Debug};
-
 ///
-pub use ez_internal::panics;
+pub use ez_proc_macros::panics;
 ///
-pub use ez_internal::throws;
-
-/// An uninhabited pseudo-Error-type that panics when any other error types to
-/// convert into it.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
-pub struct Panic(Infallible);
-
-#[allow(clippy::fallible_impl_from)]
-impl<T> From<T> for Panic
-where
-    T: Into<eyre::Report>,
-{
-    fn from(t: T) -> Self {
-        panic!("{:?}", eyre::eyre!(t));
-    }
-}
+pub use ez_proc_macros::throws;
 
 /// Returns from the enclosing function with a [`Result::Err`].
 ///
@@ -31,15 +14,19 @@ where
 /// expects a more-specific error type in its [`Result`].
 #[macro_export]
 macro_rules! throw {
-    ($msg:literal $(, $rest:tt)* $(,)?) => {
-        $crate::deps::fehler::throw!(::eyre::eyre!($msg $(, $rest)*));
+    ($msg:literal $(,)?) => {
+        $crate::deps::fehler::throw!(eyre::Report::msg($msg));
     };
 
-    ($error:expr) => {
+    ($msg:literal $(, $rest:tt)* $(,)?) => {
+        $crate::deps::fehler::throw!(eyre::Report::msg(format!($msg $(, $rest)*)));
+    };
+
+    ($error:expr $(,)?) => {
         $crate::deps::fehler::throw!($error);
     };
 
-    () => {
+    ($(,)?) => {
         $crate::deps::fehler::throw!();
     };
 }

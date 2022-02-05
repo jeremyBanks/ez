@@ -39,7 +39,7 @@ pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
 pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
     let attribute_tokens = proc_macro2::TokenStream::from(attribute_tokens);
     let attribute_tokens = if attribute_tokens.is_empty() {
-        quote! { ::ez::errors::Panic }
+        quote! { ::ez::dysfunctional::ErrorPanicker }
     } else {
         quote! { compile_error!("#[ez::panics] macro takes no arguments") }
     };
@@ -68,27 +68,31 @@ pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
 }
 
 #[proc_macro_attribute]
-pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+    let attribute_tokens = proc_macro2::TokenStream::from(attribute_tokens);
+    if !attribute_tokens.is_empty() {
+        return quote! { compile_error!("#[ez::main] macro takes no arguments") }.into_token_stream().into();
+    };
+
     let mut inner_function: syn::ItemFn = parse_macro_input!(function_tokens);
     let mut outer_function = inner_function.clone();
-    let ident = inner_function.sig.ident.clone();
 
     match inner_function.sig.inputs.len() {
         0 => {
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::main::Ignored));
+                .push(parse_quote!(_: ::ez::dysfunctional::IteratorDropper));
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::main::Ignored));
+                .push(parse_quote!(_: ::ez::dysfunctional::IteratorDropper));
         },
         1 => {
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::main::Ignored));
+                .push(parse_quote!(_: ::ez::dysfunctional::IteratorDropper));
         },
         2 => {},
         _ => {
@@ -98,8 +102,17 @@ pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> Tok
         },
     }
 
+    let extra_inner_attributes = if inner_function.sig.asyncness.is_some() {
+        quote!{
+            #[::ez::deps::tokio::main(flavor = "current_thread")]
+        }
+    } else {
+        quote!{}
+    };
+
     outer_function.sig.inputs = syn::punctuated::Punctuated::new();
     outer_function.sig.output = parse_quote! { -> Result<(), eyre::Report> };
+    outer_function.sig.asyncness = None;
 
     let block = inner_function.block.clone();
     if inner_function.sig.output == ReturnType::Default {
@@ -108,10 +121,13 @@ pub fn main(_attribute_tokens: TokenStream, function_tokens: TokenStream) -> Tok
     inner_function.block = parse_quote! { {
         Ok(#block)
     } };
+    inner_function.vis = syn::Visibility::Inherited;
+    inner_function.sig.ident = parse_quote! { ez_inner_main };
 
     outer_function.block = parse_quote! { {
+        #extra_inner_attributes
         #inner_function;
-        ::ez::main::run_main(env!("CARGO_CRATE_NAME"), #ident)
+        ::ez::main::run(env!("CARGO_CRATE_NAME"), ez_inner_main)
     } };
 
     outer_function.to_token_stream().into()

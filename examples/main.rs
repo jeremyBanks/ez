@@ -1,15 +1,15 @@
 use {std::collections::BTreeMap as SortedMap};
 
 #[ez::main]
-fn main(args: Vec<String>, env: SortedMap<String, String>) -> eyre::Result<()> {
-    x(args.len() as _);
+async fn main(args: Vec<String>, env: SortedMap<String, String>) -> eyre::Result<()> {
+    println!("{}", x(args.len() as _).await?);
 }
 
-#[ez::panics]
-fn x(n: i32) -> i32 {
-    if n % 2 == 0 {
-        n
+#[ez::throws(std::num::ParseIntError)]
+async fn x(n: i32) -> i32 {
+    if n == 0 {
+        throw!("nope".parse::<i32>().unwrap_err());
     } else {
-        throw!("n must be even");
+        n * 2
     }
 }

@@ -62,14 +62,14 @@
 )]
 #![doc = include_str!("../README.md")]
 
-#[doc(hidden)]
+
+pub mod dysfunctional;
 pub mod deps;
-
 pub mod main;
-
 pub mod errors;
 
 #[doc(inline)]
 pub use crate::errors::*;
+
 #[doc(inline)]
 pub use crate::main::*;

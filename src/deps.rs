@@ -1,4 +1,4 @@
-//! Re-exports some dependencies for use by our macros.
 #![doc(hidden)]
+//! Re-exports some of our dependencies.
 
-pub use {::eyre, ::fehler};
+pub use ::{eyre, fehler, tokio, tracing};
