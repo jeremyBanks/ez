@@ -113,7 +113,7 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
 
     outer_function.sig.inputs = syn::punctuated::Punctuated::new();
     if outer_function.sig.output == ReturnType::Default {
-        outer_function.sig.output = parse_quote! { -> Result<(), eyre::Report> };
+        outer_function.sig.output = parse_quote! { -> Result<(), ::ez::deps::eyre::Report> };
     } else {
         // emit a compile error telling the user that we don't allow this
         // macro to be used with an explicit return type
@@ -127,7 +127,7 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
 
     let block = inner_function.block.clone();
     if inner_function.sig.output == ReturnType::Default {
-        inner_function.sig.output = parse_quote! { -> Result<(), eyre::Report> };
+        inner_function.sig.output = parse_quote! { -> Result<(), ::ez::deps::eyre::Report> };
     }
     inner_function.block = parse_quote! { {
         Ok(#block)
