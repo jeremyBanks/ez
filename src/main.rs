@@ -4,7 +4,7 @@
 use std::borrow::Cow;
 
 /// `#[ez::main]` macro for use on your entry-point `main` function.
-pub use ez_proc_macros::main;
+pub use _proc_macros::main;
 
 #[doc(hidden)]
 pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(

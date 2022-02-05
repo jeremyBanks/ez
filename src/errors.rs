@@ -1,9 +1,9 @@
 //! Simplified error propagation.
 
 ///
-pub use ez_proc_macros::panics;
+pub use _proc_macros::panics;
 ///
-pub use ez_proc_macros::throws;
+pub use _proc_macros::throws;
 
 /// Returns from the enclosing function with a [`Result::Err`].
 ///

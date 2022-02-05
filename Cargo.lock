@@ -121,7 +121,7 @@ dependencies = [
  "color-eyre",
  "dotenv",
  "eyre",
- "ez-internal",
+ "ez--proc-macros",
  "fehler",
  "tokio",
  "tracing",
@@ -130,7 +130,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "ez-internal"
+name = "ez--examples"
+version = "0.0.2-dev.5"
+dependencies = [
+ "ez",
+]
+
+[[package]]
+name = "ez--proc-macros"
 version = "0.0.2-dev.5"
 dependencies = [
  "proc-macro2",

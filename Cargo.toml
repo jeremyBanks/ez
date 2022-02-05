@@ -18,7 +18,7 @@ alloc = ["core"]
 core = []
 
 [dependencies]
-ez-internal = { path = "./ez-internal", version = "=0.0.2-dev.5"}
+ez--proc-macros = { path = "./proc-macros", version = "=0.0.2-dev.5"}
 
 color-eyre = "0.6.0"
 dotenv = "0.15.0"
