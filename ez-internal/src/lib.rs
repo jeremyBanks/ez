@@ -121,7 +121,9 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
         // macro to be used with an explicit return type
         return quote_spanned! {inner_function.sig.output.span()=>
             compile_error!("#[ez::main] macro cannot be used with an explicit return type.");
-        }.into_token_stream().into();
+        }
+        .into_token_stream()
+        .into();
     }
     outer_function.sig.asyncness = None;
 
