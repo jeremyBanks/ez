@@ -5,11 +5,11 @@ use {
 };
 
 #[proc_macro_attribute]
-pub fn pz(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+pub fn ze(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
     let main = main(attribute_tokens, function_tokens);
     let main: syn::ItemFn = parse_macro_input!(main);
     quote! {
-        pub(crate) use ::ez::pz::*;
+        pub(crate) use ::ez::ze::*;
 
         #main
     }

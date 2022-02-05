@@ -3,18 +3,18 @@
 
 pub mod main;
 
-#[cfg(feature = "pz")]
-/// Too much sugar: [`#[main]`][macro@main] + [`use ez::pz::*`][module@pz]
-pub use ez_internal::pz;
+#[cfg(feature = "ze")]
+/// Too much sugar: [`#[main]`][macro@main] + [`use ez::ze::*`][module@ze]
+pub use ez_internal::ze;
 
 #[doc(inline)]
 pub use crate::main::*;
 
-#[cfg(feature = "pz")]
+#[cfg(feature = "ze")]
 /// This module re-exports a large collection of popular crates in the Rust
-/// ecosystem. Enabling this feature (`pz`) adds a ton of dependencies and
+/// ecosystem. Enabling this feature (`ze`) adds a ton of dependencies and
 /// will probably slow down your first build considerably.
-pub mod pz {
+pub mod ze {
     #[cfg(feature = "alloc")]
     pub extern crate alloc;
     #[cfg(feature = "core")]
@@ -38,7 +38,6 @@ pub mod pz {
             atty::{self},
             boolinator::{self, Boolinator},
             bytes::{self, Bytes, BytesMut},
-            clap::{self},
             crossbeam::{self, thread::scope as thread_scope},
             derive_more::{self, *},
             dpc_pariter::{self, IteratorExt},
@@ -53,10 +52,9 @@ pub mod pz {
             rayon::{self, prelude::*},
             regex::{self},
             reqwest::{self, blocking::get as fetch},
-            serde::{self, Deserialize, Serialize},
+            serde::{self},
             serde_json::{self as json, json, Value as Json},
             socket2::{self},
-            thiserror::{self, Error},
             tokio::{self},
             tracing::{self, debug, error, info, instrument, trace, warn},
         },

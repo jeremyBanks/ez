@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "ez-internal", "ezpz"]
+members = [".", "ez-internal", "ezze"]
 
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
@@ -16,12 +16,11 @@ default = ["std"]
 std = ["alloc"]
 alloc = ["core"]
 core = []
-pz = [
+ze = [
     "std",
     "atty",
     "boolinator",
     "bytes",
-    "clap",
     "crossbeam",
     "derive_more",
     "dpc-pariter",
@@ -43,7 +42,6 @@ pz = [
     "reqwest/json",
     "serde",
     "serde/default",
-    "serde/derive",
     "serde_json",
     "socket2",
     "thiserror",
@@ -65,7 +63,6 @@ tracing-subscriber = { version = "0.3.7", features = ["env-filter"] }
 atty = { version = "0.2.14", optional = true }
 boolinator = { version = "2.4.0", optional = true }
 bytes = { version = "1.1.0", optional = true }
-clap = { version = "3.0.14", optional = true }
 crossbeam = { version = "0.8.1", optional = true }
 derive_more = { version = "0.99.17", optional = true }
 dpc-pariter = { version = "0.4.0", optional = true }
