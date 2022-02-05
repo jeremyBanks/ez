@@ -44,7 +44,6 @@ pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
         quote! { compile_error!("#[ez::panics] macro takes no arguments") }
     };
 
-
     let function_tokens = proc_macro2::TokenStream::from(function_tokens);
     let mut function_tokens = Vec::from_iter(function_tokens);
     if let Some(last) = function_tokens.last_mut() {
@@ -71,7 +70,9 @@ pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
 pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
     let attribute_tokens = proc_macro2::TokenStream::from(attribute_tokens);
     if !attribute_tokens.is_empty() {
-        return quote! { compile_error!("#[ez::main] macro takes no arguments") }.into_token_stream().into();
+        return quote! { compile_error!("#[ez::main] macro takes no arguments") }
+            .into_token_stream()
+            .into();
     };
 
     let mut inner_function: syn::ItemFn = parse_macro_input!(function_tokens);
@@ -103,11 +104,11 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
     }
 
     let extra_inner_attributes = if inner_function.sig.asyncness.is_some() {
-        quote!{
+        quote! {
             #[::ez::deps::tokio::main(flavor = "current_thread")]
         }
     } else {
-        quote!{}
+        quote! {}
     };
 
     outer_function.sig.inputs = syn::punctuated::Punctuated::new();

@@ -1,7 +1,7 @@
-use {std::collections::BTreeMap as SortedMap};
+use std::collections::BTreeMap as SortedMap;
 
 #[ez::main]
-async fn main(args: Vec<String>, env: SortedMap<String, String>) -> eyre::Result<()> {
+async fn main(args: Vec<String>, _env: SortedMap<String, String>) {
     println!("{}", x(args.len() as _).await?);
 }
 

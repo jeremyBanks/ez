@@ -1,7 +1,7 @@
 #![doc(hidden)]
 //! Dysfunctional stub implementations of some traits.
 
-use std::{panic::panic_any, convert::Infallible};
+use std::{convert::Infallible, panic::panic_any};
 
 #[derive(Debug, Clone, Copy)]
 /// Drops an iterator without consuming any elements.
@@ -11,7 +11,6 @@ impl<Item> FromIterator<Item> for IteratorDropper {
         IteratorDropper
     }
 }
-
 
 /// An uninhabited pseudo-Error-type that panics when any other error types to
 /// convert into it.
