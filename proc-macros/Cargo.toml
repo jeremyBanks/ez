@@ -1,0 +1,19 @@
+[package]
+authors = ["Jeremy Banks <_@jeremy.ca>"]
+autobins = false
+description = "ಠ_ಠ"
+documentation = "https://docs.rs/ez"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+name = "ez--proc-macros"
+repository = "https://github.com/jeremyBanks/ez"
+version = "0.0.2-dev.5"
+
+[lib]
+name = "_proc_macros"
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.36"
+quote = "1.0.15"
+syn = "1.0.86"

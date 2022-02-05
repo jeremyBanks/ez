@@ -103,8 +103,6 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
         },
     }
 
-    // TODO: replace this with our own use of tokio builder in order to
-    // enable all of the features on the runtime (i, clock, etc.).
     let extra_inner_attributes = if inner_function.sig.asyncness.is_some() {
         quote! {
             #[::ez::deps::tokio::main(flavor = "current_thread")]

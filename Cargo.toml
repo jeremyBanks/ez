@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "ez-internal"]
+members = [".", "proc-macros", "examples"]
 
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
