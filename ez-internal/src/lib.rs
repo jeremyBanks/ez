@@ -103,6 +103,8 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
         },
     }
 
+    // TODO: replace this with our own use of tokio builder in order to
+    // enable all of the features on the runtime (i, clock, etc.).
     let extra_inner_attributes = if inner_function.sig.asyncness.is_some() {
         quote! {
             #[::ez::deps::tokio::main(flavor = "current_thread")]
@@ -112,7 +114,15 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
     };
 
     outer_function.sig.inputs = syn::punctuated::Punctuated::new();
-    outer_function.sig.output = parse_quote! { -> Result<(), eyre::Report> };
+    if outer_function.sig.output == ReturnType::Default {
+        outer_function.sig.output = parse_quote! { -> Result<(), eyre::Report> };
+    } else {
+        // emit a compile error telling the user that we don't allow this
+        // macro to be used with an explicit return type
+        return quote_spanned! {inner_function.sig.output.span()=>
+            compile_error!("#[ez::main] macro cannot be used with an explicit return type.");
+        }.into_token_stream().into();
+    }
     outer_function.sig.asyncness = None;
 
     let block = inner_function.block.clone();
