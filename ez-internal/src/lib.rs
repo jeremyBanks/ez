@@ -5,15 +5,65 @@ use {
 };
 
 #[proc_macro_attribute]
-pub fn ze(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
-    let main = main(attribute_tokens, function_tokens);
-    let main: syn::ItemFn = parse_macro_input!(main);
-    quote! {
-        pub(crate) use ::ez::ze::*;
+pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+    let attribute_tokens = proc_macro2::TokenStream::from(attribute_tokens);
+    let attribute_tokens = if attribute_tokens.is_empty() {
+        quote! { ::ez::deps::eyre::Report }
+    } else {
+        attribute_tokens
+    };
 
-        #main
+    let function_tokens = proc_macro2::TokenStream::from(function_tokens);
+    let mut function_tokens = Vec::from_iter(function_tokens);
+    if let Some(last) = function_tokens.last_mut() {
+        if let proc_macro2::TokenTree::Group(group) = last {
+            if group.delimiter() == proc_macro2::Delimiter::Brace {
+                *last = parse_quote! { {
+                    use ::ez::errors::throw;
+                    #last
+                } };
+            }
+        };
     }
-    .to_token_stream()
+    let function_tokens = proc_macro2::TokenStream::from_iter(function_tokens);
+
+    quote! {
+        #[::ez::deps::fehler::throws(#attribute_tokens)]
+        #function_tokens
+    }
+    .into_token_stream()
+    .into()
+}
+
+#[proc_macro_attribute]
+pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+    let attribute_tokens = proc_macro2::TokenStream::from(attribute_tokens);
+    let attribute_tokens = if attribute_tokens.is_empty() {
+        quote! { ::ez::errors::Panic }
+    } else {
+        quote! { compile_error!("#[ez::panics] macro takes no arguments") }
+    };
+
+
+    let function_tokens = proc_macro2::TokenStream::from(function_tokens);
+    let mut function_tokens = Vec::from_iter(function_tokens);
+    if let Some(last) = function_tokens.last_mut() {
+        if let proc_macro2::TokenTree::Group(group) = last {
+            if group.delimiter() == proc_macro2::Delimiter::Brace {
+                *last = parse_quote! { {
+                    use ::ez::errors::throw;
+                    #last
+                } };
+            }
+        };
+    }
+    let function_tokens = proc_macro2::TokenStream::from_iter(function_tokens);
+
+    quote! {
+        #[::ez::deps::fehler::throws(#attribute_tokens)]
+        #function_tokens
+    }
+    .into_token_stream()
     .into()
 }
 
