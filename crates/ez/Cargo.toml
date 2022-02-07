@@ -8,5 +8,5 @@ repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.2-ez.0"
 
 [dependencies]
-ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.2-ez.0"}
+ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.2"}
 ez-internal = { path = "../ez-internal", version = "=0.0.2"}
