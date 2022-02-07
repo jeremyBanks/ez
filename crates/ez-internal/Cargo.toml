@@ -1,9 +1,10 @@
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
 autobins = false
-description = "ಠ_ಠ"
+description = "internal"
 documentation = "https://docs.rs/ez"
 edition = "2021"
+homepage =  "https://crates.io/crates/ez"
 license = "MIT OR Apache-2.0"
 name = "ez-internal"
 repository = "https://github.com/jeremyBanks/ez"

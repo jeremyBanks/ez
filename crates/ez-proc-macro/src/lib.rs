@@ -1,3 +1,5 @@
+//! internal
+
 #![allow(non_snake_case)]
 use proc_macro::TokenStream;
 

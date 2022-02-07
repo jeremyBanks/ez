@@ -1,3 +1,5 @@
+//! internal
+
 use {
     proc_macro2::TokenStream,
     quote::{quote, quote_spanned, ToTokens},
@@ -135,21 +137,16 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
     };
 
     outer_function.sig.inputs = syn::punctuated::Punctuated::new();
-    if matches!(outer_function.sig.output, ReturnType::Default) {
-        outer_function.sig.output =
-            parse_quote! { -> Result<(), ::ez::internal::deps::eyre::Report> };
-    } else {
-        // emit a compile error telling the user that we don't allow this
-        // macro to be used with an explicit return type
-        return quote_spanned! {inner_function.sig.output.span()=>
-            compile_error!("#[ez::main] macro cannot be used with an explicit return type.");
-        }
-        .into_token_stream();
-    }
+    outer_function.sig.output = parse_quote! { -> Result<(), ::ez::internal::deps::eyre::Report> };
     outer_function.sig.asyncness = None;
 
     let block = inner_function.block.clone();
-    if matches!(inner_function.sig.output, ReturnType::Default) {
+
+    if let ReturnType::Type(_, ref inner) = inner_function.sig.output {
+        let output = inner.clone();
+        inner_function.sig.output =
+            parse_quote! { -> Result<#output, ::ez::internal::deps::eyre::Report> };
+    } else {
         inner_function.sig.output =
             parse_quote! { -> Result<(), ::ez::internal::deps::eyre::Report> };
     }

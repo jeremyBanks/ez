@@ -3,10 +3,31 @@
 
 use std::borrow::Cow;
 
-#[doc(hidden)]
-pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(
+pub trait ExitStatus {
+    fn to_i32(&self) -> i32;
+}
+
+impl ExitStatus for u8 {
+    fn to_i32(&self) -> i32 {
+        i32::from(*self)
+    }
+}
+
+impl ExitStatus for i32 {
+    fn to_i32(&self) -> i32 {
+        *self
+    }
+}
+
+impl ExitStatus for () {
+    fn to_i32(&self) -> i32 {
+        0
+    }
+}
+
+pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>, Return: ExitStatus>(
     main_package_name: &str,
-    main: fn(Args, Env) -> Result<(), eyre::Report>,
+    main: fn(Args, Env) -> Result<Return, eyre::Report>,
 ) -> Result<(), eyre::Report> {
     // SAFETY: Modifying environment variables can be risky business in the
     // presence of other threads. We're relying on the fact that this is the
@@ -17,9 +38,12 @@ pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(
 
     if std::env::var("RUST_LOG").unwrap_or_default().is_empty() {
         if cfg!(debug_assertions) {
-            std::env::set_var("RUST_LOG", format!("warn,{main_package_name}=debug"));
+            std::env::set_var(
+                "RUST_LOG",
+                format!("warn,{main_package_name}=debug,ez=debug"),
+            );
         } else {
-            std::env::set_var("RUST_LOG", format!("warn,{main_package_name}=info"));
+            std::env::set_var("RUST_LOG", format!("warn,{main_package_name}=info,ez=info"));
         }
     }
 
@@ -50,9 +74,9 @@ pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(
             Cow::Borrowed(lossless) => lossless.to_owned(),
             Cow::Owned(lossy) => {
                 tracing::warn!(
+                    target: "ez",
                     "Invalid UTF-8 in command-line argument. Invalid sequences have been replaced \
-                     with '�':\n  {:?}",
-                    lossy
+                     with '�':\n  {lossy:?}"
                 );
                 lossy
             },
@@ -64,6 +88,7 @@ pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(
             .or_else(|| {
                 let lossy = name.to_string_lossy();
                 tracing::warn!(
+                    target: "ez",
                     "Invalid UTF-8 in an environment variable name ({lossy:?}). It has been \
                      skipped."
                 );
@@ -74,6 +99,7 @@ pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(
             .to_str()
             .or_else(|| {
                 tracing::warn!(
+                    target: "ez",
                     "Invalid UTF-8 in the value of the environment variable {name:?}. It has been \
                      skipped."
                 );
@@ -83,5 +109,14 @@ pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(
         Some((name, value))
     });
 
-    main(args.collect(), env.collect())
+    let exit_status = main(args.collect(), env.collect()).map_err(|err| {
+        tracing::error!(target: "ez", "exiting with error status code due to an unhandled error");
+        err
+    })?.to_i32();
+    if exit_status != 0 {
+        tracing::debug!(target: "ez", "exiting with error status code {}", exit_status);
+        std::process::exit(exit_status);
+    }
+
+    Ok(())
 }
