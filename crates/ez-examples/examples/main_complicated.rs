@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 #[ez::main]
-fn main(args: Vec<String>, env: HashMap<String, String>) -> u8 {
+async fn main(args: Vec<String>, env: HashMap<String, String>) -> u8 {
     println!(
         "Are you at HOME? {}",
         env.get("HOME").map(String::from).unwrap_or_default()
@@ -12,5 +12,5 @@ fn main(args: Vec<String>, env: HashMap<String, String>) -> u8 {
     );
     println!("           args  {:?}", args);
 
-    return Ok(8);
+    Ok("8".parse()?)
 }
