@@ -1,68 +1,25 @@
-#![doc = include_str!("../../../README.md")]
-#![forbid(unsafe_op_in_unsafe_fn)]
-#![deny(unsafe_code, rustdoc::broken_intra_doc_links)]
-#![warn(
-    explicit_outlives_requirements,
-    keyword_idents,
-    macro_use_extern_crate,
-    missing_copy_implementations,
-    missing_debug_implementations,
-    missing_docs,
-    non_ascii_idents,
-    noop_method_call,
-    single_use_lifetimes,
-    unreachable_pub,
-    unused_crate_dependencies,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_lifetimes,
-    unused_qualifications,
-    clippy::cast_lossless,
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_precision_loss,
-    clippy::cast_sign_loss,
-    clippy::clone_on_ref_ptr,
-    clippy::cloned_instead_of_copied,
-    clippy::doc_markdown,
-    clippy::fallible_impl_from,
-    clippy::filter_map_next,
-    clippy::flat_map_option,
-    clippy::from_iter_instead_of_collect,
-    clippy::implicit_clone,
-    clippy::implicit_saturating_sub,
-    clippy::inefficient_to_string,
-    clippy::large_digit_groups,
-    clippy::manual_filter_map,
-    clippy::match_same_arms,
-    clippy::missing_const_for_fn,
-    clippy::missing_enforced_import_renames,
-    clippy::missing_errors_doc,
-    clippy::missing_panics_doc,
-    clippy::missing_safety_doc,
-    clippy::module_name_repetitions,
-    clippy::multiple_crate_versions,
-    clippy::multiple_inherent_impl,
-    clippy::must_use_candidate,
-    clippy::mut_mut,
-    clippy::mutex_integer,
-    clippy::needless_borrow,
-    clippy::panicking_unwrap,
-    clippy::redundant_closure_for_method_calls,
-    clippy::semicolon_if_nothing_returned,
-    clippy::single_match_else,
-    clippy::todo,
-    clippy::unicode_not_nfc,
-    clippy::unimplemented,
-    clippy::unnecessary_unwrap,
-    clippy::unreadable_literal,
-    clippy::unseparated_literal_suffix,
-    clippy::unused_self,
-    clippy::use_self,
-    clippy::useless_transmute
-)]
+#![doc = include_str!("../README.md")]
 
-pub mod deps;
-pub mod dysfunctional;
-pub mod errors;
-pub mod main;
+#[doc(hidden)]
+#[doc = include_str!("./internal.md")]
+pub use ez__internal as internal;
+#[doc(hidden)]
+#[doc = include_str!("./internal.md")]
+pub use ez__proc_macro as internal_proc_macro;
+#[allow(unused_imports)]
+use internal::deps::*;
+#[doc(inline)]
+#[doc = include_str!("./throw.md")]
+pub use internal::throw;
+#[doc(inline)]
+#[doc = include_str!("./try_throws.md")]
+pub use internal::throw as try_throws;
+#[doc(inline)]
+#[doc = include_str!("./main.md")]
+pub use internal_proc_macro::main;
+#[doc(inline)]
+#[doc = include_str!("./panics.md")]
+pub use internal_proc_macro::panics;
+#[doc(inline)]
+#[doc = include_str!("./throws.md")]
+pub use internal_proc_macro::throws;

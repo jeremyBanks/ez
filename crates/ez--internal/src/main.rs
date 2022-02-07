@@ -3,9 +3,6 @@
 
 use std::borrow::Cow;
 
-/// `#[ez::main]` macro for use on your entry-point `main` function.
-pub use ez__proc_macro::main;
-
 #[doc(hidden)]
 pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(
     main_package_name: &str,
