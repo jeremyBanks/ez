@@ -7,7 +7,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "ez-internal"
 repository = "https://github.com/jeremyBanks/ez"
-version = "0.0.2-ez.0"
+version = "0.0.2"
 
 [dependencies]
 color-eyre = "0.6.0"
