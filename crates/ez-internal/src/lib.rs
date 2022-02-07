@@ -149,7 +149,7 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
     outer_function.sig.asyncness = None;
 
     let block = inner_function.block.clone();
-    if inner_function.sig.output == ReturnType::Default {
+    if matches!(inner_function.sig.output, ReturnType::Default) {
         inner_function.sig.output =
             parse_quote! { -> Result<(), ::ez::internal::deps::eyre::Report> };
     }
