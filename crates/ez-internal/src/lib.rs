@@ -11,7 +11,7 @@ pub mod main;
 pub mod deps {
     pub use {
         crate::{alloc, core, std},
-        eyre, fehler, tokio, tracing,
+        eyre, ezio, fehler, proc_macro2, quote, syn, tokio, tracing,
     };
 }
 
@@ -22,25 +22,25 @@ pub extern crate std;
 #[macro_export]
 macro_rules! throw {
     ($msg:literal $(,)?) => {
-        $crate::deps::fehler::throw!(eyre::Report::msg($msg));
+        ::ez::internal::deps::fehler::throw!(eyre::Report::msg($msg));
     };
 
     ($msg:literal $(, $rest:tt)* $(,)?) => {
-        $crate::deps::fehler::throw!(eyre::Report::msg(format!($msg $(, $rest)*)));
+        ::ez::internal::deps::fehler::throw!(eyre::Report::msg(format!($msg $(, $rest)*)));
     };
 
     ($error:expr $(,)?) => {
-        $crate::deps::fehler::throw!($error);
+        ::ez::internal::deps::fehler::throw!($error);
     };
 
     ($(,)?) => {
-        $crate::deps::fehler::throw!();
+        ::ez::internal::deps::fehler::throw!();
     };
 }
 
 pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
     let attribute_tokens = if attribute_tokens.is_empty() {
-        quote! { ::ez::deps::eyre::Report }
+        quote! { ::ez::internal::deps::eyre::Report }
     } else {
         attribute_tokens
     };
@@ -59,7 +59,7 @@ pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
     let function_tokens = proc_macro2::TokenStream::from_iter(function_tokens);
 
     quote! {
-        #[::ez::deps::fehler::throws(#attribute_tokens)]
+        #[::ez::internal::deps::fehler::throws(#attribute_tokens)]
         #function_tokens
     }
     .into_token_stream()
@@ -67,7 +67,7 @@ pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
 
 pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
     let attribute_tokens = if attribute_tokens.is_empty() {
-        quote! { ::ez::dysfunctional::ErrorPanicker }
+        quote! { ::ez::internal::dysfunctional::ErrorPanicker }
     } else {
         quote! { compile_error!("#[ez::panics] macro takes no arguments") }
     };
@@ -86,7 +86,7 @@ pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
     let function_tokens = proc_macro2::TokenStream::from_iter(function_tokens);
 
     quote! {
-        #[::ez::deps::fehler::throws(#attribute_tokens)]
+        #[::ez::internal::deps::fehler::throws(#attribute_tokens)]
         #function_tokens
     }
     .into_token_stream()
@@ -106,17 +106,17 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::dysfunctional::IteratorDropper));
+                .push(parse_quote!(_: ::ez::internal::dysfunctional::IteratorDropper));
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::dysfunctional::IteratorDropper));
+                .push(parse_quote!(_: ::ez::internal::dysfunctional::IteratorDropper));
         },
         1 => {
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::dysfunctional::IteratorDropper));
+                .push(parse_quote!(_: ::ez::internal::dysfunctional::IteratorDropper));
         },
         2 => {},
         _ => {
@@ -128,7 +128,7 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
 
     let extra_inner_attributes = if inner_function.sig.asyncness.is_some() {
         quote! {
-            #[::ez::deps::tokio::main(flavor = "current_thread")]
+            #[::ez::internal::deps::tokio::main(flavor = "current_thread")]
         }
     } else {
         quote! {}
@@ -136,7 +136,8 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
 
     outer_function.sig.inputs = syn::punctuated::Punctuated::new();
     if outer_function.sig.output == ReturnType::Default {
-        outer_function.sig.output = parse_quote! { -> Result<(), ::ez::deps::eyre::Report> };
+        outer_function.sig.output =
+            parse_quote! { -> Result<(), ::ez::internal::deps::eyre::Report> };
     } else {
         // emit a compile error telling the user that we don't allow this
         // macro to be used with an explicit return type
@@ -149,7 +150,8 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
 
     let block = inner_function.block.clone();
     if inner_function.sig.output == ReturnType::Default {
-        inner_function.sig.output = parse_quote! { -> Result<(), ::ez::deps::eyre::Report> };
+        inner_function.sig.output =
+            parse_quote! { -> Result<(), ::ez::internal::deps::eyre::Report> };
     }
     inner_function.block = parse_quote! { {
         Ok(#block)
@@ -160,7 +162,7 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
     outer_function.block = parse_quote! { {
         #extra_inner_attributes
         #inner_function;
-        ::ez::main::run(env!("CARGO_CRATE_NAME"), ez_inner_main)
+        ::ez::internal::main::run(env!("CARGO_CRATE_NAME"), ez_inner_main)
     } };
 
     outer_function.to_token_stream()

@@ -1,11 +1,12 @@
 #![doc = include_str!("../README.md")]
-
 #[doc(hidden)]
 #[doc = include_str!("./internal.md")]
-pub use ez__internal as internal;
+pub use ez_internal as internal;
 #[doc(hidden)]
 #[doc = include_str!("./internal.md")]
-pub use ez__proc_macro as internal_proc_macro;
+pub use ez_proc_macro as internal_proc_macro;
+#[doc(inline)]
+pub use internal::deps::ezio as io;
 #[allow(unused_imports)]
 use internal::deps::*;
 #[doc(inline)]
@@ -13,7 +14,7 @@ use internal::deps::*;
 pub use internal::throw;
 #[doc(inline)]
 #[doc = include_str!("./try_throws.md")]
-pub use internal::throw as try_throws;
+pub use internal::throws as try_throws;
 #[doc(inline)]
 #[doc = include_str!("./main.md")]
 pub use internal_proc_macro::main;

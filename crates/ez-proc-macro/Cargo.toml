@@ -4,13 +4,12 @@ description = "ಠ_ಠ"
 documentation = "https://docs.rs/ez"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-name = "ez--examples"
-publish = false
+name = "ez-proc-macro"
 repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.2-dev.5"
 
-[dependencies]
-ez = { path = "../ez", version = "=0.0.2-dev.5"}
+[lib]
+proc-macro = true
 
-[package.metadata.release]
-release = false
+[dependencies]
+ez-internal = { version = "0.0.2-dev.5", path = "../ez-internal" }
