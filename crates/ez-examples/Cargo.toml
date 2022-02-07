@@ -10,7 +10,7 @@ repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.2-ez.0"
 
 [dependencies]
-ez = { path = "../ez", version = "=0.0.2"}
+ez = { path = "../ez", version = "=0.0.2-ez.0"}
 
 [package.metadata.release]
 release = false
