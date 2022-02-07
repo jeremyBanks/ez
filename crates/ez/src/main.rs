@@ -4,19 +4,19 @@
 use std::borrow::Cow;
 
 /// `#[ez::main]` macro for use on your entry-point `main` function.
-pub use _proc_macros::main;
+pub use ez__proc_macro::main;
 
 #[doc(hidden)]
 pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>>(
     main_package_name: &str,
     main: fn(Args, Env) -> Result<(), eyre::Report>,
 ) -> Result<(), eyre::Report> {
-    dotenv::dotenv().ok();
-
     // SAFETY: Modifying environment variables can be risky business in the
     // presence of other threads. We're relying on the fact that this is the
     // entry point and no other threads should exist yet, and then pass a
     // safely-frozen copy of the environment to the main function.
+
+    dotenv::dotenv().ok();
 
     if std::env::var("RUST_LOG").unwrap_or_default().is_empty() {
         if cfg!(debug_assertions) {

@@ -1,0 +1,25 @@
+[package]
+authors = ["Jeremy Banks <_@jeremy.ca>"]
+autobins = false
+description = "ez? wip."
+edition = "2021"
+license = "MIT OR Apache-2.0"
+name = "ez"
+repository = "https://github.com/jeremyBanks/ez"
+version = "0.0.2-dev.5"
+
+[dependencies]
+ez--proc-macro = { path = "../ez--proc-macro", version = "=0.0.2-dev.5"}
+ez--macros = { path = "../ez--macros", version = "=0.0.2-dev.5"}
+
+color-eyre = "0.6.0"
+dotenv = "0.15.0"
+eyre = "0.6.6"
+tracing = { version = "0.1.30", features = ["log"] }
+tracing-error = { version = "0.2.0", features = ["traced-error"] }
+tracing-subscriber = { version = "0.3.7", features = ["env-filter"] }
+fehler = "1.0.0"
+tokio = { version = "1.16.1", features = ["full"] }
+
+[package.metadata.docs.rs]
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples=examples"]

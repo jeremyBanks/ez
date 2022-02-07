@@ -1,3 +1,4 @@
+#![doc = include_str!("../../../README.md")]
 #![forbid(unsafe_op_in_unsafe_fn)]
 #![deny(unsafe_code, rustdoc::broken_intra_doc_links)]
 #![warn(
@@ -60,14 +61,8 @@
     clippy::use_self,
     clippy::useless_transmute
 )]
-#![doc = include_str!("../README.md")]
 
 pub mod deps;
 pub mod dysfunctional;
 pub mod errors;
 pub mod main;
-
-#[doc(inline)]
-pub use crate::errors::*;
-#[doc(inline)]
-pub use crate::main::*;
