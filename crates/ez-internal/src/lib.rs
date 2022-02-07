@@ -135,7 +135,7 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
     };
 
     outer_function.sig.inputs = syn::punctuated::Punctuated::new();
-    if outer_function.sig.output == ReturnType::Default {
+    if matches!(outer_function.sig.output, ReturnType::Default) {
         outer_function.sig.output =
             parse_quote! { -> Result<(), ::ez::internal::deps::eyre::Report> };
     } else {
