@@ -6,10 +6,10 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "ez-proc-macro"
 repository = "https://github.com/jeremyBanks/ez"
-version = "0.0.2-dev.5"
+version = "0.0.2-ez.0"
 
 [lib]
 proc-macro = true
 
 [dependencies]
-ez-internal = { version = "0.0.2-dev.5", path = "../ez-internal" }
+ez-internal = { version = "0.0.2-ez.0", path = "../ez-internal" }
