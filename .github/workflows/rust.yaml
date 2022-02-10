@@ -5,8 +5,12 @@ jobs:
     strategy:
       matrix:
         include:
-        - rust_toolchain: stable
-          name: stable
+        - name: maximum versions
+          rust_toolchain: stable
+        - name: minimum versions
+          rust_toolchain: 1.59.0
+          cargo_flags: -Z unstable-options -Z minimal-versions
+          bootstrap: RUSTC_BOOTSTRAP=1
       fail-fast: false
     runs-on: ubuntu-latest
     name: ${{ matrix.name }}
@@ -15,7 +19,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust_toolchain }}
-      - run: cargo +${{ matrix.rust_toolchain }} build --all
-      - run: cargo +${{ matrix.rust_toolchain }} clean
-      - run: cargo +${{ matrix.rust_toolchain }} test --all
-      - run: cargo +${{ matrix.rust_toolchain }} doc --all
+      - run: ${{ matrix.bootstrap }} cargo +${{ matrix.rust_toolchain }} ${{ matrix.cargo_flags }} build --all
+      - run: ${{ matrix.bootstrap }} cargo +${{ matrix.rust_toolchain }} ${{ matrix.cargo_flags }} clean
+      - run: ${{ matrix.bootstrap }} cargo +${{ matrix.rust_toolchain }} ${{ matrix.cargo_flags }} test --all
+      - run: ${{ matrix.bootstrap }} cargo +${{ matrix.rust_toolchain }} ${{ matrix.cargo_flags }} doc --all
