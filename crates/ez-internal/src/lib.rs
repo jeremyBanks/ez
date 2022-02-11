@@ -23,21 +23,25 @@ pub extern crate std;
 
 #[macro_export]
 macro_rules! throw {
-    ($msg:literal $(,)?) => {
-        ::ez::internal::deps::fehler::throw!(eyre::Report::msg($msg));
-    };
+    ($msg:literal $(,)?) => { {
+        ::ez::internal::deps::core::result::Result::Err(::ez::internal::deps::eyre::Report::msg($msg))?;
+        unreachable!()
+    } };
 
-    ($msg:literal $(, $rest:tt)* $(,)?) => {
-        ::ez::internal::deps::fehler::throw!(eyre::Report::msg(format!($msg $(, $rest)*)));
-    };
+    ($msg:literal $(, $rest:tt)* $(,)?) => { {
+        ::ez::internal::deps::core::result::Result::Err(::ez::internal::deps::eyre::Report::msg(format!($msg $(, $rest)*)))?;
+        unreachable!()
+    } };
 
-    ($error:expr $(,)?) => {
-        ::ez::internal::deps::fehler::throw!($error);
-    };
+    ($error:expr $(,)?) => { {
+        ::ez::internal::deps::core::result::Result::Err($error)?;
+        unreachable!()
+    } };
 
-    ($(,)?) => {
-        ::ez::internal::deps::fehler::throw!();
-    };
+    ($(,)?) => { {
+        ::ez::internal::deps::core::result::Result::Err(::ez::internal::deps::core::default::Default::default())?;
+        unreachable!()
+    } };
 }
 
 pub fn try_throws(_attribute_tokens: TokenStream, _function_tokens: TokenStream) -> TokenStream {
