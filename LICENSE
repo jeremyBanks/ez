@@ -1,13 +1,15 @@
 # License
 
-Released under both the MIT License or the Apache License 2.0, so it may
-be used under the terms of either one at your option.
+Released under both the MIT License and the Apache License 2.0, so you may
+use it under the terms of either one at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally
 submitted for inclusion in this project by you, as defined in the Apache
 License 2.0, shall be dual licensed as above, without any additional
 terms or conditions.
 
+No assurances are made about the licenses or copyrights of
+external dependencies of this project.
 
 
 ## Copyrights
@@ -22,18 +24,17 @@ Some parts of this project are based on the "fehler" project,
 Copyright Without Boats and Contributors,
 released under the MIT License and the Apache License 2.0.
 
-Some parts of this project are based on the "eyre" project,
-Copyright Jane Lusby and Contributors,
-released under the MIT License and the Apache License 2.0.
-
 Some parts of this project are based on the "anyhow" project,
 Copyright David Tolnay and Contributors,
+released under the MIT License and the Apache License 2.0.
+
+Some parts of this project are based on the "eyre" project,
+Copyright Jane Lusby and Contributors,
 released under the MIT License and the Apache License 2.0.
 
 Some parts of this project are based on the "tokio" project,
 Copyright Tokio Contributors,
 released under the MIT License.
-
 
 
 ## MIT License

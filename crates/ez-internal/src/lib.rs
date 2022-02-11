@@ -40,6 +40,10 @@ macro_rules! throw {
     };
 }
 
+pub fn try_throws(_attribute_tokens: TokenStream, _function_tokens: TokenStream) -> TokenStream {
+    todo!();
+}
+
 pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
     let attribute_tokens = if attribute_tokens.is_empty() {
         quote! { ::ez::internal::deps::eyre::Report }

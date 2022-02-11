@@ -1,8 +1,6 @@
 #![doc = include_str!("../README.md")]
 pub mod prelude {
-    //! `use ez::prelude::*` if you'd like, but note that
-    //! [`#[ez::main]`][crate::main] isn't included here because [importing
-    //! it directly conflicts with a built-in `#[main]` attribute](https://stackoverflow.com/q/71024443/1114).
+    //! `use ez::prelude::*` if you'd like
     pub use crate::{internal::deps::ezio::prelude::*, panics, throw, throws, try_throws};
 }
 #[doc(hidden)]
