@@ -5,8 +5,11 @@ pub use ez_internal as internal;
 #[doc(hidden)]
 #[doc = include_str!("./internal.md")]
 pub use ez_proc_macro as internal_proc_macro;
-#[allow(unused_imports)]
-use internal::deps::*;
+#[doc(inline)]
+#[doc = include_str!("./error.md")]
+///
+/// ---
+pub use internal::deps::eyre::Report as Error;
 #[doc(inline)]
 #[doc = include_str!("./throw.md")]
 pub use internal::throw;
