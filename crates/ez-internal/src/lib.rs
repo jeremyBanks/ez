@@ -117,19 +117,6 @@ pub fn throws(
     Ok(function.into_token_stream())
 }
 
-pub fn panics(
-    attribute_tokens: TokenStream,
-    function_tokens: TokenStream,
-) -> Result<TokenStream, eyre::Report> {
-    let attribute_tokens = if attribute_tokens.is_empty() {
-        quote! { ::ez::internal::dysfunctional::ErrorPanicker }
-    } else {
-        eyre::bail!("#[ez::panics] macro takes no arguments");
-    };
-
-    todo!()
-}
-
 pub fn main(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,

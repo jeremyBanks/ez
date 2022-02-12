@@ -1,6 +1,5 @@
-Decorates your `main` entry point function to configure some standard
-capabilities, including logging and error reporting, and add some other
-conveniences.
+Decorates a `main` entry point function to configure some standard capabilities
+such as logging and error reporting, and adds some other conveniences.
 
 ## Features
 
@@ -32,7 +31,6 @@ conveniences.
     `tokio::main` internally because of to procedural macro hygiene limitation.)
 
 ## Examples
-
 
 ```rust
 use ez::main;
