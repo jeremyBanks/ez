@@ -11,3 +11,14 @@ version = "0.0.2-ez.1"
 [dependencies]
 ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.2-ez.1"}
 ez-internal = { path = "../ez-internal", version = "=0.0.2-ez.1"}
+
+[package.metadata.release]
+consolidate-commits = true
+consolidate-pushes = true
+dev-version = true
+dev-version-ext = "dev"
+post-release-commit-message = "v{{next_version}}"
+pre-release-commit-message = "v{{version}}"
+shared-version = true
+tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
+tag-name = "{{version}}"

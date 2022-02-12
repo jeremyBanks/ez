@@ -18,3 +18,14 @@ ez-internal = { version = "0.0.2-ez.0", path = "../ez-internal" }
 proc-macro2 = "1.0.36"
 quote = "1.0.15"
 syn = { version = "1.0.86", features = ["full"] }
+
+[package.metadata.release]
+consolidate-commits = true
+consolidate-pushes = true
+dev-version = true
+dev-version-ext = "dev"
+post-release-commit-message = "v{{next_version}}"
+pre-release-commit-message = "v{{version}}"
+shared-version = true
+tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
+tag-name = "{{version}}"
