@@ -33,8 +33,8 @@ such as logging and error reporting, and adds some other conveniences.
 ## Examples
 
 ```rust
+# use std::collections::HashMap;
 use ez::main;
-use std::collections::HashMap;
 
 #[main]
 fn main(_args: Vec<String>, env: HashMap<String, String>) -> u8 {
@@ -47,18 +47,18 @@ fn main(_args: Vec<String>, env: HashMap<String, String>) -> u8 {
             println!("fatal error: HOME not set");
             return 1;
         }
-    }
+    };
 }
 ```
 
 ```rust
+# use ez::__::tokio;
 #[ez::main]
-# use ez::internal::deps::tokio;
 async fn main() {
     let contents = tokio::fs::read("Cargo.toml").await?;
     if contents.is_empty() {
         throw!("the file was empty");
     }
-    println!("{contents}");
+    println!("{contents:?}");
 }
 ```
