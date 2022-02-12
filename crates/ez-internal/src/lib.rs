@@ -3,7 +3,10 @@
 use {
     proc_macro2::TokenStream,
     quote::{quote, quote_spanned, ToTokens},
-    syn::{parse_quote, spanned::Spanned, ReturnType},
+    syn::{
+        fold::Fold, parse_quote, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned,
+        Block, ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, ReturnType, Visibility,
+    },
 };
 
 pub mod dysfunctional;
@@ -44,11 +47,43 @@ macro_rules! throw {
     } };
 }
 
-pub fn try_throws(_attribute_tokens: TokenStream, _function_tokens: TokenStream) -> TokenStream {
+pub fn try_throws(
+    _attribute_tokens: TokenStream,
+    _function_tokens: TokenStream,
+) -> Result<TokenStream, eyre::Report> {
     todo!();
 }
 
-pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+pub fn return_ok(block: Block) -> Block {
+    struct Folder;
+    impl Fold for Folder {
+        fn fold_expr_return(&mut self, expr: ExprReturn) -> ExprReturn {
+            let inner = expr.expr.clone();
+            parse_quote_spanned! { expr.span() =>
+                return ::ez::internal::deps::core::result::Result::Ok(#inner)
+            }
+        }
+
+        fn fold_item_fn(&mut self, item_fn: ItemFn) -> ItemFn {
+            item_fn
+        }
+
+        fn fold_expr_closure(&mut self, expr_closure: ExprClosure) -> ExprClosure {
+            expr_closure
+        }
+
+        fn fold_expr_async(&mut self, expr_async: ExprAsync) -> ExprAsync {
+            expr_async
+        }
+    }
+
+    Folder.fold_block(block)
+}
+
+pub fn throws(
+    attribute_tokens: TokenStream,
+    function_tokens: TokenStream,
+) -> Result<TokenStream, eyre::Report> {
     let attribute_tokens = if attribute_tokens.is_empty() {
         quote! { ::ez::internal::deps::eyre::Report }
     } else {
@@ -56,59 +91,56 @@ pub fn throws(attribute_tokens: TokenStream, function_tokens: TokenStream) -> To
     };
 
     let mut function_tokens = Vec::from_iter(function_tokens);
+
     if let Some(last) = function_tokens.last_mut() {
         if let proc_macro2::TokenTree::Group(group) = last {
             if group.delimiter() == proc_macro2::Delimiter::Brace {
+                let block: syn::Block = syn::parse2(last.clone().into_token_stream())?;
+                let block = return_ok(block);
                 *last = parse_quote! { {
                     use ::ez::errors::throw;
-                    #last
+                    #block
                 } };
             }
         };
     }
-    let function_tokens = proc_macro2::TokenStream::from_iter(function_tokens);
 
-    quote! {
-        #[::ez::internal::deps::fehler::throws(#attribute_tokens)]
-        #function_tokens
+    let mut function: ImplItemMethod = syn::parse2(function_tokens.into_iter().collect())?;
+
+    match &function.sig.output {
+        ReturnType::Default => {
+            function.sig.output = parse_quote! { -> ::ez::internal::deps::core::result::Result<(), #attribute_tokens> };
+        },
+        ReturnType::Type(_, t) => {
+            function.sig.output = parse_quote! { -> ::ez::internal::deps::core::result::Result<#t, #attribute_tokens> };
+        },
     }
-    .into_token_stream()
+
+    Ok(function.into_token_stream())
 }
 
-pub fn panics(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+pub fn panics(
+    attribute_tokens: TokenStream,
+    function_tokens: TokenStream,
+) -> Result<TokenStream, eyre::Report> {
     let attribute_tokens = if attribute_tokens.is_empty() {
         quote! { ::ez::internal::dysfunctional::ErrorPanicker }
     } else {
-        quote! { compile_error!("#[ez::panics] macro takes no arguments") }
+        eyre::bail!("#[ez::panics] macro takes no arguments");
     };
 
-    let mut function_tokens = Vec::from_iter(function_tokens);
-    if let Some(last) = function_tokens.last_mut() {
-        if let proc_macro2::TokenTree::Group(group) = last {
-            if group.delimiter() == proc_macro2::Delimiter::Brace {
-                *last = parse_quote! { {
-                    use ::ez::errors::throw;
-                    #last
-                } };
-            }
-        };
-    }
-    let function_tokens = proc_macro2::TokenStream::from_iter(function_tokens);
-
-    quote! {
-        #[::ez::internal::deps::fehler::throws(#attribute_tokens)]
-        #function_tokens
-    }
-    .into_token_stream()
+    todo!()
 }
 
-pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> TokenStream {
+pub fn main(
+    attribute_tokens: TokenStream,
+    function_tokens: TokenStream,
+) -> Result<TokenStream, eyre::Report> {
     if !attribute_tokens.is_empty() {
-        return quote! { compile_error!("#[ez::main] macro takes no arguments") }
-            .into_token_stream();
+        eyre::bail!("#[ez::main] macro takes no arguments");
     };
 
-    let mut inner_function: syn::ItemFn = syn::parse2(function_tokens).unwrap();
+    let mut inner_function: ItemFn = syn::parse2(function_tokens)?;
     let mut outer_function = inner_function.clone();
 
     match inner_function.sig.inputs.len() {
@@ -130,9 +162,9 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
         },
         2 => {},
         _ => {
-            return quote_spanned! {inner_function.sig.inputs.span()=>
+            return Ok(quote_spanned! {inner_function.sig.inputs.span()=>
                 compile_error!("#[ez::main] function must have at most 2 arguments (for example, `fn main(args: Vec<String>, env: Vec<(String, String)>)`).");
-            }.into_token_stream()
+            }.into_token_stream())
         },
     }
 
@@ -144,7 +176,7 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
         quote! {}
     };
 
-    outer_function.sig.inputs = syn::punctuated::Punctuated::new();
+    outer_function.sig.inputs = Punctuated::new();
     outer_function.sig.output = parse_quote! { -> Result<(), ::ez::internal::deps::eyre::Report> };
     outer_function.sig.asyncness = None;
 
@@ -161,7 +193,7 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
     inner_function.block = parse_quote! { {
         Ok(#block)
     } };
-    inner_function.vis = syn::Visibility::Inherited;
+    inner_function.vis = Visibility::Inherited;
     inner_function.sig.ident = parse_quote! { ez_inner_main };
 
     outer_function.block = parse_quote! { {
@@ -170,5 +202,5 @@ pub fn main(attribute_tokens: TokenStream, function_tokens: TokenStream) -> Toke
         ::ez::internal::main::run(env!("CARGO_CRATE_NAME"), ez_inner_main)
     } };
 
-    outer_function.to_token_stream()
+    Ok(outer_function.to_token_stream())
 }

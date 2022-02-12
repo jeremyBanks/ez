@@ -152,6 +152,9 @@ name = "ez-proc-macro"
 version = "0.0.2-ez.0"
 dependencies = [
  "ez-internal",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

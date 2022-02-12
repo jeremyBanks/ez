@@ -14,3 +14,8 @@ proc-macro = true
 
 [dependencies]
 ez-internal = { version = "0.0.2-ez.0", path = "../ez-internal" }
+
+quote = "1.0.15"
+syn = { version = "1.0.86", features = ["full"] }
+proc-macro2 = "1.0.36"
+
