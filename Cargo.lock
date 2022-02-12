@@ -116,7 +116,7 @@ dependencies = [
 
 [[package]]
 name = "ez"
-version = "0.0.2-ez.0"
+version = "0.0.2-ez.1"
 dependencies = [
  "ez-internal",
  "ez-proc-macro",
