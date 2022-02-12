@@ -99,7 +99,7 @@ pub fn throws(
                 let block = return_ok(block);
                 *last = parse_quote! { {
                     use ::ez::errors::throw;
-                    #block
+                    ::ez::internal::deps::core::result::Result::Ok({#block})
                 } };
             }
         };
