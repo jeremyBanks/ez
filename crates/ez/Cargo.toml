@@ -1,6 +1,6 @@
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
-description = "ez? wip."
+description = "wip"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "ez"

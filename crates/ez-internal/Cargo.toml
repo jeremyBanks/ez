@@ -1,7 +1,7 @@
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
 autobins = false
-description = "internal"
+description = "internal. not stable."
 documentation = "https://docs.rs/ez"
 edition = "2021"
 homepage =  "https://crates.io/crates/ez"

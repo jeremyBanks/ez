@@ -1,5 +1,3 @@
-//! internal
-
 use {
     proc_macro2::TokenStream,
     quote::{quote, quote_spanned, ToTokens},
@@ -97,8 +95,8 @@ pub fn throws(
             if group.delimiter() == proc_macro2::Delimiter::Brace {
                 let block: syn::Block = syn::parse2(last.clone().into_token_stream())?;
                 let block = return_ok(block);
-                *last = parse_quote! { {
-                    use ::ez::errors::throw;
+                *last = parse_quote_spanned! { block.span() => {
+                    use ::ez::throw;
                     ::ez::internal::deps::core::result::Result::Ok({#block})
                 } };
             }

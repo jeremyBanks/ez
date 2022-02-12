@@ -1,17 +1,11 @@
 [package]
-authors = ["Jeremy Banks <_@jeremy.ca>"]
-description = "internal"
-documentation = "https://docs.rs/ez"
 edition = "2021"
-homepage =  "https://crates.io/crates/ez"
-license = "MIT OR Apache-2.0"
 name = "ez-examples"
 publish = false
-repository = "https://github.com/jeremyBanks/ez"
-version = "0.0.2-ez.0"
+version = "0.0.0"
 
 [dependencies]
-ez = { path = "../ez", version = "=0.0.2-ez.0"}
+ez = { path = "../ez" }
 
 [package.metadata.release]
 release = false

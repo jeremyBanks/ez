@@ -21,6 +21,7 @@ fn fallible_dynamic(n: i32) -> i32 {
             return 2;
         },
         2 => {
+            #[allow(clippy::all)]
             [3, 4, 5]
                 .iter()
                 .map(|x| {
@@ -29,9 +30,11 @@ fn fallible_dynamic(n: i32) -> i32 {
                 })
                 .collect::<Vec<_>>()
                 .last()
-                .unwrap();
+                .unwrap()
+                .clone()
         },
         3 => {
+            #[allow(clippy::all)]
             fn double(x: i32) -> i32 {
                 let double = x * 2;
                 // doesn't touch return in a nested function
@@ -65,6 +68,7 @@ fn fallible_concrete(n: i32) -> i32 {
             return 2;
         },
         2 => {
+            #[allow(clippy::all)]
             [3, 4, 5]
                 .iter()
                 .map(|x| {
@@ -73,9 +77,11 @@ fn fallible_concrete(n: i32) -> i32 {
                 })
                 .collect::<Vec<_>>()
                 .last()
-                .unwrap();
+                .unwrap()
+                .clone()
         },
         3 => {
+            #[allow(clippy::all)]
             fn double(x: i32) -> i32 {
                 let double = x * 2;
                 // doesn't touch return in a nested function

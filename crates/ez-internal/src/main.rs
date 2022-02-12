@@ -1,6 +1,3 @@
-//! This module provides a `#[main]` macro intended for use on your
-//! entry-point `main` function.
-
 use std::borrow::Cow;
 
 pub trait ExitStatus {

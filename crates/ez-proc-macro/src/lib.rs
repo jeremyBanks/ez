@@ -1,5 +1,3 @@
-//! internal
-
 use quote::quote;
 
 #[proc_macro_attribute]

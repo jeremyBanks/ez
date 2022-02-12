@@ -1,6 +1,6 @@
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
-description = "internal"
+description = "internal. not stable."
 documentation = "https://docs.rs/ez"
 edition = "2021"
 homepage =  "https://crates.io/crates/ez"

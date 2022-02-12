@@ -1,7 +1,29 @@
-Returns from the enclosing function with a [`Result::Err`].
+Returns from the enclosing function with an error value or error message.
 
-This will contain either a provided error object, or an error message (if the
-first argument is a formatting string literal). Error messages are formatted
-into [`eyre::Report`]s using [`eyre::eyre!`], so you'll get an error if you try
-to use an error message in a function that expects a more-specific error type in
-its [`Result`].
+If called with an error value, the macro expansion works like this:
+
+```ignore
+throw!(err);
+```
+
+```ignore
+return Result::Err(err);
+```
+
+If called with a string literal as the first argument, the macro expansion works
+like this:
+
+```ignore
+throw!("the value {:?} is out of range", &x.inner);
+```
+
+```ignore
+return Result::Err(eyre::Report::msg(
+    format!("the value {:?} is out of range", &x.inner)
+));
+```
+
+This macro is automatically imported into the body of functions using
+[`#[throws]`][crate::throws] and related macros, and is the intended way of
+returning a new error value from such functions. However, it is also appropriate
+for use elsewhere.
