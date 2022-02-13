@@ -24,14 +24,14 @@ macro_rules! throw {
 #[macro_export]
 macro_rules! publish {
     {
-        use $path:path $(as $name:ident)?;
-        $(docs $doc:ident;)*
+        pub use $path:path $(as $name:ident)?;
+        $(prose from $doc:literal;)*
         $(example $example:ident;)*
-        $(failing $failing:ident;)*
+        $(failing example $failing:ident;)*
     } => {
         $(
         ///
-        #[doc = include_str!(concat!("./", stringify!($doc), ".md"))]
+        #[doc = include_str!(concat!("./", $doc))]
         ///
         )*
         $(

@@ -5,6 +5,9 @@ This project isn't really in a state where it's ready to take contributions.
 Why is this project split up into several crates? Because that's neccessary in
 order to have full control of the public interface given the use of macros.
 
+The only public interface is the `ez` crate, but most implementation code lives
+in `ez-internal`.
+
 Macros created with `#[macro_export] macro_rules` are automatically exported at
 the top level of the crate where they're defined. We define them in
 `ez_internal` so that `ez` can choose where to re-export them publicly.
@@ -26,7 +29,7 @@ the generated documentation.
 
 Some of our macros need to refer to third-party crates, such as `tokio`.
 However, if the macros are being used in a project that doesn't depend on
-`tokio` itself, `::tokio` won't be available in the global namespace for us to
+`tokio` itself, `::tokio` won't be available in the root namespace for us to
 reference. Procedural macros are limited in what they can reliably refer to. In
 our case, we require the users to import our macros through the `ez` crate, so
 that's the only thing we can be (relatively) certain is available. So anything

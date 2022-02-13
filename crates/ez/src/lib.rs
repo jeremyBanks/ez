@@ -5,28 +5,28 @@ pub use ez_internal::internal as __;
 use ez_internal::publish;
 
 publish! {
-    use ez_internal::throw;
-    docs throw;
-    failing throw;
+    pub use ez_internal::throw;
+    prose from "throw.md";
+    failing example throw;
 }
 
 publish! {
-    use ez_proc_macro::main;
-    docs main;
+    pub use ez_proc_macro::main;
+    prose from "main.md";
     example main_noop;
     example home;
     example tokio;
 }
 
 publish! {
-    use ez_proc_macro::try_throws;
-    docs try_throws;
-    failing try_throws;
+    pub use ez_proc_macro::try_throws;
+    prose from "try_throws.md";
+    failing example try_throws;
 }
 
 publish! {
-    use ez_proc_macro::throws;
-    docs throws;
+    pub use ez_proc_macro::throws;
+    prose from "throws.md";
 }
 
 /// A dynamic error reporting type. This is a re-export of

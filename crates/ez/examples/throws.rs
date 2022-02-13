@@ -101,3 +101,24 @@ fn fallible_concrete(n: i32) -> i32 {
         },
     }
 }
+
+trait Trait1 {
+    #[throws]
+    fn test(&self);
+}
+
+struct Impl1A;
+struct Impl1B;
+
+impl Trait1 for Impl1A {
+    fn test(&self) -> Result<(), ez::Error> {
+        Ok(())
+    }
+}
+
+impl Trait1 for Impl1B {
+    #[throws]
+    fn test(&self) {
+        throw!("something");
+    }
+}
