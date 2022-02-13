@@ -1,12 +1,10 @@
-use proc_macro2::Ident;
-use syn::{visit::Visit, ItemTrait, ItemImpl, Item, Expr};
-
 use {
-    proc_macro2::TokenStream,
+    proc_macro2::{Ident, TokenStream},
     quote::{quote_spanned, ToTokens},
     syn::{
-        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Block,
-        ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, Path, ReturnType, Visibility,
+        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, visit::Visit,
+        Block, Expr, ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, Item, ItemFn, ItemImpl,
+        ItemTrait, Path, ReturnType, Visibility,
     },
 };
 
@@ -66,10 +64,12 @@ fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Repor
     Ok(tokens.into_iter().collect())
 }
 
-/// Determines whether a function definition contains a reference to `self` or `Self`,
-/// either in the signature or in the body (but not recurring into nested trait or impl blocks).
+/// Determines whether a function definition contains a reference to `self` or
+/// `Self`, either in the signature or in the body (but not recurring into
+/// nested trait or impl blocks).
 ///
-/// Returns true if a path containing `Self` or `self` is found, false otherwise.
+/// Returns true if a path containing `Self` or `self` is found, false
+/// otherwise.
 fn contains_self(function: Function) -> Result<bool, eyre::Report> {
     struct SelfFinder {
         found: bool,
@@ -148,9 +148,7 @@ pub fn throws(
     Ok(function.into_token_stream())
 }
 
-pub fn panics(
-    function_tokens: TokenStream,
-) -> Result<TokenStream, eyre::Report> {
+pub fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let function_tokens = tryify_trailing_block(function_tokens)?;
 
     let mut function: Function = syn::parse2(function_tokens.into_iter().collect())?;
@@ -177,7 +175,7 @@ pub fn try_throws(
     let throwing_ident = format!("try_{}", throwing.sig.ident);
     throwing.sig.ident = Ident::new(&throwing_ident, throwing.sig.span());
 
-    Ok(parse_quote_spanned!{
+    Ok(parse_quote_spanned! {
         function_tokens.span() =>
         #throwing
         #panicking

@@ -24,8 +24,8 @@ symlink. This is because if we run the examples in the crate they're defined in,
 they can access that crates's dependencies directly, but we want to make sure
 our examples are exercising our macros in a more accurate, hygienic context, so
 we need to run them through a separate crate. However, the examples need to live
-inside the `ez` crate, because they're shipped with it so they can be included in
-the generated documentation.
+inside the `ez` crate, because they're shipped with it so they can be included
+in the generated documentation.
 
 Some of our macros need to refer to third-party crates, such as `tokio`.
 However, if the macros are being used in a project that doesn't depend on
