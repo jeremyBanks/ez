@@ -2,9 +2,8 @@ use {
     proc_macro2::{Ident, TokenStream},
     quote::{quote_spanned, ToTokens},
     syn::{
-        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, visit::Visit,
-        Block, Expr, ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, Item, ItemFn, ItemImpl,
-        ItemTrait, Path, ReturnType, Visibility,
+        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Block,
+        ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, Path, ReturnType, Visibility,
     },
 };
 
@@ -14,7 +13,7 @@ type Function = ImplItemMethod;
 
 /// Wrap every return statement in `Ok`, but don't recur into nested
 /// functions/closures/async blocks.
-fn wrap_returns_in_ok(block: Block) -> Block {
+pub fn wrap_returns_in_ok(block: Block) -> Block {
     struct Folder;
     impl Fold for Folder {
         fn fold_expr_return(&mut self, expr: ExprReturn) -> ExprReturn {
@@ -42,7 +41,7 @@ fn wrap_returns_in_ok(block: Block) -> Block {
 
 /// If this token stream has a trailing block, import `throw!` and wrap every
 /// return value in `Ok`.
-fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
+pub fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let mut tokens = Vec::from_iter(tokens);
 
     if let Some(last) = tokens.last_mut() {
@@ -64,61 +63,8 @@ fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Repor
     Ok(tokens.into_iter().collect())
 }
 
-/// Determines whether a function definition contains a reference to `self` or
-/// `Self`, either in the signature or in the body (but not recurring into
-/// nested trait or impl blocks).
-///
-/// Returns true if a path containing `Self` or `self` is found, false
-/// otherwise.
-fn contains_self(function: Function) -> Result<bool, eyre::Report> {
-    struct SelfFinder {
-        found: bool,
-    }
-    impl<'ast> Visit<'ast> for SelfFinder {
-        fn visit_path(&mut self, path: &'ast Path) {
-            if path.leading_colon.is_none() {
-                for segment in &path.segments {
-                    if segment.ident == "self" || segment.ident == "Self" {
-                        self.found = true;
-                        return;
-                    }
-                }
-            }
-            syn::visit::visit_path(self, path);
-        }
-
-        fn visit_item(&mut self, item: &'ast Item) {
-            if self.found {
-                return;
-            }
-            syn::visit::visit_item(self, item);
-        }
-
-        fn visit_expr(&mut self, expr: &'ast Expr) {
-            if self.found {
-                return;
-            }
-            syn::visit::visit_expr(self, expr);
-        }
-
-        fn visit_item_trait(&mut self, _: &'ast ItemTrait) {
-            // don't recur into nested trait blocks
-        }
-
-        fn visit_item_impl(&mut self, _: &'ast ItemImpl) {
-            // don't recur into nested impl blocks
-        }
-    }
-
-    let mut finder = SelfFinder { found: false };
-
-    finder.visit_impl_item_method(&function);
-
-    Ok(finder.found)
-}
-
 // Wraps a `ReturnType` in a `Result` with the indicated `error_type`.
-fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnType {
+pub fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnType {
     match &return_type {
         ReturnType::Default => {
             parse_quote_spanned! { return_type.span() => -> ::ez::__::Result<(), #error_type> }
