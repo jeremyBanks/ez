@@ -4,8 +4,10 @@ name = "ez-examples"
 publish = false
 version = "0.0.0"
 
-[dev-dependencies]
+[dependencies]
 ez = { path = "../ez" }
+
+[dev-dependencies]
 tokio = { version = "*", features = ["full"] }
 
 [package.metadata.release]
