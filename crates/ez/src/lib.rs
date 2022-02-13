@@ -15,7 +15,7 @@ pub use ez_internal::throw;
 #[doc(inline)]
 #[doc = include_str!("./main.md")]
 pub use ez_proc_macro::main;
-#[doc(hidden)]
+#[doc(inline)]
 #[doc = include_str!("./try_throws.md")]
 pub use ez_proc_macro::throws as try_throws;
 #[doc(inline)]
