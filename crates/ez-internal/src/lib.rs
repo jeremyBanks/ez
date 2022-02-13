@@ -27,6 +27,6 @@ pub mod internal {
             main::entry_point,
             std,
         },
-        eyre, ezio, fehler, proc_macro2, quote, syn, tokio, tracing,
+        eyre, ezio, proc_macro2, quote, syn, tokio, tracing,
     };
 }
