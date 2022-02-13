@@ -1,5 +1,3 @@
-use ez::__::tokio;
-
 #[ez::main]
 async fn main() {
     let contents = tokio::fs::read("Cargo.toml").await?;

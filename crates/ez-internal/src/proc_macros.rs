@@ -1,10 +1,9 @@
 use {
     proc_macro2::TokenStream,
-    quote::{quote, quote_spanned, ToTokens},
+    quote::{quote_spanned, ToTokens},
     syn::{
-        fold::Fold, parse_quote, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned,
-        Block, ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, Path, ReturnType,
-        Visibility,
+        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Block,
+        ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, Path, ReturnType, Visibility,
     },
 };
 
@@ -23,7 +22,7 @@ fn wrap_returns_in_ok(block: Block) -> Block {
         fn fold_expr_return(&mut self, expr: ExprReturn) -> ExprReturn {
             let inner = expr.expr.clone();
             parse_quote_spanned! { expr.span() =>
-                return ::ez::__::core::result::Result::Ok(#inner)
+                return ::ez::__::Ok(#inner)
             }
         }
 
@@ -55,7 +54,7 @@ fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Repor
                 let block = wrap_returns_in_ok(block);
                 *last = parse_quote_spanned! { block.span() => {
                     use ::ez::throw;
-                    ::ez::__::core::result::Result::Ok({#block})
+                    ::ez::__::Ok({#block})
                 } };
             }
         };
@@ -66,12 +65,12 @@ fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Repor
 
 // Wraps a `ReturnType` in a `Result` with the indicated `error_type`.
 fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnType {
-    match return_type {
+    match &return_type {
         ReturnType::Default => {
-            parse_quote! { -> ::ez::__::core::result::Result<(), #error_type> }
+            parse_quote_spanned! { return_type.span() => -> ::ez::__::core::result::Result<(), #error_type> }
         },
         ReturnType::Type(_, t) => {
-            parse_quote! { -> ::ez::__::core::result::Result<#t, #error_type> }
+            parse_quote_spanned! { return_type.span() => -> ::ez::__::core::result::Result<#t, #error_type> }
         },
     }
 }
@@ -81,7 +80,7 @@ pub fn throws(
     function_tokens: TokenStream,
 ) -> Result<TokenStream, eyre::Report> {
     let error_type: Path = if attribute_tokens.is_empty() {
-        parse_quote! { ::ez::Error }
+        parse_quote_spanned! { attribute_tokens.span() => ::ez::Error }
     } else {
         syn::parse2(attribute_tokens)?
     };
@@ -114,17 +113,17 @@ pub fn main(
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::__::IteratorDropper));
+                .push(parse_quote_spanned! { inner_function.sig.inputs.span() => _: ::ez::__::IteratorDropper });
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::__::IteratorDropper));
+                .push(parse_quote_spanned! { inner_function.sig.inputs.span() => _: ::ez::__::IteratorDropper });
         },
         1 => {
             inner_function
                 .sig
                 .inputs
-                .push(parse_quote!(_: ::ez::__::IteratorDropper));
+                .push(parse_quote_spanned! { inner_function.sig.inputs.span() => _: ::ez::__::IteratorDropper });
         },
         2 => {},
         _ => {
@@ -134,16 +133,19 @@ pub fn main(
         },
     }
 
-    inner_function.sig.output =
-        wrap_return_with_result(inner_function.sig.output, parse_quote! { ::ez::Error });
+    inner_function.sig.output = wrap_return_with_result(
+        inner_function.sig.output.clone(),
+        parse_quote_spanned! { inner_function.sig.output.span() => ::ez::Error },
+    );
 
     outer_function.sig.inputs = Punctuated::new();
-    outer_function.sig.output = parse_quote! { -> Result<(), ::ez::Error> };
+    outer_function.sig.output =
+        parse_quote_spanned! { outer_function.sig.output.span() => -> Result<(), ::ez::Error> };
     outer_function.sig.asyncness = None;
 
     if inner_function.sig.asyncness.is_some() {
         let block = inner_function.block.clone();
-        inner_function.block = parse_quote! { {
+        inner_function.block = parse_quote_spanned! { inner_function.block.span() => {
             ::ez::__::tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()?
@@ -156,9 +158,10 @@ pub fn main(
     }
 
     inner_function.vis = Visibility::Inherited;
-    inner_function.sig.ident = parse_quote! { ez_try_main };
+    inner_function.sig.ident =
+        parse_quote_spanned! { inner_function.sig.ident.span() => ez_try_main };
 
-    outer_function.block = parse_quote! { {
+    outer_function.block = parse_quote_spanned! { outer_function.block.span() => {
         #inner_function;
         ::ez::__::run(env!("CARGO_CRATE_NAME"), ez_try_main)
     } };

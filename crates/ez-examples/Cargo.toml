@@ -7,5 +7,8 @@ version = "0.0.0"
 [dependencies]
 ez = { path = "../ez" }
 
+[dev-dependencies]
+tokio = { version = "1.16.1", features = ["full"] }
+
 [package.metadata.release]
 release = false

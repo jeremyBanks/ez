@@ -120,6 +120,7 @@ version = "0.0.2-ez.5"
 dependencies = [
  "ez-internal",
  "ez-proc-macro",
+ "tokio",
 ]
 
 [[package]]
@@ -127,6 +128,7 @@ name = "ez-examples"
 version = "0.0.0"
 dependencies = [
  "ez",
+ "tokio",
 ]
 
 [[package]]

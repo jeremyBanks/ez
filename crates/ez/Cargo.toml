@@ -1,5 +1,6 @@
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
+autoexamples = false
 description = "wip"
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -11,6 +12,9 @@ version = "0.0.2-ez.5"
 [dependencies]
 ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.2-ez.5"}
 ez-internal = { path = "../ez-internal", version = "=0.0.2-ez.5"}
+
+[dev-dependencies]
+tokio = { version = "1.16.1", features = ["full"] }
 
 [package.metadata.release]
 consolidate-commits = true
