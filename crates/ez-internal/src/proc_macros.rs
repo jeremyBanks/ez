@@ -163,7 +163,7 @@ pub fn main(
 
     outer_function.block = parse_quote_spanned! { outer_function.block.span() => {
         #inner_function
-        ::ez::__::run(env!("CARGO_CRATE_NAME"), #ident)
+        ::ez::__::entry_point(env!("CARGO_CRATE_NAME"), #ident)
     } };
 
     Ok(outer_function.to_token_stream())

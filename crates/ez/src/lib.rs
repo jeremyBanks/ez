@@ -6,27 +6,27 @@ use ez_internal::publish;
 
 publish! {
     use ez_internal::throw;
-    docs from throw;
-    failing example throw;
+    docs throw;
+    failing throw;
 }
 
 publish! {
     use ez_proc_macro::main;
-    docs from main;
-    include example main_noop;
-    include example home;
-    include example tokio;
+    docs main;
+    example main_noop;
+    example home;
+    example tokio;
 }
 
 publish! {
     use ez_proc_macro::try_throws;
-    docs from try_throws;
-    failing example try_throws;
+    docs try_throws;
+    failing try_throws;
 }
 
 publish! {
     use ez_proc_macro::throws;
-    docs from throws;
+    docs throws;
 }
 
 /// A dynamic error reporting type. This is a re-export of

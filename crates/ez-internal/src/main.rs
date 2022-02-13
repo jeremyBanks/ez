@@ -22,7 +22,7 @@ impl ExitStatus for () {
     }
 }
 
-pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>, Return: ExitStatus>(
+pub fn entry_point<Args: FromIterator<String>, Env: FromIterator<(String, String)>, Return: ExitStatus>(
     main_package_name: &str,
     main: fn(Args, Env) -> Result<Return, eyre::Report>,
 ) -> Result<(), eyre::Report> {
@@ -110,6 +110,7 @@ pub fn run<Args: FromIterator<String>, Env: FromIterator<(String, String)>, Retu
         tracing::error!(target: "ez", "exiting with error status code due to an unhandled error");
         err
     })?.to_i32();
+
     if exit_status != 0 {
         tracing::debug!(target: "ez", "exiting with error status code {}", exit_status);
         std::process::exit(exit_status);

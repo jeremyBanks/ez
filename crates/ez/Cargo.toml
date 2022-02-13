@@ -15,6 +15,7 @@ ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.2-ez.6"}
 
 [dev-dependencies]
 tokio = { version = "1.16.0", features = ["full"] }
+trybuild = "1.0.56"
 
 [package.metadata.release]
 consolidate-commits = true

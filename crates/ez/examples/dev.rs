@@ -10,9 +10,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-// throws a dynamic (eyre::Report) error
-#[throws]
-fn fallible_dynamic(n: i32) -> i32 {
+// throws a dynamic error (ez::Error)
+#[throws] fn fallible_dynamic(n: i32) -> i32 {
     match n {
         // implicit return
         0 => 1,
