@@ -103,9 +103,12 @@ pub fn main(
         eyre::bail!("#[ez::main] macro takes no arguments");
     };
 
+    let function_tokens = tryify_trailing_block(function_tokens)?;
+
     let mut inner_function: ItemFn = syn::parse2(function_tokens)?;
     let mut outer_function = inner_function.clone();
 
+    // inner function must always take two arguments
     match inner_function.sig.inputs.len() {
         0 => {
             inner_function
@@ -131,37 +134,35 @@ pub fn main(
         },
     }
 
-    let extra_inner_attributes = if inner_function.sig.asyncness.is_some() {
-        // TODO: replace this
-        quote! {
-            #[::ez::__::tokio::main(flavor = "current_thread")]
-        }
-    } else {
-        quote! {}
-    };
+    inner_function.sig.output = wrap_return_with_result(
+        inner_function.sig.output,
+        parse_quote! { ::ez::__::eyre::Report },
+    );
 
     outer_function.sig.inputs = Punctuated::new();
     outer_function.sig.output = parse_quote! { -> Result<(), ::ez::__::eyre::Report> };
     outer_function.sig.asyncness = None;
 
-    let block = inner_function.block.clone();
+    if inner_function.sig.asyncness.is_some() {
+        let block = inner_function.block.clone();
+        inner_function.block = parse_quote! { {
+            ::ez::__::tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()?
+                .block_on(async {
+                    #block
+                })
+        } };
 
-    if let ReturnType::Type(_, ref inner) = inner_function.sig.output {
-        let output = inner.clone();
-        inner_function.sig.output = parse_quote! { -> Result<#output, ::ez::__::eyre::Report> };
-    } else {
-        inner_function.sig.output = parse_quote! { -> Result<(), ::ez::__::eyre::Report> };
+        inner_function.sig.asyncness = None;
     }
-    inner_function.block = parse_quote! { {
-        Ok(#block)
-    } };
+
     inner_function.vis = Visibility::Inherited;
-    inner_function.sig.ident = parse_quote! { ez_inner_main };
+    inner_function.sig.ident = parse_quote! { ez_try_main };
 
     outer_function.block = parse_quote! { {
-        #extra_inner_attributes
         #inner_function;
-        ::ez::__::run(env!("CARGO_CRATE_NAME"), ez_inner_main)
+        ::ez::__::run(env!("CARGO_CRATE_NAME"), ez_try_main)
     } };
 
     Ok(outer_function.to_token_stream())

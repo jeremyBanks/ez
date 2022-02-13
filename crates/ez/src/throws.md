@@ -14,6 +14,8 @@ functions decorated with `#[throws]`.
 ## Example 1
 
 ```rust
+use ez::throws;
+
 #[throws]
 fn expects_ten(n: i32) {
     if n != 10 {
@@ -38,6 +40,8 @@ fn expects_ten(n: i32) -> Result<(), eyre::Report> {
 ## Example 2
 
 ```rust
+use ez::throws;
+
 #[throws(std::num::ParseIntError)]
 fn check_ten(n: &str) -> bool {
     let n: i32 = n.parse()?;

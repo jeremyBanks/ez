@@ -3,17 +3,19 @@ pub extern crate core;
 pub extern crate std;
 
 mod dysfunctional;
+pub mod int;
 mod macro_rules;
 mod main;
 mod proc_macros;
 
 pub use crate::{macro_rules::*, proc_macros::*};
 
-pub mod exposed {
-    //! **INTERNAL: DO NOT USE.** This should not be considered part of this
-    //! crate's public API. This is only visible due to internal
-    //! implementation requirements
-
+pub mod internal {
+    //! **⚠️ INTERNAL! DO NOT USE!**
+    //!
+    //! This should not be considered part of this crate's public API.
+    //!
+    //! This is only public due to internal implementation requirements
     pub use {
         crate::{
             alloc, core,

@@ -8,7 +8,7 @@ jobs:
         - name: maximum versions
           rust_toolchain: nightly
         - name: minimum versions
-          rust_toolchain: nightly-2022-02-10
+          rust_toolchain: beta
           bootstrap: RUSTC_BOOTSTRAP=1
           cargo_flags: -Z unstable-options -Z minimal-versions
       fail-fast: false

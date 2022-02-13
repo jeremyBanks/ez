@@ -28,7 +28,7 @@ such as logging and error reporting, and adds some other conveniences.
 - If the function is marked as `async`, it will be run in the single-threaded
   [`tokio`](https://docs.rs/tokio) runtime.
   - This is like adding the `#[tokio::main]` macro. (We only don't actually use
-    `tokio::main` internally because of to procedural macro hygiene limitation.)
+    `tokio::main` internally because of procedural macro hygiene limitations.)
 
 ## Examples
 
@@ -42,12 +42,13 @@ fn main(_args: Vec<String>, env: HashMap<String, String>) -> u8 {
     match home {
         Some(path) => {
             println!("HOME is: {path}");
+            return 0;
         }
         None => {
             println!("fatal error: HOME not set");
             return 1;
         }
-    };
+    }
 }
 ```
 
