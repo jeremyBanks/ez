@@ -7,7 +7,7 @@ mod macro_rules;
 mod main;
 pub mod proc_macros;
 
-pub use crate::{macro_rules::*};
+pub use crate::macro_rules::*;
 
 pub mod internal {
     //! **⚠️ INTERNAL! DO NOT USE!**

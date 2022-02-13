@@ -7,13 +7,6 @@ use {
     },
 };
 
-pub fn try_throws(
-    _attribute_tokens: TokenStream,
-    _function_tokens: TokenStream,
-) -> Result<TokenStream, eyre::Report> {
-    todo!();
-}
-
 /// Wrap every return statement in `Ok`, but don't recur into nested
 /// functions/closures/async blocks.
 fn wrap_returns_in_ok(block: Block) -> Block {
@@ -95,6 +88,13 @@ pub fn throws(
     function.sig.output = wrap_return_with_result(function.sig.output, error_type);
 
     Ok(function.into_token_stream())
+}
+
+pub fn try_throws(
+    attribute_tokens: TokenStream,
+    function_tokens: TokenStream,
+) -> Result<TokenStream, eyre::Report> {
+    throws(attribute_tokens, function_tokens)
 }
 
 pub fn main(

@@ -22,7 +22,11 @@ impl ExitStatus for () {
     }
 }
 
-pub fn entry_point<Args: FromIterator<String>, Env: FromIterator<(String, String)>, Return: ExitStatus>(
+pub fn entry_point<
+    Args: FromIterator<String>,
+    Env: FromIterator<(String, String)>,
+    Return: ExitStatus,
+>(
     main_package_name: &str,
     main: fn(Args, Env) -> Result<Return, eyre::Report>,
 ) -> Result<(), eyre::Report> {

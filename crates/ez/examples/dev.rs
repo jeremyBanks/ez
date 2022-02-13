@@ -11,7 +11,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 // throws a dynamic error (ez::Error)
-#[throws] fn fallible_dynamic(n: i32) -> i32 {
+#[throws]
+fn fallible_dynamic(n: i32) -> i32 {
     match n {
         // implicit return
         0 => 1,
