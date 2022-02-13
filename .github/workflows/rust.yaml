@@ -1,0 +1,37 @@
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+  - cron: "33 22 * * 5"
+name: rust
+jobs:
+  rust:
+    strategy:
+      matrix:
+        include:
+        - name: maximum versions
+          rust_toolchain: nightly
+        - name: minimum versions
+          rust_toolchain: beta
+          bootstrap: RUSTC_BOOTSTRAP=1
+          cargo_flags: -Z unstable-options -Z minimal-versions
+      fail-fast: false
+    runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v1
+      - name: install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust_toolchain }}
+      - name: delete lockfile
+        run: rm -rf Cargo.lock
+      - name: build
+        run: ${{ matrix.bootstrap }} cargo +${{ matrix.rust_toolchain }} ${{ matrix.cargo_flags }} build --all
+      - name: clean
+        run: ${{ matrix.bootstrap }} cargo +${{ matrix.rust_toolchain }} ${{ matrix.cargo_flags }} clean
+      - name: test
+        run: ${{ matrix.bootstrap }} cargo +${{ matrix.rust_toolchain }} ${{ matrix.cargo_flags }} test --all
+      - name: documentation
+        run: ${{ matrix.bootstrap }} cargo +${{ matrix.rust_toolchain }} ${{ matrix.cargo_flags }} doc --all

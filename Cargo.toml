@@ -1,22 +1,7 @@
 [workspace]
-members = [".", "macros"]
-
-[package]
-authors = ["Jeremy Banks <_@jeremy.ca>"]
-description = "ez"
-edition = "2021"
-license = "MIT OR Apache-2.0"
-name = "weak"
-repository = "https://github.com/jeremyBanks/weak"
-version = "0.0.0-dev.1"
-
-[dependencies]
-num-derive = ">=0"
-num-traits = ">=0"
-weak-build-macros = { path = "./macros", version = "0.0.0-dev.1"}
+members = ["crates/*"]
 
 [workspace.metadata.release]
-allow-branch = ["trunk", "main", "master"]
 consolidate-commits = true
 consolidate-pushes = true
 dev-version = true
@@ -26,3 +11,7 @@ pre-release-commit-message = "v{{version}}"
 shared-version = true
 tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
 tag-name = "{{version}}"
+
+[profile.dev.package.backtrace]
+opt-level = 3
+ 
