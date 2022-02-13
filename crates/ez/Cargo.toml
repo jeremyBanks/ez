@@ -10,8 +10,8 @@ rust-version = "1.59.0"
 version = "0.0.2-ez.6"
 
 [dependencies]
-ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.2-ez.6"}
 ez-internal = { path = "../ez-internal", version = "=0.0.2-ez.6"}
+ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.2-ez.6"}
 
 [dev-dependencies]
 tokio = { version = "1.16.0", features = ["full"] }

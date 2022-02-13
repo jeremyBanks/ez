@@ -5,29 +5,27 @@ This macro is automatically imported into the body of functions using
 returning a new error value from such functions. However, it is also appropriate
 for use elsewhere.
 
-## Example 1
+## Expansion
+
+If called with an error value, the macro expansion works like this:
 
 ```ignore
 throw!(err);
 ```
 
-If called with an error value, the macro expansion works like this:
-
 ```ignore
 return Result::Err(err);
-```
-
-## Example 2
-
-```ignore
-throw!("the value {:?} is out of range", &x.inner);
 ```
 
 If called with a string literal as the first argument, the macro expansion works
 like this:
 
 ```ignore
-return Result::Err(eyre::Report::msg(
+throw!("the value {:?} is out of range", &x.inner);
+```
+
+```ignore
+return Result::Err(ez::Error::msg(
     format!("the value {:?} is out of range", &x.inner)
 ));
 ```
