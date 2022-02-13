@@ -1,12 +1,12 @@
 #[macro_export]
 macro_rules! throw {
     ($msg:literal $(,)?) => { {
-        ::ez::__::core::result::Result::Err(::ez::__::eyre::Report::msg($msg))?;
+        ::ez::__::core::result::Result::Err(::ez::Error::msg($msg))?;
         unreachable!()
     } };
 
     ($msg:literal $(, $rest:tt)* $(,)?) => { {
-        ::ez::__::core::result::Result::Err(::ez::__::eyre::Report::msg(format!($msg $(, $rest)*)))?;
+        ::ez::__::core::result::Result::Err(::ez::Error::msg(format!($msg $(, $rest)*)))?;
         unreachable!()
     } };
 

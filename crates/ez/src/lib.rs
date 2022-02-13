@@ -7,8 +7,6 @@ pub mod prelude {
     #[doc(no_inline)]
     pub use crate::{io as ezio, main, throw, throws, try_throws};
 }
-#[doc(inline)]
-pub use ez_internal::int::*;
 #[doc(hidden)]
 pub use ez_internal::internal as __;
 #[doc(inline)]
@@ -17,7 +15,7 @@ pub use ez_internal::throw;
 #[doc(inline)]
 #[doc = include_str!("./main.md")]
 pub use ez_proc_macro::main;
-#[doc(inline)]
+#[doc(hidden)]
 #[doc = include_str!("./try_throws.md")]
 pub use ez_proc_macro::throws as try_throws;
 #[doc(inline)]

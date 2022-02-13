@@ -81,7 +81,7 @@ pub fn throws(
     function_tokens: TokenStream,
 ) -> Result<TokenStream, eyre::Report> {
     let error_type: Path = if attribute_tokens.is_empty() {
-        parse_quote! { ::ez::__::eyre::Report }
+        parse_quote! { ::ez::Error }
     } else {
         syn::parse2(attribute_tokens)?
     };
@@ -134,13 +134,11 @@ pub fn main(
         },
     }
 
-    inner_function.sig.output = wrap_return_with_result(
-        inner_function.sig.output,
-        parse_quote! { ::ez::__::eyre::Report },
-    );
+    inner_function.sig.output =
+        wrap_return_with_result(inner_function.sig.output, parse_quote! { ::ez::Error });
 
     outer_function.sig.inputs = Punctuated::new();
-    outer_function.sig.output = parse_quote! { -> Result<(), ::ez::__::eyre::Report> };
+    outer_function.sig.output = parse_quote! { -> Result<(), ::ez::Error> };
     outer_function.sig.asyncness = None;
 
     if inner_function.sig.asyncness.is_some() {

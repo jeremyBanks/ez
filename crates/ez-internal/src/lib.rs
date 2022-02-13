@@ -3,7 +3,6 @@ pub extern crate core;
 pub extern crate std;
 
 mod dysfunctional;
-pub mod int;
 mod macro_rules;
 mod main;
 mod proc_macros;
