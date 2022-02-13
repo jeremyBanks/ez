@@ -21,6 +21,7 @@ publish! {
 publish! {
     use ez_proc_macro::try_throws;
     docs from try_throws;
+    failing example try_throws;
 }
 
 publish! {

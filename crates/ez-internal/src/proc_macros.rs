@@ -53,8 +53,11 @@ fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Repor
                 let block: syn::Block = syn::parse2(last.clone().into_token_stream())?;
                 let block = wrap_returns_in_ok(block);
                 *last = parse_quote_spanned! { block.span() => {
+                    #[allow(unused_imports)]
                     use ::ez::throw;
-                    ::ez::__::Ok({#block})
+                    let _inner = #block;
+                    #[allow(unreachable_code)]
+                    ::ez::__::Ok(_inner)
                 } };
             }
         };
@@ -67,10 +70,10 @@ fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Repor
 fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnType {
     match &return_type {
         ReturnType::Default => {
-            parse_quote_spanned! { return_type.span() => -> ::ez::__::core::result::Result<(), #error_type> }
+            parse_quote_spanned! { return_type.span() => -> ::ez::__::Result<(), #error_type> }
         },
         ReturnType::Type(_, t) => {
-            parse_quote_spanned! { return_type.span() => -> ::ez::__::core::result::Result<#t, #error_type> }
+            parse_quote_spanned! { return_type.span() => -> ::ez::__::Result<#t, #error_type> }
         },
     }
 }
@@ -149,21 +152,18 @@ pub fn main(
             ::ez::__::tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()?
-                .block_on(async {
-                    #block
-                })
+                .block_on(async #block)
         } };
 
         inner_function.sig.asyncness = None;
     }
 
     inner_function.vis = Visibility::Inherited;
-    inner_function.sig.ident =
-        parse_quote_spanned! { inner_function.sig.ident.span() => ez_try_main };
+    let ident = inner_function.sig.ident.clone();
 
     outer_function.block = parse_quote_spanned! { outer_function.block.span() => {
-        #inner_function;
-        ::ez::__::run(env!("CARGO_CRATE_NAME"), ez_try_main)
+        #inner_function
+        ::ez::__::run(env!("CARGO_CRATE_NAME"), #ident)
     } };
 
     Ok(outer_function.to_token_stream())
