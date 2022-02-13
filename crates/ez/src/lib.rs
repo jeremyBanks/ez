@@ -28,7 +28,9 @@ publish! {
     docs from throws;
 }
 
-/// A dynamic error reporting type. This is a re-export of [`eyre::Report`](https://docs.rs/eyre/latest/eyre/struct.Report.html) from [the `eyre` package](https://docs.rs/eyre).
+/// A dynamic error reporting type. This is a re-export of
+/// [`eyre::Report`](https://docs.rs/eyre/latest/eyre/struct.Report.html) from
+/// [the `eyre` package](https://docs.rs/eyre).
 ///
 /// ---
 #[doc(inline)]

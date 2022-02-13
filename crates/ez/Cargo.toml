@@ -6,7 +6,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "ez"
 repository = "https://github.com/jeremyBanks/ez"
-rust-version = "1.58.0"
+rust-version = "1.59.0"
 version = "0.0.2-ez.6"
 
 [dependencies]
@@ -14,7 +14,7 @@ ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.2-ez.6"}
 ez-internal = { path = "../ez-internal", version = "=0.0.2-ez.6"}
 
 [dev-dependencies]
-tokio = { version = "1.16.1", features = ["full"] }
+tokio = { version = "1.16.0", features = ["full"] }
 
 [package.metadata.release]
 consolidate-commits = true
