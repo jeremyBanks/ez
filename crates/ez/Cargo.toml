@@ -10,7 +10,8 @@ rust-version = "1.59.0"
 version = "0.0.3-dev"
 
 [dependencies]
-ez-internal = { path = "../ez-internal", version = "=0.0.3-dev"}
+eyre = "0.6.6"
+ez-impl = { path = "../ez-impl", version = "=0.0.3-dev"}
 ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.3-dev"}
 
 [dev-dependencies]

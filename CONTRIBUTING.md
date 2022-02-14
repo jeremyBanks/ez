@@ -6,17 +6,17 @@ Why is this project split up into several crates? Because that's neccessary in
 order to have full control of the public interface given the use of macros.
 
 The only public interface is the `ez` crate, but most implementation code lives
-in `ez-internal`.
+in `ez-impl`.
 
 Macros created with `#[macro_export] macro_rules` are automatically exported at
-the top level of the crate where they're defined. We define them in
-`ez_internal` so that `ez` can choose where to re-export them publicly.
+the top level of the crate where they're defined. We define them in `ez_impl` so
+that `ez` can choose where to re-export them publicly.
 
 Procedural macros must be defined in their own crate, from which they must be
 exported at the top level. We define our procedural macro's internal logic in
-`ez_internal` using `proc_macro2` so that it's easier to reuse and test. We
-actually export them as procedural macros through the `ez_proc_macro` crate, and
-`ez` can choose where to re-export them publicly.
+`ez_impl` using `proc_macro2` so that it's easier to reuse and test. We actually
+export them as procedural macros through the `ez_proc_macro` crate, and `ez` can
+choose where to re-export them publicly.
 
 Examples are included in `./crates/ez/examples`, but when you run examples
 locally they're actually run through `./crates/ez-examples/examples`, which is a

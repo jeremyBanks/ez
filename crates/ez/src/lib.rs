@@ -1,11 +1,11 @@
 #![doc = include_str!("../README.md")]
 
 #[doc(hidden)]
-pub use ez_internal::internal as __;
-use ez_internal::publish;
+pub use ez_impl::internal as __;
+use ez_impl::publish;
 
 publish! {
-    pub use ez_internal::throw;
+    pub use ez_impl::throw;
     prose from "throw.md";
     failing example throw;
 }
@@ -35,19 +35,4 @@ publish! {
 ///
 /// ---
 #[doc(inline)]
-pub use __::eyre::Report as Error;
-
-/// You may `use ez::prelude::*;`
-pub mod prelude {
-    #[doc(no_inline)]
-    pub use ezio::prelude::*;
-
-    #[doc(no_inline)]
-    pub use crate::{io as ezio, main, throw, throws, try_throws};
-}
-
-/// This is a re-export of [the `ezio` package](https://docs.rs/ezio).
-///
-/// ---
-#[doc(inline)]
-pub use __::ezio as io;
+pub use eyre::Report as Error;

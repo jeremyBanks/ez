@@ -1,9 +1,10 @@
 use {
-    proc_macro2::{Ident, TokenStream},
+    proc_macro2::{Ident, TokenStream, TokenTree},
     quote::{quote_spanned, ToTokens},
     syn::{
-        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Block,
-        ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, Path, ReturnType, Visibility,
+        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, visit::Visit,
+        Block, Expr, ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, Item, ItemFn, ItemImpl,
+        ItemTrait, Path, ReturnType, Visibility,
     },
 };
 
@@ -11,9 +12,86 @@ use {
 // its supported syntax seems to be a superset of other function types.
 type Function = ImplItemMethod;
 
+/// Returns the training block of this token stream, if it has one.
+#[allow(unused)]
+fn trailing_block(tokens: &TokenStream) -> Option<Block> {
+    let mut tokens = Vec::from_iter(tokens.clone());
+
+    if let Some(TokenTree::Group(group)) = tokens.last_mut() {
+        return Some(syn::parse2(group.stream()).unwrap());
+    }
+
+    None
+}
+
+/// Determines whether a function definition contains a reference to `self` or
+/// `Self`, either in the signature or in the body (but not recurring into
+/// nested trait or impl blocks).
+///
+/// Returns true if a path containing `Self` or `self` is found, false
+/// otherwise.
+#[allow(unused)]
+fn contains_self(function: Function) -> Result<bool, eyre::Report> {
+    struct SelfFinder {
+        found: bool,
+    }
+    impl<'ast> Visit<'ast> for SelfFinder {
+        fn visit_path(&mut self, path: &'ast Path) {
+            if path.leading_colon.is_none() {
+                for segment in &path.segments {
+                    if segment.ident == "self" || segment.ident == "Self" {
+                        self.found = true;
+                        return;
+                    }
+                }
+            }
+            syn::visit::visit_path(self, path);
+        }
+
+        fn visit_item(&mut self, item: &'ast Item) {
+            if self.found {
+                return;
+            }
+            syn::visit::visit_item(self, item);
+        }
+
+        fn visit_expr(&mut self, expr: &'ast Expr) {
+            if self.found {
+                return;
+            }
+            syn::visit::visit_expr(self, expr);
+        }
+
+        fn visit_item_trait(&mut self, _: &'ast ItemTrait) {
+            // don't recur into nested trait blocks
+        }
+
+        fn visit_item_impl(&mut self, _: &'ast ItemImpl) {
+            // don't recur into nested impl blocks
+        }
+    }
+
+    let mut finder = SelfFinder { found: false };
+
+    finder.visit_impl_item_method(&function);
+
+    Ok(finder.found)
+}
+
+/// Replace all instances of some original path prefix (such as `tokio`) with
+/// another (such as `::ez::__::tokio`) in a given `TokenStream`.
+#[allow(unused)]
+fn transplant_path_prefixes(
+    tokens: proc_macro2::TokenStream,
+    original: (),
+    replacement: (),
+) -> TokenStream {
+    todo!()
+}
+
 /// Wrap every return statement in `Ok`, but don't recur into nested
 /// functions/closures/async blocks.
-pub fn wrap_returns_in_ok(block: Block) -> Block {
+fn wrap_returns_in_ok(block: Block) -> Block {
     struct Folder;
     impl Fold for Folder {
         fn fold_expr_return(&mut self, expr: ExprReturn) -> ExprReturn {
@@ -41,7 +119,7 @@ pub fn wrap_returns_in_ok(block: Block) -> Block {
 
 /// If this token stream has a trailing block, import `throw!` and wrap every
 /// return value in `Ok`.
-pub fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
+fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let mut tokens = Vec::from_iter(tokens);
 
     if let Some(last) = tokens.last_mut() {
@@ -64,7 +142,7 @@ pub fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::R
 }
 
 // Wraps a `ReturnType` in a `Result` with the indicated `error_type`.
-pub fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnType {
+fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnType {
     match &return_type {
         ReturnType::Default => {
             parse_quote_spanned! { return_type.span() => -> ::ez::__::Result<(), #error_type> }
@@ -94,7 +172,7 @@ pub fn throws(
     Ok(function.into_token_stream())
 }
 
-pub fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
+fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let function_tokens = tryify_trailing_block(function_tokens)?;
 
     let mut function: Function = syn::parse2(function_tokens.into_iter().collect())?;

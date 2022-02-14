@@ -27,7 +27,7 @@ fn expects_ten(n: i32) {
 This is expanded out into something equivalent to:
 
 ```rust
-# use ez::__::eyre;
+# use eyre;
 fn expects_ten(n: i32) -> Result<(), eyre::Report> {
     if n != 10 {
         return Err(eyre::Report::msg(format!("expected 10, but got {n}")))

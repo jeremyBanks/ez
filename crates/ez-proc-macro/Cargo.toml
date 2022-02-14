@@ -13,7 +13,7 @@ version = "0.0.3-dev"
 proc-macro = true
 
 [dependencies]
-ez-internal = { version = "0.0.3-dev", path = "../ez-internal" }
+ez-impl = { version = "0.0.3-dev", path = "../ez-impl" }
 proc-macro2 = "1.0.36"
 quote = "1.0.15"
 syn = { version = "1.0.86", features = ["full", "visit", "visit-mut", "fold", "derive", "parsing", "printing", "clone-impls", "extra-traits", "proc-macro"] }
