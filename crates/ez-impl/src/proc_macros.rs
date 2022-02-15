@@ -1,10 +1,9 @@
 use {
-    proc_macro2::{Ident, TokenStream, TokenTree},
+    proc_macro2::{Delimiter, Ident, TokenStream, TokenTree},
     quote::{quote_spanned, ToTokens},
     syn::{
-        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, visit::Visit,
-        Block, Expr, ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, Item, ItemFn, ItemImpl,
-        ItemTrait, Path, ReturnType, Visibility,
+        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Block,
+        ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, Path, ReturnType, Visibility,
     },
 };
 
@@ -13,80 +12,18 @@ use {
 type Function = ImplItemMethod;
 
 /// Returns the training block of this token stream, if it has one.
-#[allow(unused)]
-fn trailing_block(tokens: &TokenStream) -> Option<Block> {
+fn trailing_block(tokens: &TokenStream) -> Result<Option<Block>, eyre::Report> {
     let mut tokens = Vec::from_iter(tokens.clone());
 
-    if let Some(TokenTree::Group(group)) = tokens.last_mut() {
-        return Some(syn::parse2(group.stream()).unwrap());
-    }
-
-    None
-}
-
-/// Determines whether a function definition contains a reference to `self` or
-/// `Self`, either in the signature or in the body (but not recurring into
-/// nested trait or impl blocks).
-///
-/// Returns true if a path containing `Self` or `self` is found, false
-/// otherwise.
-#[allow(unused)]
-fn contains_self(function: Function) -> Result<bool, eyre::Report> {
-    struct SelfFinder {
-        found: bool,
-    }
-    impl<'ast> Visit<'ast> for SelfFinder {
-        fn visit_path(&mut self, path: &'ast Path) {
-            if path.leading_colon.is_none() {
-                for segment in &path.segments {
-                    if segment.ident == "self" || segment.ident == "Self" {
-                        self.found = true;
-                        return;
-                    }
-                }
+    if let Some(trailing) = tokens.last_mut() {
+        if let TokenTree::Group(group) = &trailing {
+            if group.delimiter() == Delimiter::Brace {
+                return Ok(Some(syn::parse2(trailing.into_token_stream())?));
             }
-            syn::visit::visit_path(self, path);
-        }
-
-        fn visit_item(&mut self, item: &'ast Item) {
-            if self.found {
-                return;
-            }
-            syn::visit::visit_item(self, item);
-        }
-
-        fn visit_expr(&mut self, expr: &'ast Expr) {
-            if self.found {
-                return;
-            }
-            syn::visit::visit_expr(self, expr);
-        }
-
-        fn visit_item_trait(&mut self, _: &'ast ItemTrait) {
-            // don't recur into nested trait blocks
-        }
-
-        fn visit_item_impl(&mut self, _: &'ast ItemImpl) {
-            // don't recur into nested impl blocks
         }
     }
 
-    let mut finder = SelfFinder { found: false };
-
-    finder.visit_impl_item_method(&function);
-
-    Ok(finder.found)
-}
-
-/// Replace all instances of some original path prefix (such as `tokio`) with
-/// another (such as `::ez::__::tokio`) in a given `TokenStream`.
-#[allow(unused)]
-fn transplant_path_prefixes(
-    tokens: proc_macro2::TokenStream,
-    original: (),
-    replacement: (),
-) -> TokenStream {
-    todo!()
+    Ok(None)
 }
 
 /// Wrap every return statement in `Ok`, but don't recur into nested
@@ -130,9 +67,9 @@ fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Repor
                 *last = parse_quote_spanned! { block.span() => {
                     #[allow(unused_imports)]
                     use ::ez::throw;
-                    let _inner = #block;
+                    let _ez_inner = #block;
                     #[allow(unreachable_code)]
-                    ::ez::__::Ok(_inner)
+                    ::ez::__::Ok(_ez_inner)
                 } };
             }
         };
@@ -180,8 +117,8 @@ fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let block = function.block.clone();
     function.block = parse_quote_spanned! {
         function.block.span() => {
-            let _inner = move || -> ::ez::__::Result<_, ::ez::__::ErrorPanicker> #block;
-            _inner().unwrap()
+            let _ez_inner = move || -> ::ez::__::Result<_, ::ez::__::ErrorPanicker> #block;
+            _ez_inner().unwrap()
         }
     };
 
@@ -192,18 +129,45 @@ pub fn try_throws(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
 ) -> Result<TokenStream, eyre::Report> {
-    let panicking = panics(function_tokens.clone())?;
     let throwing = throws(attribute_tokens, function_tokens.clone())?;
 
     let mut throwing: Function = syn::parse2(throwing)?;
     let throwing_ident = format!("try_{}", throwing.sig.ident);
-    throwing.sig.ident = Ident::new(&throwing_ident, throwing.sig.span());
+    let throwing_ident = Ident::new(&throwing_ident, throwing.sig.span());
+    throwing.sig.ident = throwing_ident.clone();
+
+    let args = parameters_to_arguments(&throwing.sig.inputs);
+
+    let panicking = panics(if trailing_block(&function_tokens)?.is_none() {
+        let mut panicking: Function = syn::parse2(function_tokens.clone())?;
+        panicking.block = parse_quote_spanned! { function_tokens.span() => {
+                Self::#throwing_ident(#args)?
+        } };
+        panicking.into_token_stream()
+    } else {
+        function_tokens
+    })?;
 
     Ok(parse_quote_spanned! {
-        function_tokens.span() =>
+        panicking.span() =>
         #throwing
         #panicking
     })
+}
+
+fn parameters_to_arguments(
+    parameters: &Punctuated<syn::FnArg, syn::Token![,]>,
+) -> Punctuated<syn::Ident, syn::Token![,]> {
+    parameters
+        .iter()
+        .map(|arg| match arg {
+            syn::FnArg::Receiver(receiver) => syn::Ident::new("self", receiver.span()),
+            syn::FnArg::Typed(arg) => match &*arg.pat {
+                syn::Pat::Ident(pat) => pat.ident.clone(),
+                _ => panic!("unsupported pattern in arguments"),
+            },
+        })
+        .collect()
 }
 
 pub fn main(
@@ -215,7 +179,6 @@ pub fn main(
     };
 
     let function_tokens = tryify_trailing_block(function_tokens)?;
-
     let mut inner_function: ItemFn = syn::parse2(function_tokens)?;
     let mut outer_function = inner_function.clone();
 

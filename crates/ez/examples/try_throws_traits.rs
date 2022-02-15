@@ -1,7 +1,9 @@
 use ez::{main, throws, try_throws};
 
 #[main]
-fn main() {}
+async fn main() -> u8 {
+    0
+}
 
 struct StructA;
 struct StructB;
