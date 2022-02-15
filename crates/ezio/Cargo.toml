@@ -7,7 +7,7 @@ homepage = "https://crates.io/crates/ezio"
 license = "Apache-2.0"
 name = "ez-ezio"
 repository = "https://github.com/jeremyBanks/ez"
-version = "0.0.5-dev.1"
+version = "0.0.5-dev.2"
 
 [lib]
 name = "ezio"
