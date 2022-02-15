@@ -1,7 +1,6 @@
-use crate::prelude::*;
+use crate::{Read, Write};
 use eyre::WrapErr;
 use ez::{throws, try_throws};
-
 use std::path::Path;
 
 /// Create an object to read from a file.
@@ -60,6 +59,10 @@ pub struct Writer(std::fs::File);
 /// An object for reading from a file.
 pub struct Reader(std::io::BufReader<std::fs::File>);
 
+impl_inherent_read!(Reader);
+
+impl_inherent_write!(Writer);
+
 impl Write for Writer {
     #[throws]
     fn try_write_str(&mut self, s: &str) {
@@ -78,22 +81,6 @@ impl std::io::Write for Writer {
 
     fn flush(&mut self) -> Result<(), std::io::Error> {
         self.0.flush()
-    }
-}
-
-impl Writer {
-    #[try_throws]
-    pub fn write_str(&mut self, s: &str) {
-        crate::Write::try_write_str(self, s)?;
-    }
-
-    #[try_throws(std::io::Error)]
-    pub fn write(&mut self, b: &[u8]) -> usize {
-        std::io::Write::write(self, b)?
-    }
-
-    pub fn flush(&mut self) -> Result<(), std::io::Error> {
-        std::io::Write::flush(self)
     }
 }
 

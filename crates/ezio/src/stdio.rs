@@ -1,7 +1,6 @@
+use crate::{Read, Write};
 use eyre::Context;
 use ez::throws;
-
-use crate::prelude::*;
 
 /// Read a single line from stdin.
 pub fn read_line() -> String {
@@ -44,6 +43,12 @@ pub struct Stderr(std::io::Stderr);
 /// A handle to stdin.
 #[derive(Debug)]
 pub struct Stdin(std::io::Stdin);
+
+impl_inherent_write!(Stdout);
+
+impl_inherent_write!(Stderr);
+
+impl_inherent_read!(Stdin);
 
 impl Write for Stdout {
     #[throws]

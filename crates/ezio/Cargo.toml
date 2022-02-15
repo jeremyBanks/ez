@@ -1,12 +1,10 @@
 [package]
 authors = ["Nicholas Cameron <nrc@ncameron.org>"]
-description = "internal fork. not stable."
-documentation = "https://docs.rs/ezio"
+description = "internal fork of ezio. not stable."
 edition = "2021"
-homepage = "https://crates.io/crates/ezio"
+homepage = "https://github.com/jeremyBanks/ez/tree/HEAD/crates/ezio"
 license = "Apache-2.0"
 name = "ez-ezio"
-repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.5-dev.2"
 
 [lib]

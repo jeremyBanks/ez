@@ -1,3 +1,18 @@
+# ez-ezio
+
+## Changes from Upstream
+
+- Trait implementations are wrapped with inherent methods, so the traits don't
+  need to be imported and are no longer included in the prelude.
+- The `.write` method was renamed `.write_str` to disambiguate it in case both
+  write traits are imported at once.
+- Most panicking methods have fallible `try_` alternatives added (though in
+  most) cases we're just throwing an `eyre::Report` instead of anything more
+  specific.
+- This is an exercise testing out the macros from the `ez` crate.
+
+---
+
 # ezio - a crate for easy IO
 
 ezio offers an easy to use IO API for reading and writing to files and stdio.

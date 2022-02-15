@@ -1,6 +1,5 @@
-use std::str::FromStr;
-
 use ez::try_throws;
+use std::str::FromStr;
 
 /// A trait for objects which can read data.
 ///
@@ -46,6 +45,35 @@ macro_rules! read_into_iter {
                 crate::read::ReadIterator {
                     reader: std::io::BufReader::new(self),
                 }
+            }
+        }
+    };
+}
+
+macro_rules! impl_inherent_read {
+    ($type: ty) => {
+        impl $type {
+            #[ez::try_throws]
+            pub fn read_all(&mut self) -> String {
+                crate::Read::try_read_all(self)?
+            }
+
+            #[ez::try_throws]
+            pub fn read_line(&mut self) -> String {
+                crate::Read::try_read_line(self)?
+            }
+
+            #[ez::try_throws]
+            pub fn read_line_any<T: std::str::FromStr>(&mut self) -> T
+            where
+                Self: Sized,
+            {
+                crate::Read::try_read_line_any(self)?
+            }
+
+            #[ez::throws(std::io::Error)]
+            pub fn read(&mut self, buf: &mut [u8]) -> usize {
+                std::io::Read::read(self, buf)?
             }
         }
     };

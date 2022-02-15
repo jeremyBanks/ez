@@ -1,6 +1,4 @@
-use ez::throws;
-
-use crate::prelude::*;
+use crate::{Read, Write};
 
 /// Create a string [`Reader`] from a string.
 pub fn reader(s: &str) -> Reader<'_> {
@@ -20,6 +18,8 @@ pub fn writer() -> Writer {
 #[derive(Clone, Debug)]
 pub struct Reader<'a>(&'a str);
 
+impl_inherent_read!(Reader<'_>);
+
 /// A writer for writing into a string (`String`).
 ///
 /// Implements the `Write` trait, so this is a way to integrate strings into ezio's trait system.
@@ -30,6 +30,8 @@ pub struct Reader<'a>(&'a str);
 /// using `as_ref()`.
 #[derive(Clone, Debug)]
 pub struct Writer(String);
+
+impl_inherent_write!(Writer);
 
 impl Into<String> for Writer {
     fn into(self) -> String {
@@ -149,6 +151,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn str_read_any() {
         let mut reader = reader("line 1\n42\n3.14");
         assert_eq!(&reader.read_line_any::<String>(), "line 1");

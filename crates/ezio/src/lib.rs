@@ -61,10 +61,8 @@
 pub mod prelude {
     pub use super::{
         file, random,
-        read::Read,
         stdio::{self, stderr, stdin, stdout, Stderr, Stdin, Stdout},
         string,
-        write::Write,
     };
 }
 
@@ -76,6 +74,7 @@ pub use write::Write;
 mod read;
 
 /// Defines ezio's `Write` trait.
+#[macro_use]
 mod write {
     use ez::try_throws;
 
@@ -97,8 +96,34 @@ mod write {
         where
             Self: Sized,
         {
-            <Self as Write>::write_str(self, &o.to_string())
+            self.try_write_str(&o.to_string())?
         }
+    }
+
+    macro_rules! impl_inherent_write {
+        ($type:ty) => {
+            impl $type {
+                #[ez::try_throws]
+                pub fn write_str(&mut self, s: &str) {
+                    crate::Write::try_write_str(self, s)?;
+                }
+
+                #[ez::try_throws]
+                pub fn write_any(&mut self, o: impl std::fmt::Display) {
+                    crate::Write::try_write_any(self, o)?;
+                }
+
+                #[ez::throws(std::io::Error)]
+                pub fn write(&mut self, b: &[u8]) -> usize {
+                    std::io::Write::write(self, b)?
+                }
+
+                #[ez::throws(std::io::Error)]
+                pub fn flush(&mut self) {
+                    std::io::Write::flush(self)?
+                }
+            }
+        };
     }
 }
 
