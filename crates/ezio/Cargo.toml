@@ -1,0 +1,13 @@
+[package]
+name = "ezio"
+version = "0.1.2"
+edition = "2021"
+authors = ["Nicholas Cameron <nrc@ncameron.org>"]
+description = "A crate for really easy IO."
+repository = "https://github.com/nrc/ezio"
+license = "Apache-2.0"
+keywords = ["IO", "stdio", "file", "read", "write"]
+categories = ["filesystem", "os"]
+
+[dependencies]
+rand = "0.8"
