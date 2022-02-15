@@ -116,22 +116,23 @@ dependencies = [
 
 [[package]]
 name = "ez"
-version = "0.0.2"
+version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e57dff7e55cb227d5fb9e318947e2b1620adcf20ccc17f413ec6507029070873"
+checksum = "29e45aa88b313b568a9306247c02a8032509dc41f89f0967c34171bb512e4c13"
 dependencies = [
- "ez-internal",
- "ez-proc-macro 0.0.2",
+ "eyre",
+ "ez-impl 0.0.3",
+ "ez-proc-macro 0.0.3",
+ "inherent",
 ]
 
 [[package]]
 name = "ez"
-version = "0.0.3-dev"
+version = "0.0.4-dev"
 dependencies = [
  "eyre",
- "ez-impl",
- "ez-proc-macro 0.0.3-dev",
- "inherent",
+ "ez-impl 0.0.4-dev",
+ "ez-proc-macro 0.0.4-dev",
  "tokio",
  "trybuild",
 ]
@@ -140,7 +141,7 @@ dependencies = [
 name = "ez-examples"
 version = "0.0.0"
 dependencies = [
- "ez 0.0.3-dev",
+ "ez 0.0.4-dev",
  "tokio",
 ]
 
@@ -149,13 +150,15 @@ name = "ez-ezio"
 version = "0.1.3-dev"
 dependencies = [
  "eyre",
- "ez 0.0.2",
+ "ez 0.0.3",
  "rand",
 ]
 
 [[package]]
 name = "ez-impl"
-version = "0.0.3-dev"
+version = "0.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f42aca272532bb13a68fda6283fabe9d6fa1589c66f7f3242c348fff0afa9605"
 dependencies = [
  "color-eyre",
  "dotenv",
@@ -170,15 +173,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "ez-internal"
-version = "0.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e41ae28e422d221f558758a39527a529b78a187cf9d6610f010cb9253019fe35"
+name = "ez-impl"
+version = "0.0.4-dev"
 dependencies = [
  "color-eyre",
  "dotenv",
  "eyre",
- "ezio",
  "proc-macro2",
  "quote",
  "syn",
@@ -190,11 +190,11 @@ dependencies = [
 
 [[package]]
 name = "ez-proc-macro"
-version = "0.0.2"
+version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f68d1aad4a7552d74d3b320aa685ad19454078840abef124227cbf56d335ee2e"
+checksum = "c6061af2dd07e2b8e8d89ee41ee540e6b426efcb4dc3c303a351a152116b54e9"
 dependencies = [
- "ez-internal",
+ "ez-impl 0.0.3",
  "proc-macro2",
  "quote",
  "syn",
@@ -202,21 +202,12 @@ dependencies = [
 
 [[package]]
 name = "ez-proc-macro"
-version = "0.0.3-dev"
+version = "0.0.4-dev"
 dependencies = [
- "ez-impl",
+ "ez-impl 0.0.4-dev",
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "ezio"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb50dff20c889eb35cf19c662e19abab40f6dd85aea097fa97c8559b1b1dbca7"
-dependencies = [
- "rand",
 ]
 
 [[package]]

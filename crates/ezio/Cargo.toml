@@ -14,7 +14,7 @@ name = "ezio"
 
 [dependencies]
 eyre = "0.6.6"
-ez = "0.0.2"
+ez = "0.0.3"
 rand = "0.8"
 
 [package.metadata.release]
@@ -27,3 +27,4 @@ pre-release-commit-message = "v{{version}}"
 shared-version = true
 tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
 tag-name = "{{version}}"
+   
