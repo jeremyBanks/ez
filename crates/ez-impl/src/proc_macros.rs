@@ -131,19 +131,33 @@ pub fn try_throws(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
 ) -> Result<TokenStream, eyre::Report> {
-    let throwing = throws(attribute_tokens, function_tokens.clone())?;
+    let has_block = trailing_block(&function_tokens)?.is_some();
+    let source: Function = syn::parse2(function_tokens.clone())?;
+    let args = parameters_to_arguments(&source.sig.inputs);
 
+    let panicking_ident = source.sig.ident;
+    let throwing_ident = format!("try_{}", panicking_ident);
+    let throwing_ident = Ident::new(&throwing_ident, panicking_ident.span());
+
+    let throwing = throws(
+        attribute_tokens,
+        if !has_block {
+            let mut panicking: Function = syn::parse2(function_tokens.clone())?;
+            panicking.block = parse_quote_spanned! { function_tokens.span() => {
+                Self::#panicking_ident(#args)
+            } };
+            panicking.into_token_stream()
+        } else {
+            function_tokens.clone()
+        },
+    )?;
     let mut throwing: Function = syn::parse2(throwing)?;
-    let throwing_ident = format!("try_{}", throwing.sig.ident);
-    let throwing_ident = Ident::new(&throwing_ident, throwing.sig.span());
     throwing.sig.ident = throwing_ident.clone();
 
-    let args = parameters_to_arguments(&throwing.sig.inputs);
-
-    let panicking = panics(if trailing_block(&function_tokens)?.is_none() {
+    let panicking = panics(if !has_block {
         let mut panicking: Function = syn::parse2(function_tokens.clone())?;
         panicking.block = parse_quote_spanned! { function_tokens.span() => {
-                Self::#throwing_ident(#args)?
+            Self::#throwing_ident(#args)?
         } };
         panicking.into_token_stream()
     } else {
