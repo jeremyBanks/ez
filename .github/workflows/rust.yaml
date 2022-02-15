@@ -10,9 +10,9 @@ jobs:
       matrix:
         include:
         - name: maximum versions
-          rust_toolchain: beta
+          rust_toolchain: nightly
         - name: minimum versions
-          rust_toolchain: 1.59.0
+          rust_toolchain: beta
           bootstrap: RUSTC_BOOTSTRAP=1
           cargo_flags: -Z unstable-options -Z minimal-versions
       fail-fast: false
