@@ -44,8 +44,7 @@ impl AsRef<str> for Writer {
 }
 
 impl Write for Writer {
-    #[throws]
-    fn try_write(&mut self, s: &str) {
+    fn write_str(&mut self, s: &str) {
         self.0.push_str(s);
     }
 }
@@ -69,13 +68,11 @@ impl<'a> From<&'a str> for Reader<'a> {
 }
 
 impl<'a> Read for Reader<'a> {
-    #[throws]
-    fn try_read_all(&mut self) -> String {
+    fn read_all(&mut self) -> String {
         self.0.to_owned()
     }
 
-    #[throws]
-    fn try_read_line(&mut self) -> String {
+    fn read_line(&mut self) -> String {
         let (line, rest) = match self.0.find('\n') {
             Some(n) => {
                 let (line, rest) = self.0.split_at(n);
@@ -126,8 +123,8 @@ mod test {
     #[test]
     fn str_write() {
         let mut writer = writer();
-        writer.write("Hello, ");
-        writer.write("world!");
+        writer.write_str("Hello, ");
+        writer.write_str("world!");
         assert_eq!(writer.as_ref(), "Hello, world!");
     }
 

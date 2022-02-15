@@ -10,12 +10,12 @@ pub fn read_line() -> String {
 
 /// Print a string to stdout.
 pub fn print(s: &str) {
-    stdout().write(s)
+    stdout().write_str(s)
 }
 
 /// Print a string to stderr.
 pub fn eprint(s: &str) {
-    stderr().write(s)
+    stderr().write_str(s)
 }
 
 /// Get a handle to stdout.
@@ -47,7 +47,7 @@ pub struct Stdin(std::io::Stdin);
 
 impl Write for Stdout {
     #[throws]
-    fn try_write(&mut self, s: &str) {
+    fn try_write_str(&mut self, s: &str) {
         use std::io::Write;
 
         self.0
@@ -68,7 +68,7 @@ impl std::io::Write for Stdout {
 
 impl Write for Stderr {
     #[throws]
-    fn try_write(&mut self, s: &str) {
+    fn try_write_str(&mut self, s: &str) {
         use std::io::Write;
 
         self.0
@@ -128,12 +128,12 @@ mod tests {
 
     #[test]
     fn stdout_write() {
-        stdout().write("Hello!\n");
+        stdout().write_str("Hello!\n");
     }
 
     #[test]
     fn stderr_write() {
-        stderr().write("Hello!\n");
+        stderr().write_str("Hello!\n");
     }
 
     #[test]

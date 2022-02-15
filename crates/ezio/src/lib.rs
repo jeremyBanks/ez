@@ -39,12 +39,12 @@
 //!     let _ = file::read("path/to/file.txt");
 //!
 //!     // Write to a file
-//!     file::write("path/to/file.txt", "Some text");
+//!     file::write_str("path/to/file.txt", "Some text");
 //!
 //!     // Write multiple things to a file
 //!     let mut w = file::writer("path/to/file.txt");
-//!     w.write("Some text\n");
-//!     w.write("Some more text");
+//!     w.write_str("Some text\n");
+//!     w.write_str("Some more text");
 //!
 //!     // Generates a random u32
 //!     let _ = random::u32();
@@ -87,7 +87,7 @@ mod write {
         ///
         /// Panics if the string cannot be written.
         #[try_throws]
-        fn write(&mut self, s: &str);
+        fn write_str(&mut self, s: &str);
 
         /// Write any data which implements `ToString` to self.
         ///
@@ -97,7 +97,7 @@ mod write {
         where
             Self: Sized,
         {
-            <Self as Write>::write(self, &o.to_string())
+            <Self as Write>::write_str(self, &o.to_string())
         }
     }
 }

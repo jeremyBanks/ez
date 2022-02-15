@@ -50,8 +50,8 @@ pub fn read(path: impl AsRef<Path>) -> String {
 ///
 /// Panics if the file cannot be opened or created.
 #[try_throws]
-pub fn write(path: impl AsRef<Path>, s: &str) {
-    writer(path).try_write(s)?
+pub fn write_str(path: impl AsRef<Path>, s: &str) {
+    writer(path).try_write_str(s)?
 }
 
 /// An object for writing to a file.
@@ -61,8 +61,8 @@ pub struct Writer(std::fs::File);
 pub struct Reader(std::io::BufReader<std::fs::File>);
 
 impl Write for Writer {
-    #[try_throws]
-    fn write(&mut self, s: &str) {
+    #[throws]
+    fn try_write_str(&mut self, s: &str) {
         use std::io::Write;
 
         self.0
@@ -82,12 +82,13 @@ impl std::io::Write for Writer {
 }
 
 impl Writer {
-    pub fn write(&mut self, s: &str) {
-        Write::write(self, s)
+    #[try_throws]
+    pub fn write_str(&mut self, s: &str) {
+        crate::Write::try_write_str(self, s)?;
     }
 
     #[try_throws(std::io::Error)]
-    pub fn write_bytes(&mut self, b: &[u8]) -> usize {
+    pub fn write(&mut self, b: &[u8]) -> usize {
         std::io::Write::write(self, b)?
     }
 
@@ -139,7 +140,7 @@ mod test {
 
     #[test]
     fn write_read() {
-        write("test.out", "line 1\nline 2 \nline 3\n");
+        write_str("test.out", "line 1\nline 2 \nline 3\n");
         assert_eq!(read("test.out"), "line 1\nline 2 \nline 3\n");
 
         let mut reader = reader("test.out");
