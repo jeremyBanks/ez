@@ -29,10 +29,10 @@ publish! {
     prose from "throws.md";
 }
 
-/// (from [`ezio`])
+/// (_[ezio::random](https://docs.rs/ezio/latest/ezio/random)_)
 pub use ::ezio::random;
 
-/// (from [`eyre`]) A dynamic error reporting type.
+/// (_[eyre::Report](https://docs.rs/eyre/latest/eyre/struct.Report.html)_) A dynamic error reporting type.
 ///
 /// ---
 #[doc(inline)]
