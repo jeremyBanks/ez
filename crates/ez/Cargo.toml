@@ -13,8 +13,12 @@ version = "0.0.3-dev"
 eyre = "0.6.6"
 ez-impl = { path = "../ez-impl", version = "=0.0.3-dev"}
 ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.3-dev"}
+ezio = "0.1.2"
+inherent = "1.0.0"
 
 [dev-dependencies]
+eyre = "0.6.6"
+ezio = "0.1.2"
 tokio = { version = "1.16.0", features = ["full"] }
 trybuild = "1.0.56"
 
