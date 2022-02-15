@@ -5,14 +5,14 @@ edition = "2021"
 homepage = "https://github.com/jeremyBanks/ez/tree/HEAD/crates/ezio"
 license = "Apache-2.0"
 name = "ez-ezio"
-version = "0.0.6"
+version = "0.0.7-dev"
 
 [lib]
 name = "ezio"
 
 [dependencies]
 eyre = "0.6.6"
-ez = { package = "ez", version = "=0.0.5", features = [] }
+ez = { package = "ez", version = "=0.0.6", features = [] }
 rand = "0.8"
 
 [package.metadata.release]
