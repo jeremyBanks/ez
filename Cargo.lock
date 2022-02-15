@@ -116,7 +116,7 @@ dependencies = [
 
 [[package]]
 name = "ez"
-version = "0.0.3-dev"
+version = "0.0.3"
 dependencies = [
  "eyre",
  "ez-impl",
@@ -136,7 +136,7 @@ dependencies = [
 
 [[package]]
 name = "ez-impl"
-version = "0.0.3-dev"
+version = "0.0.3"
 dependencies = [
  "color-eyre",
  "dotenv",
@@ -152,7 +152,7 @@ dependencies = [
 
 [[package]]
 name = "ez-proc-macro"
-version = "0.0.3-dev"
+version = "0.0.3"
 dependencies = [
  "ez-impl",
  "proc-macro2",
