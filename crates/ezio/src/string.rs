@@ -1,3 +1,5 @@
+use ez::throws;
+
 use crate::prelude::*;
 
 /// Create a string [`Reader`] from a string.
@@ -42,7 +44,8 @@ impl AsRef<str> for Writer {
 }
 
 impl Write for Writer {
-    fn write(&mut self, s: &str) {
+    #[throws]
+    fn try_write(&mut self, s: &str) {
         self.0.push_str(s);
     }
 }
@@ -66,11 +69,13 @@ impl<'a> From<&'a str> for Reader<'a> {
 }
 
 impl<'a> Read for Reader<'a> {
-    fn read_all(&mut self) -> String {
+    #[throws]
+    fn try_read_all(&mut self) -> String {
         self.0.to_owned()
     }
 
-    fn read_line(&mut self) -> String {
+    #[throws]
+    fn try_read_line(&mut self) -> String {
         let (line, rest) = match self.0.find('\n') {
             Some(n) => {
                 let (line, rest) = self.0.split_at(n);

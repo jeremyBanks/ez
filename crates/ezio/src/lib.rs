@@ -92,6 +92,7 @@ mod write {
         /// Write any data which implements `ToString` to self.
         ///
         /// Panics if the string cannot be written.
+        #[try_throws]
         fn write_any(&mut self, o: impl ToString)
         where
             Self: Sized,

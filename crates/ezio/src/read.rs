@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use ez::try_throws;
+
 /// A trait for objects which can read data.
 ///
 /// Can be turned into an iterator to read all available lines as strings.
@@ -7,6 +9,7 @@ pub trait Read: IntoIterator + std::io::Read {
     /// Read and return all available data from self.
     ///
     /// Panics if there is an error reading.
+    #[try_throws]
     fn read_all(&mut self) -> String;
 
     /// Read and return a single line of data from self.
@@ -16,19 +19,20 @@ pub trait Read: IntoIterator + std::io::Read {
     /// is not known in advance), convert the reader into an iterator instead.
     ///
     /// Does not return the terminal newline character.
+    #[try_throws]
     fn read_line(&mut self) -> String;
 
     /// Read, parse, and return a single line of data from self.
     ///
     /// Panics if there is an error reading or parsing data.
+    #[try_throws]
     fn read_line_any<T: FromStr>(&mut self) -> T
     where
         Self: Sized,
     {
-        match self.read_line().parse() {
-            Ok(t) => t,
-            Err(_) => panic!("Could not parse string"),
-        }
+        self.read_line()
+            .parse()
+            .map_err(|_| ez::Error::msg("Could not parse string"))?
     }
 }
 

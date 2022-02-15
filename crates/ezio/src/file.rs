@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use eyre::WrapErr;
-use ez::try_throws;
+use ez::{throws, try_throws};
 
 use std::path::Path;
 
@@ -11,9 +11,10 @@ use std::path::Path;
 /// `AsRef`) to a `Path`. The file must already exist.
 ///
 /// Panics if there is no file at `path`, or the file cannot be opened.
+#[try_throws]
 pub fn reader(path: impl AsRef<Path>) -> Reader {
     Reader(std::io::BufReader::new(
-        std::fs::File::open(path).expect("Couldn't open file"),
+        std::fs::File::open(path).wrap_err("Couldn't open file")?,
     ))
 }
 
@@ -24,8 +25,9 @@ pub fn reader(path: impl AsRef<Path>) -> Reader {
 /// `AsRef`) to a `Path`. If the file does not exist, it will be created.
 ///
 /// Panics if the file cannot be opened or created.
+#[try_throws]
 pub fn writer(path: impl AsRef<Path>) -> Writer {
-    Writer(std::fs::File::create(path).expect("Couldn't create file"))
+    Writer(std::fs::File::create(path).wrap_err("Couldn't create file")?)
 }
 
 /// Read and return a whole file.
@@ -35,8 +37,9 @@ pub fn writer(path: impl AsRef<Path>) -> Writer {
 /// `AsRef`) to a `Path`. The file must already exist.
 ///
 /// Panics if there is no file at `path`, or the file cannot be opened.
+#[try_throws]
 pub fn read(path: impl AsRef<Path>) -> String {
-    reader(path).read_all()
+    reader(path).try_read_all()?
 }
 
 /// Write a string to a file.
@@ -46,8 +49,9 @@ pub fn read(path: impl AsRef<Path>) -> String {
 /// `AsRef`) to a `Path`. If the file does not exist, it will be created.
 ///
 /// Panics if the file cannot be opened or created.
+#[try_throws]
 pub fn write(path: impl AsRef<Path>, s: &str) {
-    writer(path).write(s)
+    writer(path).try_write(s)?
 }
 
 /// An object for writing to a file.
@@ -93,23 +97,25 @@ impl Writer {
 }
 
 impl Read for Reader {
-    fn read_all(&mut self) -> String {
+    #[throws]
+    fn try_read_all(&mut self) -> String {
         use std::io::Read;
 
         let mut buf = String::new();
         self.0
             .read_to_string(&mut buf)
-            .expect("Failed to read from stdin");
+            .wrap_err("Failed to read from stdin")?;
         buf
     }
 
-    fn read_line(&mut self) -> String {
+    #[throws]
+    fn try_read_line(&mut self) -> String {
         use std::io::BufRead;
 
         let mut buf = String::new();
         self.0
             .read_line(&mut buf)
-            .expect("Failed to read from stdin");
+            .wrap_err("Failed to read from stdin")?;
 
         if !buf.is_empty() {
             buf.truncate(buf.len() - 1);

@@ -1,3 +1,6 @@
+use eyre::Context;
+use ez::throws;
+
 use crate::prelude::*;
 
 /// Read a single line from stdin.
@@ -43,12 +46,13 @@ pub struct Stderr(std::io::Stderr);
 pub struct Stdin(std::io::Stdin);
 
 impl Write for Stdout {
-    fn write(&mut self, s: &str) {
+    #[throws]
+    fn try_write(&mut self, s: &str) {
         use std::io::Write;
 
         self.0
             .write_all(s.as_bytes())
-            .expect("Failed to write to stdout");
+            .wrap_err("Failed to write to stdout")?;
     }
 }
 
@@ -63,12 +67,13 @@ impl std::io::Write for Stdout {
 }
 
 impl Write for Stderr {
-    fn write(&mut self, s: &str) {
+    #[throws]
+    fn try_write(&mut self, s: &str) {
         use std::io::Write;
 
         self.0
             .write_all(s.as_bytes())
-            .expect("Failed to write to stdout");
+            .wrap_err("Failed to write to stdout")?;
     }
 }
 
@@ -83,21 +88,23 @@ impl std::io::Write for Stderr {
 }
 
 impl Read for Stdin {
-    fn read_all(&mut self) -> String {
+    #[throws]
+    fn try_read_all(&mut self) -> String {
         use std::io::Read;
 
         let mut buf = String::new();
         self.0
             .read_to_string(&mut buf)
-            .expect("Failed to read from stdin");
+            .wrap_err("Failed to read from stdin")?;
         buf
     }
 
-    fn read_line(&mut self) -> String {
+    #[throws]
+    fn try_read_line(&mut self) -> String {
         let mut buf = String::new();
         self.0
             .read_line(&mut buf)
-            .expect("Failed to read from stdin");
+            .wrap_err("Failed to read from stdin")?;
 
         if !buf.is_empty() {
             buf.truncate(buf.len() - 1);

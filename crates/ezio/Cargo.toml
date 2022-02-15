@@ -27,4 +27,3 @@ pre-release-commit-message = "v{{version}}"
 shared-version = true
 tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
 tag-name = "{{version}}"
-   
