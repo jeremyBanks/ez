@@ -7,14 +7,14 @@ license = "MIT OR Apache-2.0"
 name = "ez"
 repository = "https://github.com/jeremyBanks/ez"
 rust-version = "1.59.0"
-version = "0.0.5-dev.2"
+version = "0.0.5"
 
 [features]
 
 [dependencies]
 eyre = "0.6.6"
-ez-impl = { path = "../ez-impl", version = "=0.0.5-dev.2"}
-ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.5-dev.2"}
+ez-impl = { path = "../ez-impl", version = "=0.0.5"}
+ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.5"}
 
 [dev-dependencies]
 eyre = "0.6.6"
