@@ -6,6 +6,7 @@ edition = "2021"
 homepage = "https://crates.io/crates/ezio"
 license = "Apache-2.0"
 name = "ez-ezio"
+publish = false
 repository = "https://github.com/jeremyBanks/ez"
 version = "0.1.3-dev"
 
@@ -24,6 +25,7 @@ dev-version = true
 dev-version-ext = "dev"
 post-release-commit-message = "v{{next_version}}"
 pre-release-commit-message = "v{{version}}"
+release = false
 shared-version = true
 tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
 tag-name = "{{version}}"

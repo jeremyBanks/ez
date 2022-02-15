@@ -117,7 +117,9 @@ fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let block = function.block.clone();
     function.block = parse_quote_spanned! {
         function.block.span() => {
-            let _ez_inner = move || -> ::ez::__::Result<_, ::ez::__::ErrorPanicker> #block;
+            #[allow(unused_mut)]
+            let mut _ez_inner;
+            _ez_inner = move || -> ::ez::__::Result<_, ::ez::__::ErrorPanicker> #block;
             _ez_inner().unwrap()
         }
     };
