@@ -29,9 +29,6 @@ publish! {
     prose from "throws.md";
 }
 
-/// (from [`ezio`])
-pub use ::ezio::random;
-
 /// (from [`eyre`]) A dynamic error reporting type.
 ///
 /// ---
