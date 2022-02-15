@@ -17,16 +17,13 @@ pub mod internal {
     //! This is public only due to internal implementation requirements
     pub use {
         crate::{
-            alloc,
             core::{
-                self,
                 option::Option::{self, None, Some},
                 result::Result::{self, Err, Ok},
             },
             dysfunctional::{ErrorPanicker, IteratorDropper},
             main::entry_point,
-            std,
         },
-        eyre, ezio, proc_macro2, quote, syn, tokio, tracing,
+        tokio, tracing,
     };
 }

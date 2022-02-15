@@ -1,5 +1,5 @@
 use {
-    proc_macro2::{Ident, TokenStream},
+    proc_macro2::{Delimiter, Ident, TokenStream, TokenTree},
     quote::{quote_spanned, ToTokens},
     syn::{
         fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Block,
@@ -11,9 +11,24 @@ use {
 // its supported syntax seems to be a superset of other function types.
 type Function = ImplItemMethod;
 
+/// Returns the training block of this token stream, if it has one.
+fn trailing_block(tokens: &TokenStream) -> Result<Option<Block>, eyre::Report> {
+    let mut tokens = Vec::from_iter(tokens.clone());
+
+    if let Some(trailing) = tokens.last_mut() {
+        if let TokenTree::Group(group) = &trailing {
+            if group.delimiter() == Delimiter::Brace {
+                return Ok(Some(syn::parse2(trailing.into_token_stream())?));
+            }
+        }
+    }
+
+    Ok(None)
+}
+
 /// Wrap every return statement in `Ok`, but don't recur into nested
 /// functions/closures/async blocks.
-pub fn wrap_returns_in_ok(block: Block) -> Block {
+fn wrap_returns_in_ok(block: Block) -> Block {
     struct Folder;
     impl Fold for Folder {
         fn fold_expr_return(&mut self, expr: ExprReturn) -> ExprReturn {
@@ -41,7 +56,7 @@ pub fn wrap_returns_in_ok(block: Block) -> Block {
 
 /// If this token stream has a trailing block, import `throw!` and wrap every
 /// return value in `Ok`.
-pub fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
+fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let mut tokens = Vec::from_iter(tokens);
 
     if let Some(last) = tokens.last_mut() {
@@ -52,9 +67,9 @@ pub fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::R
                 *last = parse_quote_spanned! { block.span() => {
                     #[allow(unused_imports)]
                     use ::ez::throw;
-                    let _inner = #block;
+                    let _ez_inner = #block;
                     #[allow(unreachable_code)]
-                    ::ez::__::Ok(_inner)
+                    ::ez::__::Ok(_ez_inner)
                 } };
             }
         };
@@ -64,7 +79,7 @@ pub fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::R
 }
 
 // Wraps a `ReturnType` in a `Result` with the indicated `error_type`.
-pub fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnType {
+fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnType {
     match &return_type {
         ReturnType::Default => {
             parse_quote_spanned! { return_type.span() => -> ::ez::__::Result<(), #error_type> }
@@ -94,7 +109,7 @@ pub fn throws(
     Ok(function.into_token_stream())
 }
 
-pub fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
+fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let function_tokens = tryify_trailing_block(function_tokens)?;
 
     let mut function: Function = syn::parse2(function_tokens.into_iter().collect())?;
@@ -102,8 +117,8 @@ pub fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report>
     let block = function.block.clone();
     function.block = parse_quote_spanned! {
         function.block.span() => {
-            let _inner = move || -> ::ez::__::Result<_, ::ez::__::ErrorPanicker> #block;
-            _inner().unwrap()
+            let _ez_inner = move || -> ::ez::__::Result<_, ::ez::__::ErrorPanicker> #block;
+            _ez_inner().unwrap()
         }
     };
 
@@ -114,18 +129,45 @@ pub fn try_throws(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
 ) -> Result<TokenStream, eyre::Report> {
-    let panicking = panics(function_tokens.clone())?;
     let throwing = throws(attribute_tokens, function_tokens.clone())?;
 
     let mut throwing: Function = syn::parse2(throwing)?;
     let throwing_ident = format!("try_{}", throwing.sig.ident);
-    throwing.sig.ident = Ident::new(&throwing_ident, throwing.sig.span());
+    let throwing_ident = Ident::new(&throwing_ident, throwing.sig.span());
+    throwing.sig.ident = throwing_ident.clone();
+
+    let args = parameters_to_arguments(&throwing.sig.inputs);
+
+    let panicking = panics(if trailing_block(&function_tokens)?.is_none() {
+        let mut panicking: Function = syn::parse2(function_tokens.clone())?;
+        panicking.block = parse_quote_spanned! { function_tokens.span() => {
+                Self::#throwing_ident(#args)?
+        } };
+        panicking.into_token_stream()
+    } else {
+        function_tokens
+    })?;
 
     Ok(parse_quote_spanned! {
-        function_tokens.span() =>
+        panicking.span() =>
         #throwing
         #panicking
     })
+}
+
+fn parameters_to_arguments(
+    parameters: &Punctuated<syn::FnArg, syn::Token![,]>,
+) -> Punctuated<syn::Ident, syn::Token![,]> {
+    parameters
+        .iter()
+        .map(|arg| match arg {
+            syn::FnArg::Receiver(receiver) => syn::Ident::new("self", receiver.span()),
+            syn::FnArg::Typed(arg) => match &*arg.pat {
+                syn::Pat::Ident(pat) => pat.ident.clone(),
+                _ => panic!("unsupported pattern in arguments"),
+            },
+        })
+        .collect()
 }
 
 pub fn main(
@@ -137,7 +179,6 @@ pub fn main(
     };
 
     let function_tokens = tryify_trailing_block(function_tokens)?;
-
     let mut inner_function: ItemFn = syn::parse2(function_tokens)?;
     let mut outer_function = inner_function.clone();
 
