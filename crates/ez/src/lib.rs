@@ -29,8 +29,10 @@ publish! {
     prose from "throws.md";
 }
 
-/// (_[eyre::Report](https://docs.rs/eyre/latest/eyre/struct.Report.html)_) A dynamic error reporting type.
+/// A dynamic error reporting type.
 ///
 /// ---
 #[doc(inline)]
 pub use eyre::Report as Error;
+#[doc(inline)]
+pub use ezio::prelude::{file, random, stderr, stdin, stdio, stdout, string};

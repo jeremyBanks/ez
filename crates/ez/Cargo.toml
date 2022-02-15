@@ -14,6 +14,7 @@ version = "0.0.6-dev"
 [dependencies]
 eyre = "0.6.6"
 ez-impl = { path = "../ez-impl", version = "=0.0.6-dev"}
+ezio = { path = "../ezio", package = "ez-ezio", version = "=0.0.6-dev"}
 ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.6-dev"}
 
 [dev-dependencies]

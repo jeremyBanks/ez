@@ -1,5 +1,9 @@
 # ez-ezio
 
+This is an exercise testing out the macros from the `ez` crate, and potential
+changes for `ezio`. Nobody should use this directly. If this has any good ideas,
+we'll see about upstreaming them instead.
+
 ## Changes from Upstream
 
 - Trait implementations are wrapped with inherent methods, so the traits don't
@@ -9,7 +13,6 @@
 - Most panicking methods have fallible `try_` alternatives added (though in
   most) cases we're just throwing an `eyre::Report` instead of anything more
   specific.
-- This is an exercise testing out the macros from the `ez` crate.
 
 ---
 
