@@ -1,4 +1,7 @@
 use crate::prelude::*;
+use eyre::WrapErr;
+use ez::try_throws;
+
 use std::path::Path;
 
 /// Create an object to read from a file.
@@ -54,12 +57,13 @@ pub struct Writer(std::fs::File);
 pub struct Reader(std::io::BufReader<std::fs::File>);
 
 impl Write for Writer {
+    #[try_throws]
     fn write(&mut self, s: &str) {
         use std::io::Write;
 
         self.0
             .write_all(s.as_bytes())
-            .expect("Failed to write to stdout");
+            .wrap_err("Failed to write to stdout")?;
     }
 }
 
@@ -70,6 +74,21 @@ impl std::io::Write for Writer {
 
     fn flush(&mut self) -> Result<(), std::io::Error> {
         self.0.flush()
+    }
+}
+
+impl Writer {
+    pub fn write(&mut self, s: &str) {
+        Write::write(self, s)
+    }
+
+    #[try_throws(std::io::Error)]
+    pub fn write_bytes(&mut self, b: &[u8]) -> usize {
+        std::io::Write::write(self, b)?
+    }
+
+    pub fn flush(&mut self) -> Result<(), std::io::Error> {
+        std::io::Write::flush(self)
     }
 }
 

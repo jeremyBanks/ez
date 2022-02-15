@@ -77,6 +77,8 @@ mod read;
 
 /// Defines ezio's `Write` trait.
 mod write {
+    use ez::try_throws;
+
     /// A trait for objects which can write out data.
     pub trait Write: std::io::Write {
         /// Write a string to self.
@@ -84,6 +86,7 @@ mod write {
         /// How the string is written will depend on the implementation.
         ///
         /// Panics if the string cannot be written.
+        #[try_throws]
         fn write(&mut self, s: &str);
 
         /// Write any data which implements `ToString` to self.
