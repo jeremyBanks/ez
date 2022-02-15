@@ -14,7 +14,7 @@ name = "ezio"
 
 [dependencies]
 eyre = "0.6.6"
-ez = { version = "0.0.5-dev", features = [] }
+ez = { path = "../ez", version = "=0.0.5-dev.2", features = [] }
 rand = "0.8"
 
 [package.metadata.release]

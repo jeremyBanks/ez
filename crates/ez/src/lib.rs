@@ -34,7 +34,3 @@ publish! {
 /// ---
 #[doc(inline)]
 pub use eyre::Report as Error;
-#[cfg(feature = "ezio")]
-/// (_[ezio::random](https://docs.rs/ezio/latest/ezio/random)_)
-#[doc(inline)]
-pub use ezio::random;
