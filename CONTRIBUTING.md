@@ -21,7 +21,6 @@ graph TD;
     rand(rand)
     eyre(eyre)
     color-eyre(color-eyre)
-    noisy_float(noisy_float)
     num-traits("num-traits<br>&amp; num-derive")
     proc_macro2("proc_macro2<br>&amp; syn &amp; quote")
     tokio(tokio)
@@ -31,9 +30,7 @@ graph TD;
 
   ez ----> ez-main
   ez ----> ez-core
-  ez ---> ezio
-  ez ---> ez-int
-  ez ------> noisy_float
+  ez --> ezio
 
   ez-int -..-> ez-core
   ez-int ----> num-traits
@@ -51,7 +48,7 @@ graph TD;
   color-eyre --> eyre
   ez-proc-macro ---> proc_macro2
   ezio -..-> ez-core
-  noisy_float --> num-traits
+  ezio --> ez-int
   ezio -..-> rand
 ```
 

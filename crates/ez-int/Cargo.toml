@@ -1,19 +1,18 @@
 [package]
-name = "weak"
-publish = false
-version = "0.0.1-dev.0"
-edition = "2021"
 authors = ["Jeremy Banks <_@jeremy.ca>"]
-
-[features]
-default = []
-unstable-float = []
+description = "internal"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+name = "ez-int"
+repository = "https://github.com/jeremyBanks/ez"
+version = "0.0.7-dev"
 
 [dependencies]
 boolinator = "2.4.0"
 bytes = "1.1.0"
 derive_more = "0.99.17"
 eyre = "0.6.6"
+ez = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
 inherent = "1.0.0"
 itertools = "0.10.3"
 macro_rules_attribute = "0.0.2"
@@ -25,3 +24,17 @@ remain = "0.2.2"
 serde = { version = "1.0.136", features = ["derive"] }
 thiserror = "1.0.30"
 thousands = "0.2.0"
+
+[package.metadata.release]
+consolidate-commits = true
+consolidate-pushes = true
+dev-version = true
+dev-version-ext = "dev"
+post-release-commit-message = "v{{next_version}}"
+pre-release-commit-message = "v{{version}}"
+shared-version = true
+tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
+tag-name = "{{version}}"
+
+[package.metadata.docs.rs]
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples=examples"]

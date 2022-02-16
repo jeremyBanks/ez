@@ -1,6 +1,0 @@
-__*cache__
-.*_cache
-.vscode
-*.log
-*.pyc
-/target

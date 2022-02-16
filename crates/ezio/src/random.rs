@@ -1,4 +1,7 @@
-use rand::{random, thread_rng, Rng};
+use {
+    ez_int::Int,
+    rand::{random, thread_rng, Rng},
+};
 
 macro_rules! rand_fns {
     ($name:ident, $max_name:ident) => {
@@ -44,6 +47,25 @@ macro_rules! frand_fns {
             thread_rng().gen_range(0.0..upper_bound)
         }
     };
+}
+
+/// Generate a random integer from a uniform distribution.
+///
+/// Implemented using the [rand](https://docs.rs/rand) crate, see their
+/// docs for more information.
+pub fn int() -> Int {
+    ez_int::int(i128())
+}
+
+/// Generate a random integer between 0 and `upper_bound`
+/// from a uniform distribution.
+///
+/// `upper_bound` is exclusive so will never be returned.
+///
+/// Implemented using the [rand](https://docs.rs/rand) crate, see their
+/// docs for more information.
+pub fn int_bound(upper_bound: Int) -> Int {
+    ez_int::int(thread_rng().gen_range(0..upper_bound.0))
 }
 
 rand_fns!(u8, u8_bound);

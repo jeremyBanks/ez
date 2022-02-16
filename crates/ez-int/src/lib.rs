@@ -1,11 +1,6 @@
-#![feature(doc_cfg, never_type)]
-#![allow(unused)]
 #![doc = include_str!("../README.md")]
 
-use {
-    ::eyre::{bail as throw, ensure, eyre as error, Report, Result as Fallible, WrapErr},
-    num_derive::{FromPrimitive, ToPrimitive},
-};
+use ::eyre::{Report, Result as Fallible};
 
 macro_rules! implicint {
     {
@@ -60,7 +55,7 @@ macro_rules! implicint {
         }
     } => {
         $(#$attributes)*
-        pub struct $Outer($Inner);
+        pub struct $Outer(pub $Inner);
         pub fn $outer(x: impl ::std::fmt::Debug) -> $Outer {
             todo!();
         }
@@ -228,17 +223,7 @@ fn test_implicint() -> Fallible<()> {
     let c: i64 = 2002;
     let d: u128 = 3003;
 
-    let quad = a + int(2) + b + c + d;
+    // let quad = a + int(2) + b + c + d;
 
     Ok(())
 }
-
-#[cfg(any(feature = "unstable-float", doc))]
-#[doc(cfg(feature = "unstable-float"))]
-pub fn float(_: !) -> Float {
-    todo!()
-}
-
-#[cfg(any(feature = "unstable-float", doc))]
-#[doc(cfg(feature = "unstable-float"))]
-pub struct Float(!);

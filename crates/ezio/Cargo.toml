@@ -14,6 +14,7 @@ doc = false
 [dependencies]
 eyre = "0.6.6"
 ez = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
+ez-int = { path = "../ez-int", version = "=0.0.7-dev" }
 rand = "0.8"
 
 [package.metadata.release]

@@ -5,7 +5,6 @@ pub use ::{
     ez_core::{main, throw, throws, try_throws, Error},
     ez_int::{int, Int},
     ezio::{file, random, stdio, string},
-    noisy_float::types::{r64 as float, R64 as Float},
 };
 
 pub mod prelude {
