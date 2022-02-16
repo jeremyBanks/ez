@@ -2,6 +2,29 @@ This project isn't really in a state where it's ready to take contributions.
 
 ## Crate Structure
 
+```mermaid
+graph TD;
+  subgraph public
+    ez
+    ez-int
+    ezio
+  end
+
+  subgraph internal
+    ez-core["ez-core<br>(used as <i>ez</i> for macro compatibility)"]
+    ez-proc-macros
+    ez-macro-rules
+  end
+
+  ezio --> ez-core
+  ez-core --> ez-proc-macros
+  ez-core --> ez-macro-rules
+  ez --> ez-int
+  ez-int --> ez-core
+  ez --> ezio
+  ez --> ez-core
+```
+
 Why is this project split up into several crates? Because that's neccessary in
 order to have full control of the public interface given the use of macros.
 
