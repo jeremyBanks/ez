@@ -5,9 +5,9 @@ This project isn't ready to take contributions.
 ```mermaid
 graph TD;
   subgraph public crates
-    ez((ez))
-    ez-int((ez-int))
-    ezio((ezio))
+    ez(ez)
+    ez-int(ez-int)
+    ezio(ez-ezio)
   end
 
   subgraph internal crates
@@ -30,6 +30,7 @@ graph TD;
 
   ez ----> ez-main
   ez ----> ez-core
+  ez --> ez-int
   ez --> ezio
 
   ez-int -..-> ez-core
@@ -47,8 +48,8 @@ graph TD;
 
   color-eyre --> eyre
   ez-proc-macro ---> proc_macro2
-  ezio -..-> ez-core
   ezio --> ez-int
+  ezio -..-> ez-core
   ezio -..-> rand
 ```
 
