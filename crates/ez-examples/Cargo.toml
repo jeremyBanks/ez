@@ -4,6 +4,10 @@ name = "ez-examples"
 publish = false
 version = "0.0.0"
 
+[[bin]]
+name = "ez-examples"
+doc = false
+
 [dependencies]
 ez = { path = "../ez" }
 
