@@ -4,44 +4,57 @@ This project isn't ready to take contributions.
 
 ```mermaid
 graph TD;
-  subgraph public
-    ez
-    ez-int
-    ezio
+  subgraph public interfaces
+    ez((ez))
+    ez-int((ez-int))
+    ezio((ezio))
   end
 
-  subgraph internal
-    ez-core["ez-core<br>(used as <i>ez</i> for macro compatibility)"]
+  subgraph internal dependencies
+    ez-main
+    ez-core
     ez-macro-rules
     ez-proc-macros
   end
 
-  subgraph external
-    eyre["eyre<br>&amp; color-eyre"]
-    noisy_float
-    num-traits["num-traits<br>&amp; num-derive"]
-    proc_macro2["proc_macro2<br>&amp; syn<br>&amp; quote"]
-    tokio
-    tracing["tracing<br>&amp; tracing-subscriber<br>&amp; tracing-error"]
-    dotenv
+  subgraph direct external dependencies
+    rand(rand)
+    eyre(eyre)
+    color-eyre(color-eyre)
+    noisy_float(noisy_float)
+    num-traits("num-traits<br>&amp; num-derive")
+    proc_macro2("proc_macro2<br>&amp; syn<br>&amp; quote")
+    tokio(tokio)
+    tracing("tracing<br>&amp; tracing-subscriber<br>&amp; tracing-error")
+    dotenv(dotenv)
   end
 
-  ez --> ezio
-  ez --> ez-core
-  ez --> ez-int
-  ez --> noisy_float
-  ez --> tokio
-  tokio --> tracing
-  ez --> tracing
+  ez ----> ez-main
+  ez ---> ezio
+  ez ----> ez-core
+  ez ---> ez-int
+  ez ------> noisy_float
+
+  ez-int --> ez-core
+  ez-int ----> num-traits
+
+  ez-main ----> dotenv
+  ez-main ----> tracing
+  ez-main ----> tokio
+  ez-main ----> color-eyre
+  ez-main --> ez-core
+
+  ez-core --> eyre
   ez-core --> ez-macro-rules
   ez-core --> ez-proc-macros
-  ez-core ----> eyre
-  ez-int --> ez-core
-  ez-int --> num-traits
+
+
   ez-proc-macros --> proc_macro2
   ezio --> ez-core
   noisy_float --> num-traits
-  ez --> dotenv
+  tokio --> tracing
+  ezio --> rand
+  color-eyre --> eyre
 ```
 
 ## Licensing

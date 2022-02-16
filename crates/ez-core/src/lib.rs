@@ -1,3 +1,6 @@
+/// A subset of `ez`, for use internally in implementing other parts of `ez`.
+///
+/// This package must be imported as `ez` for macro compatibility.
 mod errors;
 mod main;
 
