@@ -1,7 +1,7 @@
 use rand::{random, thread_rng, Rng};
 
 macro_rules! rand_fns {
-    ($name: ident, $max_name: ident) => {
+    ($name:ident, $max_name:ident) => {
         /// Generate a random integer from a uniform distribution.
         ///
         /// Implemented using the [rand](https://docs.rs/rand) crate, see their
@@ -24,7 +24,7 @@ macro_rules! rand_fns {
 }
 
 macro_rules! frand_fns {
-    ($name: ident, $max_name: ident) => {
+    ($name:ident, $max_name:ident) => {
         /// Generate a random floating point number from a uniform distribution.
         ///
         /// Implemented using the [rand](https://docs.rs/rand) crate, see their

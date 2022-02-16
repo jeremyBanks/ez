@@ -8,6 +8,7 @@ version = "0.0.0"
 ez = { path = "../ez" }
 
 [dev-dependencies]
+eyre = { version = "*" }
 tokio = { version = "*", features = ["full"] }
 
 [package.metadata.release]

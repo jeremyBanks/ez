@@ -1,13 +1,14 @@
 //! ezio - an easy IO library for Rust
 //!
-//! ezio offers an easy to use IO API for reading and writing to files and stdio.
-//! ezio includes utilities for generating random numbers and other IO-like functionality.
-//! Performance and idiomatic error handling are explicit non-goals, so ezio is
-//! probably not suitable for production use. It is better suited for education,
-//! experimentation, and prototyping.
+//! ezio offers an easy to use IO API for reading and writing to files and
+//! stdio. ezio includes utilities for generating random numbers and other
+//! IO-like functionality. Performance and idiomatic error handling are explicit
+//! non-goals, so ezio is probably not suitable for production use. It is better
+//! suited for education, experimentation, and prototyping.
 //!
-//! ezio wraps the standard library's IO APIs and other well-established crates, and is designed
-//! to interoperate with them, so ezio should be compatible with most upstream libraries.
+//! ezio wraps the standard library's IO APIs and other well-established crates,
+//! and is designed to interoperate with them, so ezio should be compatible with
+//! most upstream libraries.
 //!
 //! The easiest way to use ezio is to include the prelude:
 //!
@@ -15,8 +16,8 @@
 //! use ezio::prelude::*;
 //! ```
 //!
-//! You can then either use reader and writer objects, or read/write free functions,
-//! each are defined in the modules for specific IO kinds.
+//! You can then either use reader and writer objects, or read/write free
+//! functions, each are defined in the modules for specific IO kinds.
 //!
 //! ezio has its own [`Read`] and [`Write`] traits which you can use for generic
 //! programming.
@@ -66,8 +67,7 @@ pub mod prelude {
     };
 }
 
-pub use read::Read;
-pub use write::Write;
+pub use {read::Read, write::Write};
 
 /// Defines ezio's `Read` trait and iterators for reading.
 #[macro_use]

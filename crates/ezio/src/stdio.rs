@@ -1,6 +1,8 @@
-use crate::{Read, Write};
-use eyre::Context;
-use ez::throws;
+use {
+    crate::{Read, Write},
+    eyre::Context,
+    ez::throws,
+};
 
 /// Read a single line from stdin.
 pub fn read_line() -> String {

@@ -122,3 +122,12 @@ pub fn entry_point<
 
     Ok(())
 }
+
+#[derive(Debug, Clone, Copy)]
+/// Drops an iterator without consuming any elements.
+pub struct IteratorDropper;
+impl<Item> FromIterator<Item> for IteratorDropper {
+    fn from_iter<Iterator: IntoIterator<Item = Item>>(_: Iterator) -> Self {
+        IteratorDropper
+    }
+}

@@ -1,12 +1,10 @@
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
 autobins = false
-description = "internal. not stable."
-documentation = "https://docs.rs/ez"
+description = "internal"
 edition = "2021"
-homepage =  "https://crates.io/crates/ez"
 license = "MIT OR Apache-2.0"
-name = "ez-impl"
+name = "ez-core"
 repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.7-dev"
 
@@ -14,9 +12,8 @@ version = "0.0.7-dev"
 color-eyre = "0.6.0"
 dotenv = "0.15.0"
 eyre = "0.6.6"
-proc-macro2 = "1.0.36"
-quote = "1.0.15"
-syn = { version = "1.0.86", features = ["full", "visit", "visit-mut", "fold", "derive", "parsing", "printing", "clone-impls", "extra-traits", "proc-macro"] }
+ez-macro-rules = { path = "../ez-macro-rules", version = "=0.0.7-dev"}
+ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.7-dev"}
 tokio = { version = "1.16.0", features = ["full"] }
 tracing = { version = "0.1.30", features = ["log"] }
 tracing-error = { version = "0.2.0", features = ["traced-error"] }
@@ -30,5 +27,5 @@ dev-version-ext = "dev"
 post-release-commit-message = "v{{next_version}}"
 pre-release-commit-message = "v{{version}}"
 shared-version = true
-tag-message = "https://crates.io/crates/ez/{{version}}"
+tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
 tag-name = "{{version}}"

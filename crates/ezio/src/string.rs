@@ -12,9 +12,9 @@ pub fn writer() -> Writer {
 
 /// A reader for reading from a string (`&str`).
 ///
-/// Implements the `Read` trait, so this is a way to integrate strings into ezio's trait system.
-/// Primarily designed for testing and other experimentation where proper IO is mocked with string
-/// data.
+/// Implements the `Read` trait, so this is a way to integrate strings into
+/// ezio's trait system. Primarily designed for testing and other
+/// experimentation where proper IO is mocked with string data.
 #[derive(Clone, Debug)]
 pub struct Reader<'a>(&'a str);
 
@@ -22,12 +22,12 @@ impl_inherent_read!(Reader<'_>);
 
 /// A writer for writing into a string (`String`).
 ///
-/// Implements the `Write` trait, so this is a way to integrate strings into ezio's trait system.
-/// Primarily designed for testing and other experimentation where proper IO is mocked with string
-/// data.
+/// Implements the `Write` trait, so this is a way to integrate strings into
+/// ezio's trait system. Primarily designed for testing and other
+/// experimentation where proper IO is mocked with string data.
 ///
-/// To access the written string data, convert into a `String` using `into()`, or get a reference
-/// using `as_ref()`.
+/// To access the written string data, convert into a `String` using `into()`,
+/// or get a reference using `as_ref()`.
 #[derive(Clone, Debug)]
 pub struct Writer(String);
 
@@ -79,7 +79,7 @@ impl<'a> Read for Reader<'a> {
             Some(n) => {
                 let (line, rest) = self.0.split_at(n);
                 (line, &rest[1..])
-            }
+            },
             None => (self.0, ""),
         };
 
@@ -110,7 +110,8 @@ impl<'a> IntoIterator for Reader<'a> {
 }
 
 impl<'a> Iterator for StrIterReader<'a> {
-    // We could return &'a str, but we use String for consistency with the rest of the crate.
+    // We could return &'a str, but we use String for consistency with the rest of
+    // the crate.
     type Item = String;
 
     fn next(&mut self) -> Option<String> {

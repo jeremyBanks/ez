@@ -116,147 +116,64 @@ dependencies = [
 
 [[package]]
 name = "ez"
-version = "0.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5172710d3d3f56fa1b38a9b8c12b2feca54fc78362c705c552555e7d41e741d0"
-dependencies = [
- "eyre",
- "ez-impl 0.0.5",
- "ez-proc-macro 0.0.5",
-]
-
-[[package]]
-name = "ez"
-version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a3d69730118f38087e5196ae2c9b3531120be5dc3e4c2e217b328e311acd68a"
-dependencies = [
- "eyre",
- "ez-ezio 0.0.6",
- "ez-impl 0.0.6",
- "ez-proc-macro 0.0.6",
-]
-
-[[package]]
-name = "ez"
 version = "0.0.7-dev"
 dependencies = [
+ "ez-core",
+ "ez-ezio",
+ "ez-int",
+ "noisy_float",
+]
+
+[[package]]
+name = "ez-core"
+version = "0.0.7-dev"
+dependencies = [
+ "color-eyre",
+ "dotenv",
  "eyre",
- "ez-ezio 0.0.7-dev",
- "ez-impl 0.0.7-dev",
- "ez-proc-macro 0.0.7-dev",
+ "ez-macro-rules",
+ "ez-proc-macro",
  "tokio",
+ "tracing",
+ "tracing-error",
+ "tracing-subscriber",
 ]
 
 [[package]]
 name = "ez-examples"
 version = "0.0.0"
 dependencies = [
- "ez 0.0.7-dev",
+ "eyre",
+ "ez",
  "tokio",
 ]
 
 [[package]]
 name = "ez-ezio"
-version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba88a2c907d8340db6134620813b724a5e1afac3489e23912097a5b279c938de"
+version = "0.0.7-dev"
 dependencies = [
  "eyre",
- "ez 0.0.5",
+ "ez-core",
  "rand",
 ]
 
 [[package]]
-name = "ez-ezio"
+name = "ez-int"
 version = "0.0.7-dev"
 dependencies = [
  "eyre",
- "ez 0.0.6",
- "rand",
+ "ez-core",
 ]
 
 [[package]]
-name = "ez-impl"
-version = "0.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4a82935efa69012c54ed281a6f40b27d685f2adbb8efe2bcec386584ecfe8d4"
-dependencies = [
- "color-eyre",
- "dotenv",
- "eyre",
- "proc-macro2",
- "quote",
- "syn",
- "tokio",
- "tracing",
- "tracing-error",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "ez-impl"
-version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8353979009e425fece48ee3478fbc87f89660a47363ec9251505a0cf3260c2dd"
-dependencies = [
- "color-eyre",
- "dotenv",
- "eyre",
- "proc-macro2",
- "quote",
- "syn",
- "tokio",
- "tracing",
- "tracing-error",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "ez-impl"
+name = "ez-macro-rules"
 version = "0.0.7-dev"
-dependencies = [
- "color-eyre",
- "dotenv",
- "eyre",
- "proc-macro2",
- "quote",
- "syn",
- "tokio",
- "tracing",
- "tracing-error",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "ez-proc-macro"
-version = "0.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e61a50db4b4b971bf8e363c5a1c277759df38717fdf836b6c19cbde68112cea"
-dependencies = [
- "ez-impl 0.0.5",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "ez-proc-macro"
-version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f734ebaec1ef099b71da46bab5c3579080ce393144b921107aebbac165fe192d"
-dependencies = [
- "ez-impl 0.0.6",
- "proc-macro2",
- "quote",
- "syn",
-]
 
 [[package]]
 name = "ez-proc-macro"
 version = "0.0.7-dev"
 dependencies = [
- "ez-impl 0.0.7-dev",
+ "eyre",
  "proc-macro2",
  "quote",
  "syn",
@@ -381,12 +298,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "noisy_float"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "978fe6e6ebc0bf53de533cd456ca2d9de13de13856eda1518a285d7705a213af"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "ntapi"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c28774a7fd2fbb4f0babd8237ce554b73af68021b5f695a3cebd6c59bac0980f"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "num-traits"
+version = "0.2.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a64b1ec5cda2586e284722486d802acf1f7dbdc623e2bfc57e65ca1cd099290"
+dependencies = [
+ "autocfg",
 ]
 
 [[package]]

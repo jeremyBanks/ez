@@ -9,17 +9,11 @@ repository = "https://github.com/jeremyBanks/ez"
 rust-version = "1.59.0"
 version = "0.0.7-dev"
 
-[features]
-
 [dependencies]
-eyre = "0.6.6"
-ez-impl = { path = "../ez-impl", version = "=0.0.7-dev"}
-ezio = { path = "../ezio", package = "ez-ezio", version = "=0.0.7-dev"}
-ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.7-dev"}
-
-[dev-dependencies]
-eyre = "0.6.6"
-tokio = { version = "1.16.0", features = ["full"] }
+ez-core = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
+ez-int = { path = "../ez-int", version = "=0.0.7-dev" }
+ezio = { path = "../ezio", package = "ez-ezio", version = "=0.0.7-dev" }
+noisy_float = "0.2.0"
 
 [package.metadata.release]
 consolidate-commits = true

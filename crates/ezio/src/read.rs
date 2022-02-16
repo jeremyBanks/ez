@@ -1,5 +1,4 @@
-use ez::try_throws;
-use std::str::FromStr;
+use {ez::try_throws, std::str::FromStr};
 
 /// A trait for objects which can read data.
 ///
@@ -13,9 +12,10 @@ pub trait Read: IntoIterator + std::io::Read {
 
     /// Read and return a single line of data from self.
     ///
-    /// Panics if there is an error reading. Note that for finite data sources (e.g., files) this
-    /// function will panic when the reader is exhausted. To get all lines (if the number of lines
-    /// is not known in advance), convert the reader into an iterator instead.
+    /// Panics if there is an error reading. Note that for finite data sources
+    /// (e.g., files) this function will panic when the reader is exhausted.
+    /// To get all lines (if the number of lines is not known in advance),
+    /// convert the reader into an iterator instead.
     ///
     /// Does not return the terminal newline character.
     #[try_throws]
@@ -36,7 +36,7 @@ pub trait Read: IntoIterator + std::io::Read {
 }
 
 macro_rules! read_into_iter {
-    ($t: ty) => {
+    ($t:ty) => {
         impl IntoIterator for $t {
             type Item = String;
             type IntoIter = crate::read::ReadIterator<$t>;
@@ -51,7 +51,7 @@ macro_rules! read_into_iter {
 }
 
 macro_rules! impl_inherent_read {
-    ($type: ty) => {
+    ($type:ty) => {
         impl $type {
             #[ez::try_throws]
             pub fn read_all(&mut self) -> String {
@@ -102,7 +102,7 @@ impl<T: std::io::Read> Iterator for ReadIterator<T> {
             _ => {
                 buf.truncate(buf.len() - 1);
                 Some(buf)
-            }
+            },
         }
     }
 }

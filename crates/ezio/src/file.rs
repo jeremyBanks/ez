@@ -1,7 +1,9 @@
-use crate::{Read, Write};
-use eyre::WrapErr;
-use ez::{throws, try_throws};
-use std::path::Path;
+use {
+    crate::{Read, Write},
+    eyre::WrapErr,
+    ez::{throws, try_throws},
+    std::path::Path,
+};
 
 /// Create an object to read from a file.
 ///

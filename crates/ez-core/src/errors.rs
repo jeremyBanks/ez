@@ -1,16 +1,4 @@
-#![doc(hidden)]
-//! Dysfunctional stub implementations of some traits.
-
 use std::{convert::Infallible, panic::panic_any};
-
-#[derive(Debug, Clone, Copy)]
-/// Drops an iterator without consuming any elements.
-pub struct IteratorDropper;
-impl<Item> FromIterator<Item> for IteratorDropper {
-    fn from_iter<Iterator: IntoIterator<Item = Item>>(_: Iterator) -> Self {
-        IteratorDropper
-    }
-}
 
 /// An uninhabited pseudo-Error-type that panics when any other error types to
 /// convert into it.
