@@ -9,15 +9,9 @@ repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.7-dev"
 
 [dependencies]
-color-eyre = "0.6.0"
-dotenv = "0.15.0"
 eyre = "0.6.6"
 ez-macro-rules = { path = "../ez-macro-rules", version = "=0.0.7-dev"}
 ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.7-dev"}
-tokio = { version = "1.16.0", features = ["full"] }
-tracing = { version = "0.1.30", features = ["log"] }
-tracing-error = { version = "0.2.0", features = ["traced-error"] }
-tracing-subscriber = { version = "0.3.7", features = ["env-filter"] }
 
 [package.metadata.release]
 consolidate-commits = true

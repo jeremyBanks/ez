@@ -1,8 +1,8 @@
-/// A subset of `ez`, for use internally in implementing other parts of `ez`.
-///
-/// This package must be imported as `ez` for macro compatibility.
+//! A subset of `ez`, for use internally in implementing other parts of `ez`.
+//!
+//! This package must be imported as `ez` for macro compatibility.
+
 mod errors;
-mod main;
 
 pub use {
     eyre::{Report as Error, WrapErr},
@@ -11,20 +11,8 @@ pub use {
 };
 
 pub mod __ {
-    //! **⚠️ INTERNAL! DO NOT USE!**
-    //!
-    //! This should not be considered part of this crate's public API.
-    //!
-    //! This is public only due to internal implementation requirements
     pub use {
-        crate::{
-            errors::ErrorPanicker,
-            main::{entry_point, IteratorDropper},
-        },
-        std::{
-            option::Option::{self, None, Some},
-            result::Result::{self, Err, Ok},
-        },
-        tokio, tracing,
+        crate::errors::ErrorPanicker,
+        std::result::Result::{self, Err, Ok},
     };
 }

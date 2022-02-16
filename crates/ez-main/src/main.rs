@@ -28,8 +28,8 @@ pub fn entry_point<
     Return: ExitStatus,
 >(
     main_package_name: &str,
-    main: fn(Args, Env) -> Result<Return, eyre::Report>,
-) -> Result<(), eyre::Report> {
+    main: fn(Args, Env) -> Result<Return, ez::Error>,
+) -> Result<(), ez::Error> {
     // SAFETY: Modifying environment variables can be risky business in the
     // presence of other threads. We're relying on the fact that this is the
     // entry point and no other threads should exist yet, and then pass a

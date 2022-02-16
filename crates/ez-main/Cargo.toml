@@ -1,20 +1,21 @@
 [package]
 authors = ["Jeremy Banks <_@jeremy.ca>"]
-autoexamples = false
-description = "A collection of easy-to-use, beginner-friendly utilities for Rust."
+autobins = false
+description = "internal"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-name = "ez"
+name = "ez-main"
 repository = "https://github.com/jeremyBanks/ez"
-rust-version = "1.59.0"
 version = "0.0.7-dev"
 
 [dependencies]
-ez-core = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
-ez-int = { path = "../ez-int", version = "=0.0.7-dev" }
-ez-main = { path = "../ez-main", version = "=0.0.7-dev" }
-ezio = { path = "../ezio", package = "ez-ezio", version = "=0.0.7-dev" }
-noisy_float = "0.2.0"
+color-eyre = "0.6.0"
+dotenv = "0.15.0"
+ez = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
+tokio = { version = "1.16.0", features = ["full"] }
+tracing = { version = "0.1.30", features = ["log"] }
+tracing-error = { version = "0.2.0", features = ["traced-error"] }
+tracing-subscriber = { version = "0.3.7", features = ["env-filter"] }
 
 [package.metadata.release]
 consolidate-commits = true
