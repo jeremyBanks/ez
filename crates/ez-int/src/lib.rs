@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![warn(unused_crate_dependencies)]
 
 use ::eyre::{Report, Result as Fallible};
 

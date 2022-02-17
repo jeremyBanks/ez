@@ -52,6 +52,8 @@
 //! }
 //! ```
 
+#![warn(unused_crate_dependencies)]
+
 /// Re-exports of ezio's modules, traits, and some functions and types.
 ///
 /// Import using:

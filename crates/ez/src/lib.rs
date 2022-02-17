@@ -1,13 +1,14 @@
 #![doc = include_str!("../README.md")]
 
 #[doc(inline)]
-pub use ::{
-    ez_core::{main, throw, throws, try_throws, Error},
-    ez_int::{int, Int},
-    ezio::{file, random, stdio, string},
-};
+pub use ::ez_core::{main, throw, throws, try_throws, Error};
+#[cfg(feature = "ez-int")]
+pub use ::ez_int::{int, Int};
+#[cfg(feature = "ezio")]
+pub use ::ezio::{file, random, stdio, string};
 
 pub mod prelude {
+    #[cfg(feature = "ezio")]
     #[doc(inline)]
     pub use ::ezio::prelude::*;
 }
@@ -19,5 +20,9 @@ pub mod __ {
     //! This should not be considered part of this crate's public API.
     //!
     //! This is public only due to internal implementation requirements
-    pub use ::{ez_core::__::*, ez_main::__::*};
+    #[doc(inline)]
+    pub use ::ez_core::__::*;
+    #[cfg(feature = "ez-main")]
+    #[doc(inline)]
+    pub use ::ez_main::__::*;
 }

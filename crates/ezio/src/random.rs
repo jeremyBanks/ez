@@ -49,7 +49,8 @@ macro_rules! frand_fns {
     };
 }
 
-/// Generate a random integer from a uniform distribution.
+#[cfg(feature = "ez-int")]
+/// Generate a random [`Int`][ez_int:Int] from a uniform distribution.
 ///
 /// Implemented using the [rand](https://docs.rs/rand) crate, see their
 /// docs for more information.
@@ -57,7 +58,8 @@ pub fn int() -> Int {
     ez_int::int(i128())
 }
 
-/// Generate a random integer between 0 and `upper_bound`
+#[cfg(feature = "ez-int")]
+/// Generate a random [`Int`][ez_int:Int] between 0 and `upper_bound`
 /// from a uniform distribution.
 ///
 /// `upper_bound` is exclusive so will never be returned.

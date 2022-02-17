@@ -2,6 +2,8 @@
 //!
 //! This package must be imported as `ez` for macro compatibility.
 
+#![warn(unused_crate_dependencies)]
+
 mod errors;
 
 pub use {

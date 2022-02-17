@@ -4,53 +4,23 @@ This project isn't ready to take contributions.
 
 ```mermaid
 graph TD;
-  subgraph public crates
-    ez(ez)
-    ez-int(ez-int)
-    ezio(ez-ezio)
+  subgraph public[" "]
+    ez
+    ez-int
+    ezio
   end
 
-  subgraph internal crates
-    ez-main
-    ez-core
-    ez-macro-rules
-    ez-proc-macro
-  end
-
-  subgraph external crates
-    rand(rand)
-    eyre(eyre)
-    color-eyre(color-eyre)
-    num-traits("num-traits<br>&amp; num-derive")
-    proc_macro2("proc_macro2<br>&amp; syn &amp; quote")
-    tokio(tokio)
-    tracing("tracing<br>&amp; tracing-subscriber<br>&amp; tracing-error")
-    dotenv(dotenv)
-  end
-
-  ez ----> ez-main
-  ez ----> ez-core
-  ez --> ez-int
-  ez --> ezio
-
-  ez-int -..-> ez-core
-  ez-int ----> num-traits
-
-  ez-main -...-> tracing
-  ez-main -....-> dotenv
-  ez-main ---> tokio
-  ez-main -..-> color-eyre
+  ezio -.-> ez-int
+  ez ---> ez-core
+  ez -.-> ez-int
+  ez -.-> ezio
+  ez -...-> ez-main
+  ezio --> ez-core
+  ez-core --> ez-macro-rules
+  ez-core --> ez-proc-macro
+  ez-int --> ez-core
   ez-main --> ez-core
-
-  ez-core --> eyre
-  ez-core -.-> ez-macro-rules
-  ez-core -.-> ez-proc-macro
-
-  color-eyre --> eyre
-  ez-proc-macro ---> proc_macro2
-  ezio --> ez-int
-  ezio -..-> ez-core
-  ezio -..-> rand
+  ez -...-> ez-batteries
 ```
 
 ## Licensing

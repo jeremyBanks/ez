@@ -1,3 +1,5 @@
+#![warn(unused_crate_dependencies)]
+
 use quote::quote;
 
 mod proc_macros;
