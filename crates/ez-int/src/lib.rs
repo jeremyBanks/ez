@@ -1,6 +1,9 @@
 #![warn(unused_crate_dependencies)]
 
-use ez::{throws, try_throws, __::repeat};
+use {
+    ez::{throws, try_throws, __::repeat},
+    paste::paste,
+};
 
 #[derive(
     ::core::clone::Clone,
@@ -8,15 +11,16 @@ use ez::{throws, try_throws, __::repeat};
     ::core::cmp::Ord,
     ::core::cmp::PartialEq,
     ::core::cmp::PartialOrd,
+    ::core::default::Default,
     ::core::hash::Hash,
     ::core::marker::Copy,
+    ::derive_more::AsMut,
+    ::derive_more::AsRef,
     ::derive_more::DebugCustom,
-    ::derive_more::Display,
     ::derive_more::Deref,
     ::derive_more::DerefMut,
+    ::derive_more::Display,
     ::derive_more::FromStr,
-    ::derive_more::AsRef,
-    ::derive_more::AsMut,
     ::num_derive::FromPrimitive,
     ::num_derive::Num,
     ::num_derive::NumCast,
@@ -42,19 +46,54 @@ impl TryToInt for &str {
 }
 
 repeat! {
+    // where Type: IntoInt
     for Type in [u8, u16, u32, u64, usize, i8, i16, i32, i64, i128, isize] {
         impl ToInt for Type {
             fn to_int(&self) -> Int {
                 Int((*self).try_into().unwrap())
             }
         }
-    }
-}
 
-impl TryToInt for u128 {
-    #[throws]
-    fn try_to_int(&self) -> Int {
-        Int((*self).try_into().unwrap())
+        impl std::ops::Add<Int> for Type {
+            type Output = Int;
+
+            fn add(self, rhs: Int) -> Self::Output {
+                self.to_int() + rhs
+            }
+        }
+
+        impl std::ops::Add<Type> for Int {
+            type Output = Int;
+
+            fn add(self, rhs: Type) -> Self::Output {
+                self + rhs.to_int()
+            }
+        }
+    }
+
+    // where Type: TryIntoInt + !IntoInt
+    for Type in [u128] {
+        impl ToInt for Type {
+            fn to_int(&self) -> Int {
+                Int((*self).try_into().unwrap())
+            }
+        }
+
+        impl std::ops::Add<Int> for Type {
+            type Output = Int;
+
+            fn add(self, rhs: Int) -> Self::Output {
+                self.try_to_int().unwrap() + rhs
+            }
+        }
+
+        impl std::ops::Add<Type> for Int {
+            type Output = Int;
+
+            fn add(self, rhs: Type) -> Self::Output {
+                self + rhs.try_to_int().unwrap()
+            }
+        }
     }
 }
 

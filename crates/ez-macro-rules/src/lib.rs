@@ -21,11 +21,14 @@ macro_rules! throw {
 #[macro_export]
 macro_rules! repeat {
     {
-        $(for $id:ident in [$($replacement:ident),*])+
+        $(
+        $(for $id:ident in [$($replacement:tt),*])+
         {
             $($rest:tt)*
         }
+        )+
     } => {
+        $(
         ::ez::__::repeat_impl!{
             [
                 $([
@@ -35,5 +38,6 @@ macro_rules! repeat {
             ]
             [$($rest)*]
         }
+        )+
     }
 }
