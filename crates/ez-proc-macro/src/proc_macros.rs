@@ -1,10 +1,7 @@
-use std::borrow::{Borrow, BorrowMut};
-
-use proc_macro2::Group;
-
 use {
-    proc_macro2::{Delimiter, Ident, TokenStream, TokenTree},
+    proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree},
     quote::{quote_spanned, ToTokens},
+    std::borrow::{Borrow, BorrowMut},
     syn::{
         fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Block,
         ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, Path, ReturnType, Visibility,
@@ -302,24 +299,18 @@ fn replace_ident_in_token_stream(
     let mut output = TokenStream::new();
     for token in input {
         match token {
-            TokenTree::Ident(ref candidate) => {
+            TokenTree::Ident(ref candidate) =>
                 if *candidate == *ident {
                     output.extend(replacement.clone().into_token_stream());
                 } else {
                     output.extend([token.clone()]);
-                }
-            }
+                },
 
-            TokenTree::Group(group) => {
-                output.extend([
-                    TokenTree::Group(Group::new(group.delimiter(), replace_ident_in_token_stream(
-                        group.stream(),
-                        ident,
-                        replacement.clone(),
-                    )?)),
-                ])
-            },
-            _ => output.extend([token.clone()])
+            TokenTree::Group(group) => output.extend([TokenTree::Group(Group::new(
+                group.delimiter(),
+                replace_ident_in_token_stream(group.stream(), ident, replacement.clone())?,
+            ))]),
+            _ => output.extend([token.clone()]),
         }
     }
     Ok(output)
@@ -349,14 +340,21 @@ pub fn repeat(tokens: TokenStream) -> eyre::Result<TokenStream> {
 
     let mut output: TokenStream = block.into_iter().collect();
 
-    // you idiot what is this loop even doing? total nonsense.
-    for Repetition { ident , replacements } in repetitions {
-        output =
-            replace_ident_in_token_stream(
-                output,
+    for Repetition {
+        ident,
+        replacements,
+    } in repetitions
+    {
+        let base = output.clone();
+        output = TokenStream::new();
+
+        for replacement in replacements {
+            output.extend(replace_ident_in_token_stream(
+                base.clone(),
                 &ident,
-                replacements.into_iter().collect()
-            )?;
+                [replacement.clone()].into_iter().collect(),
+            )?);
+        }
     }
 
     Ok(output.into_iter().collect())

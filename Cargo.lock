@@ -343,6 +343,7 @@ name = "ez-proc-macro"
 version = "0.0.7-dev"
 dependencies = [
  "eyre",
+ "ez-macro-rules",
  "proc-macro2",
  "quote",
  "syn",

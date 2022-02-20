@@ -1,4 +1,3 @@
-
 /// Convert to Int infallibly and exactly.
 pub trait ToInt {
     fn to_int(&self) -> crate::Int;
@@ -65,10 +64,8 @@ impl From<crate::Int> for i128 {
     }
 }
 
-
 impl<T: ToInt> std::convert::From<T> for crate::Int {
     fn from(t: T) -> crate::Int {
         t.to_int()
     }
 }
-

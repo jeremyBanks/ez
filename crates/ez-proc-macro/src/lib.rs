@@ -44,10 +44,11 @@ pub fn main(
 }
 
 #[proc_macro]
-pub fn repeat(tokens: proc_macro:: TokenStream) -> proc_macro::TokenStream {
-    crate::proc_macros::repeat(tokens.into()).unwrap_or_else(|err| {
-        let err = format!("{err:?}");
-        quote! { compile_error!(#err); }
-    })
-    .into()
+pub fn repeat(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    crate::proc_macros::repeat(tokens.into())
+        .unwrap_or_else(|err| {
+            let err = format!("{err:?}");
+            quote! { compile_error!(#err); }
+        })
+        .into()
 }
