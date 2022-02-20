@@ -1,3 +1,7 @@
+use std::borrow::{Borrow, BorrowMut};
+
+use proc_macro2::Group;
+
 use {
     proc_macro2::{Delimiter, Ident, TokenStream, TokenTree},
     quote::{quote_spanned, ToTokens},
@@ -56,12 +60,12 @@ fn wrap_returns_in_ok(block: Block) -> Block {
 
 /// If this token stream has a trailing block, import `throw!` and wrap every
 /// return value in `Ok`.
-fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
+fn tryify_trailing_block(tokens: TokenStream) -> eyre::Result<TokenStream> {
     let mut tokens = Vec::from_iter(tokens);
 
     if let Some(last) = tokens.last_mut() {
-        if let proc_macro2::TokenTree::Group(group) = last {
-            if group.delimiter() == proc_macro2::Delimiter::Brace {
+        if let TokenTree::Group(group) = last {
+            if group.delimiter() == Delimiter::Brace {
                 let block: syn::Block = syn::parse2(last.clone().into_token_stream())?;
                 let block = wrap_returns_in_ok(block);
                 *last = parse_quote_spanned! { block.span() => {
@@ -93,7 +97,7 @@ fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> ReturnT
 pub fn throws(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
-) -> Result<TokenStream, eyre::Report> {
+) -> eyre::Result<TokenStream> {
     let error_type: Path = if attribute_tokens.is_empty() {
         parse_quote_spanned! { attribute_tokens.span() => ::ez::Error }
     } else {
@@ -109,7 +113,7 @@ pub fn throws(
     Ok(function.into_token_stream())
 }
 
-fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
+fn panics(function_tokens: TokenStream) -> eyre::Result<TokenStream> {
     let function_tokens = tryify_trailing_block(function_tokens)?;
 
     let mut function: Function = syn::parse2(function_tokens.into_iter().collect())?;
@@ -130,7 +134,7 @@ fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
 pub fn try_throws(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
-) -> Result<TokenStream, eyre::Report> {
+) -> eyre::Result<TokenStream> {
     let has_block = trailing_block(&function_tokens)?.is_some();
     let source: Function = syn::parse2(function_tokens.clone())?;
     let args = parameters_to_arguments(&source.sig.inputs);
@@ -189,7 +193,7 @@ fn parameters_to_arguments(
 pub fn main(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
-) -> Result<TokenStream, eyre::Report> {
+) -> eyre::Result<TokenStream> {
     if !attribute_tokens.is_empty() {
         eyre::bail!("#[ez::main] macro takes no arguments");
     };
@@ -255,4 +259,105 @@ pub fn main(
     } };
 
     Ok(outer_function.to_token_stream())
+}
+
+impl<T: Borrow<TokenTree> + BorrowMut<TokenTree>> TokenTreeExt for T {}
+trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
+    fn children(&self) -> eyre::Result<Vec<TokenTree>> {
+        if let TokenTree::Group(g) = self.borrow() {
+            Ok(g.stream().into_iter().collect())
+        } else {
+            panic!("expected a group")
+        }
+    }
+
+    fn only(&self) -> eyre::Result<TokenTree> {
+        let children = self.children()?;
+        assert_eq!(children.len(), 1);
+        Ok(children[0].clone())
+    }
+
+    fn map<R>(&self, f: impl Fn(TokenTree) -> R) -> Vec<R> {
+        self.children().unwrap().into_iter().map(f).collect()
+    }
+
+    fn for_each(&self, f: impl FnMut(TokenTree)) {
+        self.children().unwrap().into_iter().for_each(f)
+    }
+
+    fn ident(&self) -> eyre::Result<Ident> {
+        if let TokenTree::Ident(i) = self.borrow() {
+            Ok(i.clone())
+        } else {
+            eyre::bail!("expected an ident, got: {:?}", self.borrow())
+        }
+    }
+}
+
+fn replace_ident_in_token_stream(
+    input: TokenStream,
+    ident: &Ident,
+    replacement: TokenStream,
+) -> eyre::Result<TokenStream> {
+    let mut output = TokenStream::new();
+    for token in input {
+        match token {
+            TokenTree::Ident(ref candidate) => {
+                if *candidate == *ident {
+                    output.extend(replacement.clone().into_token_stream());
+                } else {
+                    output.extend([token.clone()]);
+                }
+            }
+
+            TokenTree::Group(group) => {
+                output.extend([
+                    TokenTree::Group(Group::new(group.delimiter(), replace_ident_in_token_stream(
+                        group.stream(),
+                        ident,
+                        replacement.clone(),
+                    )?)),
+                ])
+            },
+            _ => output.extend([token.clone()])
+        }
+    }
+    Ok(output)
+}
+
+pub fn repeat(tokens: TokenStream) -> eyre::Result<TokenStream> {
+    #[derive(Debug)]
+    struct Repetition {
+        ident: Ident,
+        replacements: Vec<TokenTree>,
+    }
+
+    let input: Vec<TokenTree> = tokens.into_iter().collect();
+    assert_eq!(input.len(), 2);
+
+    let repetitions = input[0].map(|t| {
+        let children = t.children().unwrap();
+        let ident = children[0].only().unwrap().ident().unwrap();
+        let replacements = children[1].children().unwrap();
+        Repetition {
+            ident,
+            replacements,
+        }
+    });
+
+    let block = input[1].children()?;
+
+    let mut output: TokenStream = block.into_iter().collect();
+
+    // you idiot what is this loop even doing? total nonsense.
+    for Repetition { ident , replacements } in repetitions {
+        output =
+            replace_ident_in_token_stream(
+                output,
+                &ident,
+                replacements.into_iter().collect()
+            )?;
+    }
+
+    Ok(output.into_iter().collect())
 }

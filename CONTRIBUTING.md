@@ -14,13 +14,13 @@ graph TD;
   ez ---> ez-core
   ez -.-> ez-int
   ez -.-> ezio
+  ez -...-> ez-batteries
   ez -...-> ez-main
   ezio --> ez-core
   ez-core --> ez-macro-rules
   ez-core --> ez-proc-macro
   ez-int --> ez-core
   ez-main --> ez-core
-  ez -...-> ez-batteries
 ```
 
 ## Licensing

@@ -1,9 +1,64 @@
-#![doc = include_str!("../README.md")]
 #![warn(unused_crate_dependencies)]
 
-use ::eyre::{Report, Result as Fallible};
+#[derive(
+    ::core::clone::Clone,
+    ::core::cmp::Eq,
+    ::core::cmp::Ord,
+    ::core::cmp::PartialEq,
+    ::core::cmp::PartialOrd,
+    ::core::hash::Hash,
+    ::core::marker::Copy,
+    ::derive_more::DebugCustom,
+    ::derive_more::Display,
+    ::derive_more::Deref,
+    ::derive_more::DerefMut,
+    ::derive_more::FromStr,
+    ::derive_more::AsRef,
+    ::derive_more::AsMut,
+    ::num_derive::FromPrimitive,
+    ::num_derive::Num,
+    ::num_derive::NumCast,
+    ::num_derive::NumOps,
+    ::num_derive::One,
+    ::num_derive::ToPrimitive,
+    ::num_derive::Zero,
+    ::serde::Deserialize,
+    ::serde::Serialize,
+)]
+#[repr(transparent)]
+#[serde(transparent)]
+pub struct Int(i128);
 
-macro_rules! implicint {
+mod convert;
+use self::convert::*;
+
+impl TryToInt for &str {
+    #[throws]
+    fn try_to_int(&self) -> Int {
+        Int(self.parse()?)
+    }
+}
+
+impl ToInt for i128 {
+    // TODO: every smaller type
+    fn to_int(&self) -> Int {
+        Int(*self)
+    }
+}
+
+impl TryToInt for u128 {
+    #[throws]
+    fn try_to_int(&self) -> Int {
+        Int((*self).try_into()?)
+    }
+}
+
+#[try_throws]
+pub fn int(i: impl TryToIntApproximate) -> Int {
+    i.try_to_int_approximate()?
+}
+
+/*
     {
         $(#$attributes:tt)*
         pub struct $Outer:ident($Inner:ident);
@@ -152,7 +207,6 @@ macro_rules! implicint {
     };
 }
 
-implicint! {
     #[derive(
         ::core::clone::Clone,
         ::core::cmp::Eq,
@@ -213,18 +267,20 @@ implicint! {
     }
 
     // We should have #[inherent]-style shims for as much as it makes sense.
-}
+ */
 
-#[test]
-fn test_implicint() -> Fallible<()> {
-    use num_traits::Zero;
+use ez::{throws, try_throws, __::repeat};
 
-    let a: i8 = 101;
-    let b: u32 = 1001;
-    let c: i64 = 2002;
-    let d: u128 = 3003;
 
-    // let quad = a + int(2) + b + c + d;
-
-    Ok(())
+repeat!{
+    for Type in [u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize]
+    for Other in [u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize]
+    {
+        let _: Type;
+        // impl From<Type> for crate::Int {
+        //     fn from(t: Type) -> crate::Int {
+        //         crate::Int(t as i128)
+        //     }
+        // }
+    }
 }

@@ -67,7 +67,7 @@ pub fn int() -> Int {
 /// Implemented using the [rand](https://docs.rs/rand) crate, see their
 /// docs for more information.
 pub fn int_bound(upper_bound: Int) -> Int {
-    ez_int::int(thread_rng().gen_range(0..upper_bound.0))
+    ez_int::int(thread_rng().gen_range(0..*upper_bound))
 }
 
 rand_fns!(u8, u8_bound);

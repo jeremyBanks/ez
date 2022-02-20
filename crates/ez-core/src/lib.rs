@@ -17,4 +17,6 @@ pub mod __ {
         crate::errors::ErrorPanicker,
         std::result::Result::{self, Err, Ok},
     };
+    pub use ez_proc_macro::repeat as repeat_impl;
+    pub use ez_macro_rules::repeat;
 }

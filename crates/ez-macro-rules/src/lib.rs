@@ -16,46 +16,24 @@ macro_rules! throw {
         ::ez::__::Err($error)?;
         unreachable!()
     } };
-
-    ($(,)?) => { {
-        ::ez::__::Err(::ez::__::core::default::Default::default())?;
-        unreachable!()
-    } };
 }
 
 #[macro_export]
-macro_rules! publish {
+macro_rules! repeat {
     {
-        pub use $path:path $(as $name:ident)?;
-        $(prose from $doc:literal;)*
-        $(example $example:ident;)*
-        $(failing example $failing:ident;)*
+        $(for $id:ident in [$($replacement:ident),*])+
+        {
+            $($rest:tt)*
+        }
     } => {
-        $(
-        ///
-        #[doc = include_str!(concat!("./", $doc))]
-        ///
-        )*
-        $(
-        ///
-        #[doc = concat!("## Example `", stringify!($example), "`")]
-        ///
-        /// ```rust
-        /// # use ez::__::*;
-        #[doc = include_str!(concat!("../examples/", stringify!($example), ".rs"))]
-        /// ```
-        )*
-        $(
-        ///
-        #[doc = concat!("## Example `", stringify!($failing), "`")]
-        ///
-        /// ```should_panic
-        /// # use ez::__::*;
-        #[doc = include_str!(concat!("../examples/", stringify!($failing), ".rs"))]
-        /// ```
-        )*
-        ///
-        #[doc(inline)]
-        pub use $path $(as $name)?;
+        ::ez::__::repeat_impl!{
+            [
+                $([
+                    $id
+                    {$( $replacement )*}
+                ])*
+            ]
+            [$($rest)*]
+        }
     }
 }
