@@ -6,7 +6,7 @@ use {
     },
 };
 
-pub fn doop(tokens: TokenStream) -> eyre::Result<TokenStream> {
+pub fn doop(tokens: TokenStream) -> Result<TokenStream, syn::Error> {
     #[derive(Debug)]
     struct Repetition {
         ident: Ident,
@@ -16,15 +16,19 @@ pub fn doop(tokens: TokenStream) -> eyre::Result<TokenStream> {
     let input: Vec<TokenTree> = tokens.into_iter().collect();
     assert_eq!(input.len(), 2);
 
-    let repetitions = input[0].map(|t| {
-        let children = t.children().unwrap();
-        let ident = children[0].only().unwrap().ident().unwrap();
-        let replacements = children[1].children().unwrap();
-        Repetition {
-            ident,
-            replacements,
-        }
-    });
+    let repetitions: Result<Vec<Repetition>, syn::Error> = input[0]
+        .map(|t| {
+            let children = t.children()?;
+            let ident = children[0].only()?.ident()?;
+            let replacements = children[1].children()?;
+            Ok(Repetition {
+                ident,
+                replacements,
+            })
+        })
+        .into_iter()
+        .collect();
+    let repetitions = repetitions?;
 
     let block = input[1].children()?;
 
@@ -54,7 +58,7 @@ fn replace_ident_in_token_stream(
     input: TokenStream,
     ident: &Ident,
     replacement: TokenStream,
-) -> eyre::Result<TokenStream> {
+) -> Result<TokenStream, syn::Error> {
     let mut output = TokenStream::new();
     for token in input {
         match token {

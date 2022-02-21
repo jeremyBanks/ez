@@ -1,11 +1,6 @@
-use {
-    proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree},
-    quote::{quote_spanned, ToTokens},
+use ::{
+    proc_macro2::{Ident, TokenTree},
     std::borrow::{Borrow, BorrowMut},
-    syn::{
-        fold::Fold, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, Block,
-        ExprAsync, ExprClosure, ExprReturn, ImplItemMethod, ItemFn, Path, ReturnType, Visibility,
-    },
 };
 
 impl<T: Borrow<TokenTree> + BorrowMut<TokenTree>> TokenTreeExt for T {}
@@ -18,15 +13,15 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
         matches!(self.borrow(), TokenTree::Ident(_))
     }
 
-    fn children(&self) -> eyre::Result<Vec<TokenTree>> {
+    fn children(&self) -> Result<Vec<TokenTree>, syn::Error> {
         if let TokenTree::Group(g) = self.borrow() {
             Ok(g.stream().into_iter().collect())
         } else {
-            panic!("expected a group")
+            Err(syn::Error::new(self.borrow().span(), "expected a group"))
         }
     }
 
-    fn only(&self) -> eyre::Result<TokenTree> {
+    fn only(&self) -> Result<TokenTree, syn::Error> {
         let children = self.children()?;
         assert_eq!(children.len(), 1);
         Ok(children[0].clone())
@@ -40,11 +35,11 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
         self.children().unwrap().into_iter().for_each(f)
     }
 
-    fn ident(&self) -> eyre::Result<Ident> {
+    fn ident(&self) -> Result<Ident, syn::Error> {
         if let TokenTree::Ident(i) = self.borrow() {
             Ok(i.clone())
         } else {
-            eyre::bail!("expected an ident, got: {:?}", self.borrow())
+            Err(syn::Error::new(self.borrow().span(), "expected an ident"))
         }
     }
 }
