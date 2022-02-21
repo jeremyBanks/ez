@@ -23,11 +23,11 @@ println!("{}", x[index]);
 ```
 
 This was motivated by my experience working on [Advent of Code 2021][AOC-2021]
-problems both in Rust and in Python. I found myself repeating a lot of
-boilerplate in Rust for things that often aren't worth worrying about when
-trying to write ephemeral code, such as for competitive programming. A few weeks
-later [Nick Cameron announced `ezio`][EZIO], a crate with similar goals for file
-IO, which was encouraging.
+problems both in Rust and in Python. I found myself dooping a lot of boilerplate
+in Rust for things that often aren't worth worrying about when trying to write
+ephemeral code, such as for competitive programming. A few weeks later
+[Nick Cameron announced `ezio`][EZIO], a crate with similar goals for file IO,
+which was encouraging.
 
 [`Int`] isn't an unbounded "big" integer like in Python. However, it is an
 [`i128`], so it can fit a value from any of the widely-used integer sizes (if we

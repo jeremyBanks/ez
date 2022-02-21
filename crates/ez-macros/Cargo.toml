@@ -4,12 +4,15 @@ autobins = false
 description = "internal"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-name = "ez-macro-rules"
+name = "ez-macros"
 repository = "https://github.com/jeremyBanks/ez"
 version = "0.0.7-dev"
 
 [lib]
 doc = false
+
+[dependencies]
+ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.7-dev"}
 
 [package.metadata.release]
 consolidate-commits = true

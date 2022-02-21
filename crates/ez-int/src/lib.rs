@@ -1,7 +1,8 @@
 #![warn(unused_crate_dependencies)]
 
 use {
-    ez::{throws, try_throws, __::repeat},
+    doop::doop,
+    ez::{throws, try_throws},
     paste::paste,
 };
 
@@ -45,11 +46,20 @@ impl TryToInt for &str {
     }
 }
 
-repeat! {
-    for Type in [u8, u16, u32, u64, usize, i8, i16, i32, i64, i128, isize] {
+// XXX: where possible maybe implement for Result and/or Option?
+
+doop! {
+    let TrueFromTypes = [u8, u16, u32, u64, usize, i8, i16, i32, i64, i128, isize];
+    let PseudoFromTypes = [usize, isize];
+    let BinaryOps = [ (Add, add), (Sub, sub), (Mul, mul), (Div, div) ];
+    let FromTypes = TrueFromTypes, PseudoFromTypes;
+
+    for Type in FromTypes
+    for (Trait, Method) in BinaryOps
+    {
         impl ToInt for Type {
             fn to_int(&self) -> Int {
-                Int((*self).try_into().unwrap())
+                Int((*self).)
             }
         }
 
@@ -69,8 +79,9 @@ repeat! {
             }
         }
     }
+}
 
-    // where Type: TryIntoInt + !IntoInt
+doop! {
     for Type in [u128] {
         impl ToInt for Type {
             fn to_int(&self) -> Int {

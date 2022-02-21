@@ -20,7 +20,7 @@ quote = "1.0.15"
 syn = { version = "1.0.86", features = ["full", "visit", "visit-mut", "fold", "derive", "parsing", "printing", "clone-impls", "extra-traits", "proc-macro"] }
 
 [dev-dependencies]
-ez-macro-rules = { path = "../ez-macro-rules", version = "=0.0.7-dev" }
+ez-macros = { path = "../ez-macros", version = "=0.0.7-dev" }
 
 [package.metadata.release]
 consolidate-commits = true

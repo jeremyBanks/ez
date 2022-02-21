@@ -13,8 +13,7 @@ doc = false
 
 [dependencies]
 eyre = "0.6.6"
-ez-macro-rules = { path = "../ez-macro-rules", version = "=0.0.7-dev"}
-ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.7-dev"}
+ez-macros = { path = "../ez-macros", version = "=0.0.7-dev"}
 
 [package.metadata.release]
 consolidate-commits = true

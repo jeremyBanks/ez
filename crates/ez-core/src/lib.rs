@@ -8,15 +8,15 @@ mod errors;
 
 pub use {
     eyre::{Report as Error, WrapErr},
-    ez_macro_rules::throw,
-    ez_proc_macro::{main, throws, try_throws},
+    ez_macros::{
+        proc::{main, throws, try_throws},
+        throw,
+    },
 };
 
 pub mod __ {
     pub use {
         crate::errors::ErrorPanicker,
-        ez_macro_rules::repeat,
-        ez_proc_macro::repeat as repeat_impl,
         std::result::Result::{self, Err, Ok},
     };
 }

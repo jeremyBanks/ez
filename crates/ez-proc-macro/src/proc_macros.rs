@@ -260,6 +260,14 @@ pub fn main(
 
 impl<T: Borrow<TokenTree> + BorrowMut<TokenTree>> TokenTreeExt for T {}
 trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
+    fn is_group(&self) -> bool {
+        matches!(self.borrow(), TokenTree::Group(_))
+    }
+
+    fn is_ident(&self) -> bool {
+        matches!(self.borrow(), TokenTree::Ident(_))
+    }
+
     fn children(&self) -> eyre::Result<Vec<TokenTree>> {
         if let TokenTree::Group(g) = self.borrow() {
             Ok(g.stream().into_iter().collect())
@@ -291,7 +299,15 @@ trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
     }
 }
 
-pub fn repeat(tokens: TokenStream) -> eyre::Result<TokenStream> {
+/*
+
+
+*/
+
+// TODO: also export as macro attribute?
+//
+//
+pub fn doop(tokens: TokenStream) -> eyre::Result<TokenStream> {
     #[derive(Debug)]
     struct Repetition {
         ident: Ident,
@@ -359,4 +375,3 @@ fn replace_ident_in_token_stream(
     }
     Ok(output)
 }
-
