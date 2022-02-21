@@ -23,12 +23,12 @@ macro_rules! throw {
 #[macro_export]
 macro_rules! doop {
     {
-        $(let $let_binding_name:ident = $($let_binding_refs:ident $(+)?)* $([$($let_binding_replacements:tt),*])?;)*
+        $( let $let_binding_name:ident = $( $let_binding_refs:ident $(+)? )* $( [ $( $let_binding_replacements:tt ),* ] )?; )*
 
         $(
-            $(for $loop_binding_name:tt in $($loop_binding_refs:ident $(+)?)* $([$($loop_binding_replacements:tt),*])?)+
+            $( for $loop_binding_name:tt in $( $loop_binding_refs:ident $(+)? )* $( [ $( $loop_binding_replacements:tt ),* ] )? )+
             {
-                $($body:tt)*
+                $( $body:tt )*
             }
         )+
     } => {

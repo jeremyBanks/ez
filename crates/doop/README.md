@@ -1,5 +1,5 @@
 `doop`—spelled like "loop" and pronounced like "dupe"—is a macro for local code
-duplication in Rust.
+duplication in Rust, using a loop-style syntax.
 
 This type of code duplication should usually be avoided in favour of more
 conventional language features like traits (or even functions). However for
@@ -30,7 +30,7 @@ doop! {
     }
 
     // `for` can refer to aliases and/or bracketed token trees, just like `let`.
-    for Type in Types [u128, i128]
+    for Type in Types + [u128, i128]
     for U in [!, -] {
         let n: Type = 2;
         dbg!(U n);

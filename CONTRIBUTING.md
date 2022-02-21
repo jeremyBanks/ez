@@ -15,7 +15,7 @@ graph TD;
   ez ---> ez-core
   ez -.-> ez-int
   ez -.-> ezio
-  ez -......-> ez-batteries
+  ez -..-> ez-batteries
   ezio --> ez-core
   ez-core --> ez-macros
   ez -....-> ez-main
@@ -24,6 +24,7 @@ graph TD;
   ez-main --> ez-core
   ez-macros --> ez-proc-macro
   doop --> ez-macros
+  ez-batteries --> doop
 ```
 
 ## Licensing

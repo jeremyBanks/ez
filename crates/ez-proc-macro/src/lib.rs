@@ -2,14 +2,17 @@
 
 use quote::quote;
 
-mod proc_macros;
+mod common;
+mod doop;
+mod errors;
+mod main;
 
 #[proc_macro_attribute]
 pub fn throws(
     attribute_tokens: proc_macro::TokenStream,
     function_tokens: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    crate::proc_macros::throws(attribute_tokens.into(), function_tokens.into())
+    crate::errors::throws(attribute_tokens.into(), function_tokens.into())
         .unwrap_or_else(|err| {
             let err = format!("{err:?}");
             quote! { compile_error!(#err); }
@@ -22,7 +25,7 @@ pub fn try_throws(
     attribute_tokens: proc_macro::TokenStream,
     function_tokens: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    crate::proc_macros::try_throws(attribute_tokens.into(), function_tokens.into())
+    crate::errors::try_throws(attribute_tokens.into(), function_tokens.into())
         .unwrap_or_else(|err| {
             let err = format!("{err:?}");
             quote! { compile_error!(#err); }
@@ -35,7 +38,7 @@ pub fn main(
     attribute_tokens: proc_macro::TokenStream,
     function_tokens: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    crate::proc_macros::main(attribute_tokens.into(), function_tokens.into())
+    crate::main::main(attribute_tokens.into(), function_tokens.into())
         .unwrap_or_else(|err| {
             let err = format!("{err:?}");
             quote! { compile_error!(#err); }
@@ -45,7 +48,7 @@ pub fn main(
 
 #[proc_macro]
 pub fn doop(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    crate::proc_macros::doop(tokens.into())
+    crate::doop::doop(tokens.into())
         .unwrap_or_else(|err| {
             let err = format!("{err:?}");
             quote! { compile_error!(#err); }
