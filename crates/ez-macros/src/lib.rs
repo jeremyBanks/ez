@@ -23,33 +23,23 @@ macro_rules! throw {
 #[macro_export]
 macro_rules! doop {
     {
-        $(let $named_binding:ident =  $($renamed_bindings:ident $(+)?)* $([$($named_replacements:tt),*])?;)*
+        $(let $let_binding_name:ident = $($let_binding_refs:ident $(+)?)* $([$($let_binding_replacements:tt),*])?;)*
 
         $(
-            $(for $loop_bindings:tt in $($named_loop:ident $(+)?)* $([$($replacements:tt),*])?)+
+            $(for $loop_binding_name:tt in $($loop_binding_refs:ident $(+)?)* $([$($loop_binding_replacements:tt),*])?)+
             {
-                $($rest:tt)*
+                $($body:tt)*
             }
         )+
     } => {
         $crate::proc::doop!{
-            [
-                $([
-                    [ $named_binding ]
-                    [ $($renamed_bindings)* ]
-                    [ $($( $named_replacements )*)? ]
-                ])*
-            ]
-            $([
-                [
-                    $([
-                        [ $loop_bindings ]
-                        [ $( $named_loop )* ]
-                        [ $($( $replacements )*)? ]
-                    ])*
-                ]
-                [$($rest)*]
-            ])+
+            (doop_args (let_bindings $( (let_binding (let_binding_name $let_binding_name)
+                                                     (let_binding_refs $( $let_binding_refs )*)
+                                                     (let_binding_replacements $( $( $let_binding_replacements )* )? )) )* ))
+                       (loops $( (loop (loop_bindings $( (loop_binding (loop_binding_name $loop_binding_name)
+                                                                       (loop_binding_refs $( $loop_binding_refs )* )
+                                                                       (loop_binding_replacements $( $( $loop_binding_replacements )* )? )) )* )
+                                       (body $($body)* ) ) )* )
         }
     }
 }

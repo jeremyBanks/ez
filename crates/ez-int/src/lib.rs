@@ -58,7 +58,7 @@ doop! {
     {
         impl ToInt for Type {
             fn to_int(&self) -> Int {
-                Int((*self).)
+                todo!()
             }
         }
 
