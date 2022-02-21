@@ -291,31 +291,6 @@ trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
     }
 }
 
-fn replace_ident_in_token_stream(
-    input: TokenStream,
-    ident: &Ident,
-    replacement: TokenStream,
-) -> eyre::Result<TokenStream> {
-    let mut output = TokenStream::new();
-    for token in input {
-        match token {
-            TokenTree::Ident(ref candidate) =>
-                if *candidate == *ident {
-                    output.extend(replacement.clone().into_token_stream());
-                } else {
-                    output.extend([token.clone()]);
-                },
-
-            TokenTree::Group(group) => output.extend([TokenTree::Group(Group::new(
-                group.delimiter(),
-                replace_ident_in_token_stream(group.stream(), ident, replacement.clone())?,
-            ))]),
-            _ => output.extend([token.clone()]),
-        }
-    }
-    Ok(output)
-}
-
 pub fn repeat(tokens: TokenStream) -> eyre::Result<TokenStream> {
     #[derive(Debug)]
     struct Repetition {
@@ -359,3 +334,29 @@ pub fn repeat(tokens: TokenStream) -> eyre::Result<TokenStream> {
 
     Ok(output.into_iter().collect())
 }
+
+fn replace_ident_in_token_stream(
+    input: TokenStream,
+    ident: &Ident,
+    replacement: TokenStream,
+) -> eyre::Result<TokenStream> {
+    let mut output = TokenStream::new();
+    for token in input {
+        match token {
+            TokenTree::Ident(ref candidate) =>
+                if *candidate == *ident {
+                    output.extend(replacement.clone().into_token_stream());
+                } else {
+                    output.extend([token.clone()]);
+                },
+
+            TokenTree::Group(group) => output.extend([TokenTree::Group(Group::new(
+                group.delimiter(),
+                replace_ident_in_token_stream(group.stream(), ident, replacement.clone())?,
+            ))]),
+            _ => output.extend([token.clone()]),
+        }
+    }
+    Ok(output)
+}
+

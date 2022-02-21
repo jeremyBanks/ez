@@ -9,6 +9,7 @@ version = "0.0.7-dev"
 
 [dependencies]
 derive_more = "0.99.17"
+duplicate = "0.4.0"
 ez = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
 num-derive = "0.3.3"
 num-traits = "0.2.14"

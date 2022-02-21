@@ -46,7 +46,6 @@ impl TryToInt for &str {
 }
 
 repeat! {
-    // where Type: IntoInt
     for Type in [u8, u16, u32, u64, usize, i8, i16, i32, i64, i128, isize] {
         impl ToInt for Type {
             fn to_int(&self) -> Int {

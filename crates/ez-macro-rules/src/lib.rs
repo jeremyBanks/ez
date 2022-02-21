@@ -19,7 +19,7 @@ macro_rules! throw {
 }
 
 #[macro_export]
-macro_rules! repeat {
+macro_rules! duplicate {
     {
         $(
         $(for $id:ident in [$($replacement:tt),*])+
