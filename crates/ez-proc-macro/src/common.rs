@@ -5,41 +5,40 @@ use ::{
 
 impl<T: Borrow<TokenTree> + BorrowMut<TokenTree>> TokenTreeExt for T {}
 pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
-    fn is_group(&self) -> bool {
-        matches!(self.borrow(), TokenTree::Group(_))
-    }
-
-    fn is_ident(&self) -> bool {
-        matches!(self.borrow(), TokenTree::Ident(_))
-    }
-
-    fn children(&self) -> Result<Vec<TokenTree>, syn::Error> {
+    fn tagged(&self, tag: &str) -> Result<Vec<TokenTree>, syn::Error> {
         if let TokenTree::Group(g) = self.borrow() {
-            Ok(g.stream().into_iter().collect())
+            let mut tokens = g.stream().into_iter();
+            let actual_tag = tokens
+                .next()
+                .ok_or_else(|| {
+                    let message = format!("expected ({} ...)", tag);
+                    syn::Error::new(self.borrow().span(), message)
+                })?
+                .ident()
+                .map_err(|_err| {
+                    let message = format!("expected ({} ...)", tag);
+                    syn::Error::new(self.borrow().span(), message)
+                })?;
+            if actual_tag != tag {
+                let message = format!("expected ({} ...) but found ({} ...)", tag, actual_tag);
+                return Err(syn::Error::new(self.borrow().span(), message))?;
+            }
+
+            Ok(tokens.collect())
         } else {
-            Err(syn::Error::new(self.borrow().span(), "expected a group"))
+            let message = format!("expected ({} ...)", tag);
+            Err(syn::Error::new(self.borrow().span(), &message))
         }
-    }
-
-    fn only(&self) -> Result<TokenTree, syn::Error> {
-        let children = self.children()?;
-        assert_eq!(children.len(), 1);
-        Ok(children[0].clone())
-    }
-
-    fn map<R>(&self, f: impl Fn(TokenTree) -> R) -> Vec<R> {
-        self.children().unwrap().into_iter().map(f).collect()
-    }
-
-    fn for_each(&self, f: impl FnMut(TokenTree)) {
-        self.children().unwrap().into_iter().for_each(f)
     }
 
     fn ident(&self) -> Result<Ident, syn::Error> {
         if let TokenTree::Ident(i) = self.borrow() {
             Ok(i.clone())
         } else {
-            Err(syn::Error::new(self.borrow().span(), "expected an ident"))
+            Err(syn::Error::new(
+                self.borrow().span(),
+                "expected an identifier",
+            ))
         }
     }
 }

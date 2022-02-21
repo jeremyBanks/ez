@@ -1,5 +1,6 @@
 use {
     crate::common::TokenTreeExt,
+    std::fmt::Result,
     ::{
         proc_macro2::{Group, Ident, TokenStream, TokenTree},
         quote::ToTokens,
@@ -7,32 +8,68 @@ use {
 };
 
 pub fn doop(tokens: TokenStream) -> Result<TokenStream, syn::Error> {
+    let tokens: Vec<TokenTree> = tokens.into_iter().collect();
+
     #[derive(Debug)]
     struct Repetition {
         ident: Ident,
         replacements: Vec<TokenTree>,
     }
 
-    let input: Vec<TokenTree> = tokens.into_iter().collect();
-    assert_eq!(input.len(), 2);
+    let doop_args = tokens[0].tagged("doop_args")?;
 
-    let repetitions: Result<Vec<Repetition>, syn::Error> = input[0]
-        .map(|t| {
-            let children = t.children()?;
-            let ident = children[0].only()?.ident()?;
-            let replacements = children[1].children()?;
-            Ok(Repetition {
-                ident,
-                replacements,
-            })
-        })
+    let let_bindings = doop_args[0].tagged("let_bindings")?;
+    let let_bindings = let_bindings
         .into_iter()
-        .collect();
-    let repetitions = repetitions?;
+        .map(|input| {
+            let let_binding = input.tagged("let_binding")?;
 
-    let block = input[1].children()?;
+            let name = let_binding[0].tagged("let_binding_name")?;
+            let name = name.ident()?;
 
-    let mut output: TokenStream = block.into_iter().collect();
+            let refs = let_binding[1]
+                .tagged("let_binding_refs")?
+                .into_iter()
+                .map(|r| r.ident()?)
+                .collect::<Result<_, _>>()?;
+
+            let replacements = let_binding[2].tagged("let_binding_replacements")?;
+
+            Ok((name, refs, replacements))
+        })
+        .collect::<Result<_, _>>()?;
+
+    let loops = doop_args[1].tagged("loops")?;
+    let loops = loops
+        .into_iter()
+        .map(|input| {
+            let loop_ = input.tagged("loop")?;
+
+            let loop_bindings = loop_[0].tagged("loop_bindings")?;
+            let loop_bindings = loop_bindings
+                .into_iter()
+                .map(|input| {
+                    let loop_binding = input.tagged("loop_binding")?;
+
+                    let name = loop_binding[0].tagged("loop_binding_name")?;
+
+                    let refs = loop_binding[1]
+                        .tagged("loop_binding_refs")?
+                        .into_iter()
+                        .map(|r| r.ident()?)
+                        .collect::<Result<_, _>>()?;
+
+                    let replacements = loop_binding[2].tagged("loop_binding_replacements")?;
+
+                    Ok((name, refs, replacements))
+                })
+                .collect::<Result<_, _>>()?;
+
+            let body = loop_[1].tagged("body")?;
+
+            Ok((loop_bindings, body))
+        })
+        .collect::<Result<_, _>>()?;
 
     for Repetition {
         ident,
