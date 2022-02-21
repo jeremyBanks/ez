@@ -258,6 +258,7 @@ version = "0.0.7-dev"
 dependencies = [
  "bytes",
  "crossbeam",
+ "doop",
  "dpc-pariter",
  "euclid",
  "indexmap",
@@ -336,6 +337,7 @@ name = "ez-proc-macro"
 version = "0.0.7-dev"
 dependencies = [
  "ez-macros",
+ "indexmap",
  "proc-macro2",
  "quote",
  "syn",

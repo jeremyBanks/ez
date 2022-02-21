@@ -20,6 +20,7 @@ pub mod batteries {
         ::{
             bytes::{Buf, BufMut, Bytes, BytesMut},
             crossbeam::{self, thread::scope as thread_scope},
+            doop::doop,
             dpc_pariter::IteratorExt,
             euclid,
             indexmap::{IndexMap as OrderedMap, IndexSet as OrderedSet},
