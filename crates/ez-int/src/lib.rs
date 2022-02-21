@@ -3,7 +3,6 @@
 use {
     doop::doop,
     ez::{throws, try_throws},
-    paste::paste,
 };
 
 #[derive(
@@ -52,9 +51,9 @@ doop! {
     let TrueFromTypes = [u8, u16, u32, u64, usize, i8, i16, i32, i64, i128, isize];
     let PseudoFromTypes = [usize, isize];
     let BinaryOps = [ (Add, add), (Sub, sub), (Mul, mul), (Div, div) ];
-    let FromTypes = TrueFromTypes, PseudoFromTypes;
+    let FromTypes = TrueFromTypes + PseudoFromTypes + [u128];
 
-    for Type in FromTypes
+    for Type in FromTypes + [u128]
     for (Trait, Method) in BinaryOps
     {
         impl ToInt for Type {

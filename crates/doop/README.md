@@ -18,8 +18,8 @@ doop! {
     let UnsignedTypes = [u8, u16, u32];
     let SignedTypes = [i8, i16, i32];
     let BinaryOps = [+, -, /];
-    // ...and/or we can reference existing aliases, outside of brackets:
-    let Types = SignedTypes, UnsignedTypes [usize, isize];
+    // ...and/or we can reference existing aliases:
+    let Types = SignedTypes + UnsignedTypes;
 
     // Each piece of code to be duplicated is indicated with a `for`-loop-style
     // block, optionally with multiple `for` statements for nested repetitions.

@@ -23,10 +23,10 @@ macro_rules! throw {
 #[macro_export]
 macro_rules! doop {
     {
-        $(let $named_binding:ident = $($renamed_bindings:ident),* $([$($named_replacements:tt),*])?;)*
+        $(let $named_binding:ident =  $($renamed_bindings:ident $(+)?)* $([$($named_replacements:tt),*])?;)*
 
         $(
-            $(for $loop_bindings:tt in $($named_loop:ident),* $([$($replacements:tt),*])?)+
+            $(for $loop_bindings:tt in $($named_loop:ident $(+)?)* $([$($replacements:tt),*])?)+
             {
                 $($rest:tt)*
             }
@@ -35,17 +35,17 @@ macro_rules! doop {
         $crate::proc::doop!{
             [
                 $([
-                    [$named_binding]
-                    [$($renamed_bindings)*]
-                    {$($( $named_replacements )*)?}
+                    [ $named_binding ]
+                    [ $($renamed_bindings)* ]
+                    [ $($( $named_replacements )*)? ]
                 ])*
             ]
             $([
                 [
                     $([
-                        [$loop_bindings]
-                        {$( $named_loop )*}
-                        {$($( $replacements )*)?}
+                        [ $loop_bindings ]
+                        [ $( $named_loop )* ]
+                        [ $($( $replacements )*)? ]
                     ])*
                 ]
                 [$($rest)*]
