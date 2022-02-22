@@ -56,7 +56,7 @@ pub fn wrap_returns_in_ok(block: Block) -> Block {
 
 /// If this token stream has a trailing block, import `throw!` and wrap every
 /// return value in `Ok`.
-pub fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, syn::Error> {
+pub fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let mut tokens = Vec::from_iter(tokens);
 
     if let Some(last) = tokens.last_mut() {
@@ -93,7 +93,7 @@ pub fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> Ret
 pub fn throws(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
-) -> Result<TokenStream, syn::Error> {
+) -> Result<TokenStream, eyre::Report> {
     let error_type: Path = if attribute_tokens.is_empty() {
         parse_quote_spanned! { attribute_tokens.span() => ::ez::Error }
     } else {
@@ -109,7 +109,7 @@ pub fn throws(
     Ok(function.into_token_stream())
 }
 
-fn panics(function_tokens: TokenStream) -> Result<TokenStream, syn::Error> {
+fn panics(function_tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let function_tokens = tryify_trailing_block(function_tokens)?;
 
     let mut function: Function = syn::parse2(function_tokens.into_iter().collect())?;
@@ -130,7 +130,7 @@ fn panics(function_tokens: TokenStream) -> Result<TokenStream, syn::Error> {
 pub fn try_throws(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
-) -> Result<TokenStream, syn::Error> {
+) -> Result<TokenStream, eyre::Report> {
     let has_block = trailing_block(&function_tokens)?.is_some();
     let source: Function = syn::parse2(function_tokens.clone())?;
     let args = parameters_to_arguments(&source.sig.inputs);

@@ -336,6 +336,7 @@ dependencies = [
 name = "ez-proc-macro"
 version = "0.0.7-dev"
 dependencies = [
+ "eyre",
  "ez-macros",
  "indexmap",
  "proc-macro2",

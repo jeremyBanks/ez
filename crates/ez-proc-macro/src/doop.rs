@@ -7,7 +7,7 @@ use {
     },
 };
 
-pub fn doop(tokens: TokenStream) -> Result<TokenStream, syn::Error> {
+pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let tokens: Vec<TokenTree> = tokens.into_iter().collect();
 
     let doop_args = tokens[0].tagged("doop_args")?;

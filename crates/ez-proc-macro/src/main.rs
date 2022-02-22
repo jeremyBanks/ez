@@ -10,7 +10,7 @@ use {
 pub fn main(
     attribute_tokens: TokenStream,
     function_tokens: TokenStream,
-) -> Result<TokenStream, syn::Error> {
+) -> Result<TokenStream, eyre::Report> {
     if !attribute_tokens.is_empty() {
         syn::Error::new(
             attribute_tokens.span(),

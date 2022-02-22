@@ -8,10 +8,16 @@ pub use ::ez_int::{int, Int};
 pub use ::ezio::{file, random, stdio, string};
 
 pub mod prelude {
+    #[cfg(feature = "ez-batteries")]
+    #[doc(inline)]
+    pub use ::ez_batteries::prelude::*;
     #[cfg(feature = "ezio")]
     #[doc(inline)]
     pub use ::ezio::prelude::*;
 }
+
+#[cfg(feature = "ez-batteries")]
+pub use ::ez_batteries::batteries;
 
 #[doc(hidden)]
 pub mod __ {
