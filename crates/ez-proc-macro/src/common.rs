@@ -4,6 +4,20 @@ use ::{
 };
 
 impl<T: Borrow<TokenTree> + BorrowMut<TokenTree>> TokenTreeExt for T {}
+impl<T: Borrow<Option<TokenTree>> + BorrowMut<Option<TokenTree>>> OptionTokenTreeExt for T {}
+
+pub trait OptionTokenTreeExt: Borrow<Option<TokenTree>> + BorrowMut<Option<TokenTree>> + Sized {
+    fn please(self) -> Option<TokenTree> {
+        let borrowed = self.borrow();
+        if let Some(token) = borrowed.as_ref() {
+            token.clone()
+        } else {
+            let message = format!("unexpected end of input");
+            return Err(syn::Error::new(Span::call_site(), message))?;
+        }
+    }
+}
+
 pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
     fn tagged(&self, tag: &str) -> Result<Vec<TokenTree>, syn::Error> {
         if let TokenTree::Group(g) = self.borrow() {
@@ -38,6 +52,28 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
             Err(syn::Error::new(
                 self.borrow().span(),
                 "expected an identifier",
+            ))
+        }
+    }
+
+    fn group(&self) -> Result<Group, syn::Error> {
+        if let TokenTree::Group(g) = self.borrow() {
+            Ok(g.clone())
+        } else {
+            Err(syn::Error::new(
+                self.borrow().span(),
+                "expected a group",
+            ))
+        }
+    }
+
+    fn punct(&self) -> Result<Punct, syn::Error> {
+        if let TokenTree::Punct(p) = self.borrow() {
+            Ok(p.clone())
+        } else {
+            Err(syn::Error::new(
+                self.borrow().span(),
+                "expected punctuation",
             ))
         }
     }

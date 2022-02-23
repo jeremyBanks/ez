@@ -2,7 +2,19 @@ use ez::batteries::doop;
 
 fn main() {
     doop! {
-        let Literals = ["a", 'b', "see", 3, 0.0, 10u8];
+        // You can use any of ({[/]}) to bracket the items.
+        // The only difference is that one layer of the outer bracket character
+        // will be removed if an item is wrapped in them. This is neccessary for
+        // cases where your items contain a comma that is not in a group, so it
+        // can't be distinguished from the comma delimiting items.
+        let Literals = {
+            
+        };
+        let Literals = [
+            "a", 'b', {'c', 'c'}, [['d', 'd']]
+        ];
+
+
         let Identifiers = [a, b, see, _3, Trait, Type];
         let Keywords = [fn, loop, let];
         let Paths = [::std, u64, std::collections::HashMap<i8, u64>];
