@@ -326,6 +326,7 @@ dependencies = [
  "color-eyre",
  "dotenv",
  "ez-core",
+ "ez-macros",
  "tokio",
  "tracing",
  "tracing-error",

@@ -1,2 +1,2 @@
 #[doc(inline)]
-pub use ez_macros::doop;
+pub use ez_macros::proc::doop;

@@ -1,5 +1,6 @@
 use {
     crate::errors::*,
+    quote::quote,
     ::{
         proc_macro2::TokenStream,
         quote::{quote_spanned, ToTokens},
@@ -79,4 +80,16 @@ pub fn main(
     } };
 
     Ok(outer_function.to_token_stream())
+}
+
+pub fn ly(
+    attribute_tokens: TokenStream,
+    function_tokens: TokenStream,
+) -> Result<TokenStream, eyre::Report> {
+    let item = main(attribute_tokens, function_tokens)?;
+    Ok(quote! {
+        use ::ez::prelude::*;
+
+        #item
+    })
 }
