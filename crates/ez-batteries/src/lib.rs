@@ -18,6 +18,8 @@ pub mod batteries {
             time::Duration,
         },
         ::{
+            csv,
+            clap,
             blake3,
             bytes::{Buf, BufMut, Bytes, BytesMut},
             crossbeam::{self, thread::scope as thread_scope},
@@ -35,7 +37,7 @@ pub mod batteries {
             parking_lot::{self, Mutex, RwLock},
             rand,
             rayon::{self, prelude::*},
-            regex, serde,
+            regex, reqwest, serde,
             serde_json::{self, Value as Json},
             sha2, sha3,
             tap::{self, tap},
