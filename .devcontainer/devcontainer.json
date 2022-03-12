@@ -1,0 +1,14 @@
+{
+    "dockerFile": "Dockerfile",
+    "extensions": [
+      "akamud.vscode-theme-onelight",
+      "denoland.vscode-deno",
+      "eamodio.gitlens",
+      "github.github-vscode-theme",
+      "matklad.rust-analyzer",
+      "ms-vscode.theme-1337",
+      "tamasfe.even-better-toml",
+      "Tyriar.sort-lines",
+      "usernamehw.errorlens"
+    ]
+  }

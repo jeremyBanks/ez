@@ -21,7 +21,6 @@ pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
 
     let mut let_bindings = IndexMap::<Ident, IndexSet<TokenStream>>::new();
 
-    let
 
     loop {
         match input.next() {

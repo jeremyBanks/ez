@@ -39,6 +39,7 @@ tap = "1.0.1"
 tokio = "1.17.0"
 toml = "0.5.8"
 tracing = "0.1.30"
+tracing-tree = "0.2.0"
 unicode-segmentation = "1.9.0"
 url = { version = "2.2.2", features = ["serde"] }
 walkdir = "2.3.2"
