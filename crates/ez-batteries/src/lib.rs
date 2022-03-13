@@ -25,7 +25,7 @@ pub mod batteries {
             crossterm::{self, tty::IsTty},
             csv,
             digest,
-            // doop::doop,
+            doop::doop,
             dpc_pariter::IteratorExt,
             either::Either,
             euclid,

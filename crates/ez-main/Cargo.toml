@@ -13,7 +13,6 @@ doc = false
 
 [dependencies]
 color-eyre = "0.6.0"
-console-subscriber = "0.1.3"
 dotenv = "0.15.0"
 ez = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
 ez-macros = { path = "../ez-macros", version = "=0.0.7-dev"}
