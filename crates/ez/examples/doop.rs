@@ -8,7 +8,7 @@ fn main() {
         // cases where your items contain a comma that is not in a group, so it
         // can't be distinguished from the comma delimiting items.
         let Literals = {
-            
+
         };
         let Literals = [
             "a", 'b', {'c', 'c'}, [['d', 'd']]

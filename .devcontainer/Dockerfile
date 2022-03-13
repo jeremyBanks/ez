@@ -18,4 +18,4 @@ RUN rustup toolchain add nightly beta \
     && rustup component add rustfmt --toolchain nightly \
     && rustup target add wasm32-wasi wasm32-unknown-unknown
 
-RUN cargo install cargo-edit cargo-expand cargo-udeps cargo-geiger save git-uncommit
+RUN cargo install cargo-edit cargo-expand cargo-udeps cargo-geiger save git-uncommit cargo-format

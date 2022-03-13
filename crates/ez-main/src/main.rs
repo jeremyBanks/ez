@@ -1,6 +1,7 @@
-use std::borrow::Cow;
-
-use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+use {
+    std::borrow::Cow,
+    tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt},
+};
 
 pub trait ExitStatus {
     fn to_i32(&self) -> i32;
@@ -59,17 +60,13 @@ pub fn entry_point<
 
     color_eyre::install().unwrap();
 
-    tracing_subscriber::util::SubscriberInitExt::init(tracing_subscriber::Layer::with_subscriber(
-        tracing_error::ErrorLayer::default(),
-        tracing_subscriber::fmt()
-            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-            .with_target(true)
-            .with_span_events(
-                tracing_subscriber::fmt::format::FmtSpan::NEW
-                    | tracing_subscriber::fmt::format::FmtSpan::CLOSE,
-            )
-            .finish(),
-    ).with(tracing_tree::HierarchicalLayer::new(2)));
+    tracing_subscriber::Registry::default()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(
+            tracing_tree::HierarchicalLayer::new(2)
+                .with_indent_lines(true)
+        )
+        .init();
 
     let args = std::env::args_os()
         .skip(1)

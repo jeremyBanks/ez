@@ -2,9 +2,9 @@
 
 mod main;
 
-pub use ez_macros::proc::main;
 #[doc(hidden)]
 pub use ez_macros::proc::ly;
+pub use ez_macros::proc::main;
 
 pub mod __ {
     pub use {

@@ -1,14 +1,17 @@
-use proc_macro2::{Punct, Group, Span};
-
-use ::{
-    proc_macro2::{Ident, TokenTree},
-    std::borrow::{Borrow, BorrowMut},
+use {
+    proc_macro2::{Group, Punct, Span},
+    ::{
+        proc_macro2::{Ident, TokenTree},
+        std::borrow::{Borrow, BorrowMut},
+    },
 };
 
 impl<T: Borrow<TokenTree> + BorrowMut<TokenTree>> TokenTreeExt for T {}
 impl<T: Borrow<Option<TokenTree>> + BorrowMut<Option<TokenTree>>> OptionTokenTreeExt for T {}
 
-pub trait OptionTokenTreeExt: Borrow<Option<TokenTree>> + BorrowMut<Option<TokenTree>> + Sized {
+pub trait OptionTokenTreeExt:
+    Borrow<Option<TokenTree>> + BorrowMut<Option<TokenTree>> + Sized
+{
     fn please(self) -> Result<TokenTree, syn::Error> {
         let borrowed = self.borrow();
         if let Some(token) = borrowed.as_ref() {
@@ -62,10 +65,7 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
         if let TokenTree::Group(g) = self.borrow() {
             Ok(g.clone())
         } else {
-            Err(syn::Error::new(
-                self.borrow().span(),
-                "expected a group",
-            ))
+            Err(syn::Error::new(self.borrow().span(), "expected a group"))
         }
     }
 
