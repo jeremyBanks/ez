@@ -62,10 +62,7 @@ pub fn entry_point<
 
     tracing_subscriber::Registry::default()
         .with(tracing_subscriber::EnvFilter::from_default_env())
-        .with(
-            tracing_tree::HierarchicalLayer::new(2)
-                .with_indent_lines(true)
-        )
+        .with(tracing_tree::HierarchicalLayer::new(2).with_indent_lines(true))
         .init();
 
     let args = std::env::args_os()

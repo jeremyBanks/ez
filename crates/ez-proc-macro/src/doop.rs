@@ -1,12 +1,11 @@
 #![allow(clippy::all)]
 #![allow(dead_code)]
 
-use eyre::ensure;
-use indexmap::{IndexMap, IndexSet};
-use proc_macro2::Punct;
-
 use {
     crate::common::TokenTreeExt,
+    eyre::ensure,
+    indexmap::{IndexMap, IndexSet},
+    proc_macro2::Punct,
     std::collections::HashMap,
     ::{
         proc_macro2::{Group, Ident, TokenStream, TokenTree},
@@ -18,9 +17,7 @@ pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let mut input = tokens.into_iter();
     let mut output = TokenStream::new();
 
-
     let mut let_bindings = IndexMap::<Ident, IndexSet<TokenStream>>::new();
-
 
     loop {
         match input.next() {
@@ -42,15 +39,12 @@ pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
                     let _replaced_bindings = let_bindings.insert(ident, bindings);
                 } else if keyword == "for" {
                     let loop_binding = token.next().please()?;
-
-
                 } else {
                     return Err(syn::Error(token.span(), "expected `let` or `for`").into());
                 }
-            }
-            None => break
+            },
+            None => break,
         }
-
     }
 
     Ok(output.into_iter().collect())

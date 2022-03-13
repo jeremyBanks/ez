@@ -1,7 +1,7 @@
 use ez::prelude::*;
 
 #[main]
-fn main(){
+fn main() {
     print_double(1, "twice one is");
 }
 
