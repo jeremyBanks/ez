@@ -1,15 +1,14 @@
-Decorates a function so that it implicitly wraps the result in [`Result::Ok`],
-unless a [`Result::Err`] is propagated with [the `?` operator][std::ops::Try] or
-returned with [the `throw!` macro][crate::throw].
+Decorates a function so that it implicitly wraps the result in [`Result::Ok`], unless a
+[`Result::Err`] is propagated with [the `?` operator][std::ops::Try] or returned with [the `throw!`
+macro][crate::throw].
 
-By default, `#[throws]` will use [`ez::Error`][crate::Error]/`eyre::Report` for
-the error value. This is a dynamic error type that's useful for error reporting
-in application code. However, if you're writing library code you may want to use
-a more specific error type, and one may be specified as an argument to this
-macro, such as `#[ez::throws(std::num::ParseIntError)]`.
+By default, `#[throws]` will use [`ez::Error`][crate::Error]/`eyre::Report` for the error value.
+This is a dynamic error type that's useful for error reporting in application code. However, if
+you're writing library code you may want to use a more specific error type, and one may be specified
+as an argument to this macro, such as `#[ez::throws(std::num::ParseIntError)]`.
 
-The [`throw!`][crate::throw] macro will be automatically imported in the body of
-functions decorated with `#[throws]`.
+The [`throw!`][crate::throw] macro will be automatically imported in the body of functions decorated
+with `#[throws]`.
 
 ## Expansion
 

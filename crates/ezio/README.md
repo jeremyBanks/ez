@@ -1,32 +1,29 @@
 # ez-ezio
 
-This is an exercise testing out the macros from the `ez` crate, and potential
-changes for `ezio`. Nobody should use this directly. If this has any good ideas,
-we'll see about upstreaming them instead.
+This is an exercise testing out the macros from the `ez` crate, and potential changes for `ezio`.
+Nobody should use this directly. If this has any good ideas, we'll see about upstreaming them
+instead.
 
 ## Changes from Upstream
 
-- Trait implementations are wrapped with inherent methods, so the traits don't
-  need to be imported and are no longer included in the prelude.
-- The `.write` method was renamed `.write_str` to disambiguate it in case both
-  write traits are imported at once.
-- Most panicking methods have fallible `try_` alternatives added (though in
-  most) cases we're just throwing an `eyre::Report` instead of anything more
-  specific.
+- Trait implementations are wrapped with inherent methods, so the traits don't need to be imported
+  and are no longer included in the prelude.
+- The `.write` method was renamed `.write_str` to disambiguate it in case both write traits are
+  imported at once.
+- Most panicking methods have fallible `try_` alternatives added (though in most) cases we're just
+  throwing an `eyre::Report` instead of anything more specific.
 
 ---
 
 # ezio - a crate for easy IO
 
-ezio offers an easy to use IO API for reading and writing to files and stdio.
-ezio includes utilities for generating random numbers and other IO-like
-functionality. Performance and idiomatic error handling are explicit non-goals,
-so ezio is probably not suitable for production use. It is better suited for
-education, experimentation, and prototyping.
+ezio offers an easy to use IO API for reading and writing to files and stdio. ezio includes
+utilities for generating random numbers and other IO-like functionality. Performance and idiomatic
+error handling are explicit non-goals, so ezio is probably not suitable for production use. It is
+better suited for education, experimentation, and prototyping.
 
-ezio wraps the standard library's IO APIs and other well-established crates, and
-is designed to interoperate with them, so ezio should be compatible with most
-upstream libraries.
+ezio wraps the standard library's IO APIs and other well-established crates, and is designed to
+interoperate with them, so ezio should be compatible with most upstream libraries.
 
 ## Examples
 
@@ -66,12 +63,10 @@ fn main() {
 - Easy to import - provide a prelude and most users will not need anything else
 - Simple module hierarchy
 - String-based, not byte-based by default
-- Panic-happy: panic by default, `try_` versions of functions where you really
-  need an error
+- Panic-happy: panic by default, `try_` versions of functions where you really need an error
 - Allocation-happy: returns Strings, etc rather than taking buffers
-- Compatible and interoperable with std IO so programs can gradually migrate
-  from ezio to std::io
-- Just because we're doing unsophisticated IO, doesn't mean the rest of the
-  program is unsophisticated. Therefore:
+- Compatible and interoperable with std IO so programs can gradually migrate from ezio to std::io
+- Just because we're doing unsophisticated IO, doesn't mean the rest of the program is
+  unsophisticated. Therefore:
   - should be idiomatic Rust
   - should support generics and trait objects, etc
