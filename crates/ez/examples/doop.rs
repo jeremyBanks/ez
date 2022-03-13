@@ -1,5 +1,4 @@
-use ez::batteries::doop;
-
+#[ez::ly]
 fn main() {
     doop! {
         // You can use any of ({[/]}) to bracket the items.
