@@ -2,10 +2,10 @@
 #![allow(dead_code)]
 
 use {
-    crate::common::TokenTreeExt,
+    crate::common::{OptionTokenTreeExt, TokenTreeExt},
     eyre::ensure,
     indexmap::{IndexMap, IndexSet},
-    proc_macro2::Punct,
+    proc_macro2::{Punct, Spacing},
     std::collections::HashMap,
     ::{
         proc_macro2::{Group, Ident, TokenStream, TokenTree},
@@ -22,25 +22,25 @@ pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     loop {
         match input.next() {
             Some(token) => {
-                let keyword = token.ident().ok();
+                let keyword = token.ident().ok().unwrap();
                 if keyword == "let" {
-                    let ident = token.next().please()?.ident()?;
+                    let ident = input.next().please()?.ident()?;
                     let mut bindings = IndexSet::new();
                     ensure!(
-                        input.next() != Some(Punct::new('=', Spacing::Alone)),
+                        input.next().please()?.punct()?.as_char() != '=',
                         "expected `=`"
                     );
-                    let group = token.next().please()?.group()?;
+                    let group = input.next().please()?.group()?;
                     ensure!(
-                        input.next() != Some(Punct::new('=', Spacing::Alone)),
+                        input.next().please()?.punct()?.as_char() != ';',
                         "expected `;`"
                     );
 
                     let _replaced_bindings = let_bindings.insert(ident, bindings);
                 } else if keyword == "for" {
-                    let loop_binding = token.next().please()?;
+                    // let loop_binding = token.next().please()?;
                 } else {
-                    return Err(syn::Error(token.span(), "expected `let` or `for`").into());
+                    return Err(syn::Error::new(token.span(), "expected `let` or `for`").into());
                 }
             },
             None => break,
