@@ -5,6 +5,7 @@ edition = "2021"
 homepage = "https://github.com/jeremyBanks/ez/tree/HEAD/crates/ezio"
 license = "Apache-2.0"
 name = "ez-ezio"
+rust-version = "1.59.0"
 version = "0.0.7-dev"
 
 [lib]

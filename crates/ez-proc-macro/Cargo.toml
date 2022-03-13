@@ -8,6 +8,7 @@ homepage =  "https://crates.io/crates/ez"
 license = "MIT OR Apache-2.0"
 name = "ez-proc-macro"
 repository = "https://github.com/jeremyBanks/ez"
+rust-version = "1.59.0"
 version = "0.0.7-dev"
 
 [lib]
