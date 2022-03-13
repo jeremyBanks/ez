@@ -23,6 +23,7 @@ pub mod prelude {
     #[cfg(feature = "ezio")]
     #[doc(inline)]
     pub use ::ezio::prelude::*;
+    pub use ::ez_main::main;
 }
 
 #[cfg(feature = "ez-batteries")]

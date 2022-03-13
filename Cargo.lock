@@ -583,6 +583,7 @@ dependencies = [
  "rayon",
  "regex",
  "reqwest",
+ "serde",
  "serde_json",
  "sha2",
  "sha3",
@@ -590,7 +591,6 @@ dependencies = [
  "tokio",
  "toml",
  "tracing",
- "tracing-tree",
  "unicode-segmentation",
  "url",
  "walkdir",
@@ -654,6 +654,7 @@ dependencies = [
  "tracing",
  "tracing-error",
  "tracing-subscriber",
+ "tracing-tree",
 ]
 
 [[package]]

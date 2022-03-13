@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+
 pub trait ExitStatus {
     fn to_i32(&self) -> i32;
 }
@@ -62,13 +64,12 @@ pub fn entry_point<
         tracing_subscriber::fmt()
             .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
             .with_target(true)
-            .with(tracing_tree::HeirarchicalLayer::new(2))
             .with_span_events(
                 tracing_subscriber::fmt::format::FmtSpan::NEW
                     | tracing_subscriber::fmt::format::FmtSpan::CLOSE,
             )
             .finish(),
-    ));
+    ).with(tracing_tree::HierarchicalLayer::new(2)));
 
     let args = std::env::args_os()
         .skip(1)

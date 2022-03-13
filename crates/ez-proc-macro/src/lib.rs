@@ -1,7 +1,7 @@
 use proc_macro2::{Span, TokenStream};
 
 mod common;
-mod doop;
+// mod doop;
 mod errors;
 mod main;
 
@@ -37,10 +37,10 @@ pub fn ly(
     crate::main::ly(attribute_tokens.into(), function_tokens.into()).unwrap_token()
 }
 
-#[proc_macro]
-pub fn doop(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    crate::doop::doop(tokens.into()).unwrap_token()
-}
+// #[proc_macro]
+// pub fn doop(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
+//     crate::doop::doop(tokens.into()).unwrap_token()
+// }
 
 trait ResultExt: Sized {
     fn result(self) -> Result<TokenStream, eyre::Report>;

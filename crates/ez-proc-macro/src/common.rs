@@ -1,3 +1,5 @@
+use proc_macro2::{Punct, Group, Span};
+
 use ::{
     proc_macro2::{Ident, TokenTree},
     std::borrow::{Borrow, BorrowMut},
@@ -7,13 +9,13 @@ impl<T: Borrow<TokenTree> + BorrowMut<TokenTree>> TokenTreeExt for T {}
 impl<T: Borrow<Option<TokenTree>> + BorrowMut<Option<TokenTree>>> OptionTokenTreeExt for T {}
 
 pub trait OptionTokenTreeExt: Borrow<Option<TokenTree>> + BorrowMut<Option<TokenTree>> + Sized {
-    fn please(self) -> Option<TokenTree> {
+    fn please(self) -> Result<TokenTree, syn::Error> {
         let borrowed = self.borrow();
         if let Some(token) = borrowed.as_ref() {
-            token.clone()
+            Ok(token.clone())
         } else {
             let message = format!("unexpected end of input");
-            return Err(syn::Error::new(Span::call_site(), message))?;
+            return Err(syn::Error::new(Span::call_site(), message));
         }
     }
 }
