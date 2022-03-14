@@ -92,9 +92,16 @@ pub trait TokenTreeIterExt: Borrow<TokenStreamIter> + BorrowMut<TokenStreamIter>
     }
 
     fn next_puncts_eq(&mut self, puncts: &str) -> Result<Vec<Punct>, syn::Error> {
+        // clone it, gather while connected
+
+        let mut puncts = String::new();
+        loop {
+            let punct = self.next_punct()?;
+        }
+
+        let expected = format!("`{puncts}`");
         let chars = puncts.chars().collect_vec();
-        let _iter = self.borrow_mut();
-        todo!()
+        self.next_if(|_| None, &expected)
     }
 }
 

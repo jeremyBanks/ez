@@ -8,7 +8,6 @@ fn main() {
         // can't be distinguished from the comma delimiting items.
         let Literals = {
 
-        };
         let Literals = [
             "a", 'b', {'c', 'c'}, [['d', 'd']]
         ];
@@ -27,8 +26,8 @@ fn main() {
             println!("{}", stringify!(X));
         }
 
-        for $ in [1, 2, 3] + Literals - [0.0, "ignored missing value"] {
-            let literal = $;
+        for X in [1, 2, 3] + Literals - [0.0, "ignored missing value"] {
+            let literal = X;
             println!("{literal}");
         }
 
@@ -40,9 +39,9 @@ fn main() {
 
         let Ops = [+, -, /, *];
 
-        for @ in Ops
-        for +- in [+, -] {
-            println!("{}", 4 @ 2 +- 10);
+        for OP in Ops
+        for PLUS_MINUS in [+, -] {
+            println!("{}", 4 OP 2 PLUS_MINUS 10);
         }
     }
 }

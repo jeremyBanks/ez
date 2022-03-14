@@ -27,15 +27,9 @@ pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
         if keyword == "let" {
             let ident = input.next_ident()?;
             let mut bindings = IndexSet::new();
-            let punct = input.next_punct()?;
-            if punct.as_char() != '=' {
-                Err(syn::Error::new(punct.span(), "expected ="))?;
-            }
+            let _eq = input.next_puncts_eq("=")?;
             let group = input.next_group()?;
-            let punct = input.next_punct()?;
-            if punct.as_char() != ';' {
-                Err(syn::Error::new(punct.span(), "expected ;"))?;
-            }
+            let _semi = input.next_puncts_eq(";")?;
 
             let _replaced_bindings = let_bindings.insert(ident, bindings);
         } else if keyword == "for" {
