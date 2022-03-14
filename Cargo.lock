@@ -664,6 +664,7 @@ dependencies = [
  "eyre",
  "ez-macros",
  "indexmap",
+ "itertools",
  "proc-macro2",
  "quote",
  "syn",

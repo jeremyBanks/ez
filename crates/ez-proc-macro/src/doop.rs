@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 
 use {
-    crate::common::{OptionTokenTreeExt, TokenTreeExt},
+    crate::common::{OptionTokenTreeExt, TokenTreeExt, TokenTreeIterExt},
     eyre::ensure,
     indexmap::{IndexMap, IndexSet},
     proc_macro2::{Punct, Spacing},

@@ -29,6 +29,17 @@ pub fn main(
     crate::main::main(attribute_tokens.into(), function_tokens.into()).unwrap_token()
 }
 
+/// > _easily,_  \
+/// > _let's get carried away_
+///
+/// >  ― [Red Hot Chili Peppers](https://genius.com/25345758)
+///
+/// ```
+/// #[ez::ly]
+/// fn main() {
+///     info!("using ez::prelude::* and #[ez::main]");
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn ly(
     attribute_tokens: proc_macro::TokenStream,
@@ -41,7 +52,6 @@ pub fn ly(
 pub fn doop(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
     crate::doop::doop(tokens.into()).unwrap_token()
 }
-
 trait ResultExt: Sized {
     fn result(self) -> Result<TokenStream, eyre::Report>;
 
