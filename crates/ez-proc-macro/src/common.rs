@@ -53,6 +53,10 @@ pub trait TokenTreeIterExt: Borrow<TokenStreamIter> + BorrowMut<TokenStreamIter>
         }
     }
 
+    fn is_empty(&self) -> bool {
+        self.borrow().clone().next().is_none()
+    }
+
     fn next_tt(&mut self) -> Result<TokenTree, syn::Error> {
         self.next_if(|tt| Some(tt), "any token")
     }
@@ -87,7 +91,7 @@ pub trait TokenTreeIterExt: Borrow<TokenStreamIter> + BorrowMut<TokenStreamIter>
         self.next_if(|tt| tt.punct().ok(), "a punct(uation)")
     }
 
-    fn next_punct_eq(&mut self, puncts: &str) -> Result<Vec<Punct>, syn::Error> {
+    fn next_puncts_eq(&mut self, puncts: &str) -> Result<Vec<Punct>, syn::Error> {
         let chars = puncts.chars().collect_vec();
         let _iter = self.borrow_mut();
         todo!()

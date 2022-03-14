@@ -20,30 +20,28 @@ pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let mut let_bindings = IndexMap::<Ident, IndexSet<TokenStream>>::new();
 
     loop {
-        match input.next() {
-            Some(token) => {
-                let keyword = token.ident().ok().unwrap();
-                if keyword == "let" {
-                    let ident = input.next().please()?.ident()?;
-                    let mut bindings = IndexSet::new();
-                    let punct = input.next().please()?.punct()?;
-                    if punct.as_char() != '=' {
-                        Err(syn::Error::new(punct.span(), "expected ="))?;
-                    }
-                    let group = input.next().please()?.group()?;
-                    let punct = input.next().please()?.punct()?;
-                    if punct.as_char() != ';' {
-                        Err(syn::Error::new(punct.span(), "expected ;"))?;
-                    }
+        if input.is_empty() {
+            break;
+        }
+        let keyword = input.next_ident()?;
+        if keyword == "let" {
+            let ident = input.next_ident()?;
+            let mut bindings = IndexSet::new();
+            let punct = input.next_punct()?;
+            if punct.as_char() != '=' {
+                Err(syn::Error::new(punct.span(), "expected ="))?;
+            }
+            let group = input.next_group()?;
+            let punct = input.next_punct()?;
+            if punct.as_char() != ';' {
+                Err(syn::Error::new(punct.span(), "expected ;"))?;
+            }
 
-                    let _replaced_bindings = let_bindings.insert(ident, bindings);
-                } else if keyword == "for" {
-                    // let loop_binding = token.next().please()?;
-                } else {
-                    return Err(syn::Error::new(token.span(), "expected `let` or `for`").into());
-                }
-            },
-            None => break,
+            let _replaced_bindings = let_bindings.insert(ident, bindings);
+        } else if keyword == "for" {
+            // let loop_binding = token.next().please()?;
+        } else {
+            return Err(syn::Error::new(keyword.span(), "expected `let` or `for`").into());
         }
     }
 
