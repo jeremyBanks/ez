@@ -2,16 +2,43 @@
 #![allow(dead_code)]
 
 use {
-    crate::common::{OptionTokenTreeExt, TokenTreeExt, TokenTreeIterExt},
-    eyre::ensure,
+    crate::common::TokenTreeIterExt,
     indexmap::{IndexMap, IndexSet},
-    proc_macro2::{Punct, Spacing},
-    std::collections::HashMap,
-    ::{
-        proc_macro2::{Group, Ident, TokenStream, TokenTree},
-        quote::ToTokens,
-    },
+    proc_macro2::{Group, Ident, Span, TokenStream, TokenTree},
+    quote::ToTokens,
 };
+
+mod input {
+    use proc_macro2::{Group, Ident};
+
+    #[derive(Debug, Clone)]
+    pub struct Root {
+        pub items: Vec<Item>,
+    }
+
+    #[derive(Debug, Clone)]
+    pub enum Item {
+        Let { binding: Binding },
+        For { bindings: Vec<Binding>, body: Group },
+    }
+
+    #[derive(Debug, Clone)]
+    pub struct Binding {
+        pub name: Ident,
+        pub terms: Vec<Binding>,
+    }
+
+    #[derive(Debug, Clone)]
+    pub enum Term {
+        Add { items: Vec<Binding> },
+        Remove { items: Vec<Binding> },
+    }
+}
+
+enum BindingItem {
+    TokenList { token_list: Vec<TokenTree> },
+    BoundName { name: Ident },
+}
 
 pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let mut input = tokens.into_iter();
@@ -26,12 +53,30 @@ pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
         let keyword = input.next_ident()?;
         if keyword == "let" {
             let ident = input.next_ident()?;
-            let mut bindings = IndexSet::new();
-            let _eq = input.next_puncts_eq("=")?;
-            let group = input.next_group()?;
-            let _semi = input.next_puncts_eq(";")?;
+            input.next_puncts_eq("=")?;
 
-            let _replaced_bindings = let_bindings.insert(ident, bindings);
+            if let Ok(group) = input.next_group() {
+            } else if let Ok(ident) = input.next_ident() {
+            } else {
+                return Err(syn::Error::new(
+                    input
+                        .next()
+                        .map(|tt| tt.span())
+                        .unwrap_or_else(Span::call_site),
+                    "expected group or identifier",
+                )
+                .into());
+            }
+
+            // next_doop_binding
+            // which is made up of next_doop_bindings delimited by + or -
+
+            let group = input.next_group()?;
+
+            input.next_puncts_eq(";")?;
+
+            // let mut bindings = IndexSet::new();
+            // let _replaced_bindings = let_bindings.insert(ident, bindings);
         } else if keyword == "for" {
             // let loop_binding = token.next().please()?;
         } else {

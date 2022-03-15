@@ -96,7 +96,7 @@ pub trait TokenTreeIterExt: Borrow<TokenStreamIter> + BorrowMut<TokenStreamIter>
 
         let mut puncts = vec![];
         loop {
-            let punct = self.next_punct()?;
+            let punct = tee.next_punct()?;
             puncts.push(punct.clone());
             if punct.spacing() == Spacing::Alone {
                 break;

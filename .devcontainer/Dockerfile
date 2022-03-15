@@ -20,4 +20,6 @@ RUN rustup toolchain add stable nightly beta 1.59.0 \
     && rustup component add rustfmt --toolchain nightly \
     && rustup target add wasm32-wasi wasm32-unknown-unknown
 
-RUN cargo install baking cargo-edit cargo-expand cargo-format cargo-geiger cargo-udeps git-uncommit save tokio-console
+RUN curl https://wasmtime.dev/install.sh -sSf | bash
+
+RUN cargo install baking cargo-edit cargo-expand cargo-format cargo-geiger cargo-udeps cargo-wasi git-uncommit save tokio-console

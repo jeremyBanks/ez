@@ -17,7 +17,7 @@ pub mod batteries {
             sync::Arc,
             time::Duration,
         },
-        ::{
+        {
             blake3,
             bytes::{Buf, BufMut, Bytes, BytesMut},
             clap,

@@ -1,11 +1,8 @@
 use {
     crate::errors::*,
-    quote::quote,
-    ::{
-        proc_macro2::TokenStream,
-        quote::{quote_spanned, ToTokens},
-        syn::{parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, ItemFn, Visibility},
-    },
+    proc_macro2::TokenStream,
+    quote::{quote, quote_spanned, ToTokens},
+    syn::{parse_quote_spanned, punctuated::Punctuated, spanned::Spanned, ItemFn, Visibility},
 };
 
 pub fn main(
