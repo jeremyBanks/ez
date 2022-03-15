@@ -24,6 +24,10 @@ fn main() {
             println!("{}", stringify!(X));
         }
 
+        // Destructuring is supported, but only for tuple-style items
+        // (wrapped in parentheses, delimited by commas). NB that trailing commas are
+        // interpreted as an empty item, not ignored. All items must have the same number
+        // of items/commas.
         for (name, value) in [(a, 2), (b, 3), (c, 4)] {
             println!("{} = {}", name, value);
         }
@@ -41,11 +45,10 @@ fn main() {
 
         let Ops = [+, -, /, *];
 
-        for @ in Ops
-        for +- in [+, -] {
-            println!("{}", 4 @ 2 +- 10);
+        for (Trait, method, @) in [(std::ops::Add, add, +), (::core::ops::Sub, sub, -), (Mul, mul, *), (Div, div, /)] {
+            let a = 4;
+            let b = 6;
+            assert_eq!(a @ b, Trait::method(a, b));
         }
-
-        // TODO: Destrucutring assignment of multiple items, eh! Don't forget. It's important.
     }
 }
