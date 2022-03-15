@@ -1,22 +1,14 @@
 [package]
-authors = ["Nicholas Cameron <nrc@ncameron.org>"]
+authors = ["Jeremy Banks <_@jeremy.ca>"]
 description = "internal"
 edition = "2021"
-homepage = "https://github.com/jeremyBanks/ez/tree/HEAD/crates/ezio"
-license = "Apache-2.0"
-name = "ez-ezio"
+license = "MIT OR Apache-2.0"
+name = "orerr"
+repository = "https://github.com/jeremyBanks/ez"
 rust-version = "1.59.0"
 version = "0.0.7-dev"
 
-[lib]
-name = "ezio"
-doc = false
-
 [dependencies]
-eyre = "0.6.6"
-ez = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
-implicint = { path = "../implicint", version = "=0.0.7-dev", optional = true }
-rand = "0.8"
 
 [package.metadata.release]
 consolidate-commits = true

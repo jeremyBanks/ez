@@ -11,17 +11,16 @@ version = "0.0.7-dev"
 
 [features]
 default = ["int", "batteries", "main", "io"]
-batteries = ["ez-batteries"]
-int = ["ez-int"]
+int = ["implicint"]
 io = ["ezio"]
 main = ["ez-main"]
 
 [dependencies]
-ez-batteries = { path = "../ez-batteries", version = "=0.0.7-dev", optional = true }
+batteries = { path = "../batteries", version = "=0.0.7-dev", optional = true }
 ez-core = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
-ez-int = { path = "../ez-int", version = "=0.0.7-dev", optional = true }
+implicint = { path = "../implicint", version = "=0.0.7-dev", optional = true }
 ez-main = { path = "../ez-main", version = "=0.0.7-dev", optional = true }
-ezio = { path = "../ezio", package = "ez-ezio", version = "=0.0.7-dev", features = ["ez-int"], optional = true }
+ezio = { path = "../ezio", package = "ez-ezio", version = "=0.0.7-dev", features = ["implicint"], optional = true }
 
 [package.metadata.release]
 consolidate-commits = true

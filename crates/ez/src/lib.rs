@@ -2,8 +2,6 @@
 
 #[doc(inline)]
 pub use ::ez_core::{throw, throws, try_throws, Error};
-#[cfg(feature = "ez-int")]
-pub use ::ez_int::{int, Int};
 #[cfg(feature = "ez-main")]
 #[doc(hidden)]
 pub use ::ez_main::ly;
@@ -12,19 +10,21 @@ pub use ::ez_main::ly;
 pub use ::ez_main::main;
 #[cfg(feature = "ezio")]
 pub use ::ezio::{file, random, stdio, string};
+#[cfg(feature = "implicint")]
+pub use ::implicint::{int, Int};
 
 pub mod prelude {
-    #[cfg(feature = "ez-batteries")]
+    #[cfg(feature = "batteries")]
     #[doc(inline)]
-    pub use ::ez_batteries::prelude::*;
+    pub use ::batteries::prelude::*;
     pub use ::ez_main::main;
     #[cfg(feature = "ezio")]
     #[doc(inline)]
     pub use ::ezio::prelude::*;
 }
 
-#[cfg(feature = "ez-batteries")]
-pub use ::ez_batteries::batteries;
+#[cfg(feature = "batteries")]
+pub use ::batteries::batteries;
 
 #[doc(hidden)]
 pub mod __ {

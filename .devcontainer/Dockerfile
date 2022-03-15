@@ -13,11 +13,10 @@ RUN mkdir -p /deno \
 
 USER codespace
 
-RUN rustup toolchain add nightly beta \
-    && rustup update \
+RUN rustup toolchain add stable nightly beta 1.59.0 \
+    && rustup update                                 \
     && rustup component add clippy --toolchain stable \
     && rustup component add rustfmt --toolchain stable \
-    && rustup component add rustfmt --toolchain beta \
     && rustup component add rustfmt --toolchain nightly \
     && rustup target add wasm32-wasi wasm32-unknown-unknown
 

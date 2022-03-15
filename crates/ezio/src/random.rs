@@ -1,5 +1,5 @@
 use {
-    ez_int::Int,
+    implicint::Int,
     rand::{random, thread_rng, Rng},
 };
 
@@ -49,17 +49,17 @@ macro_rules! frand_fns {
     };
 }
 
-#[cfg(feature = "ez-int")]
-/// Generate a random [`Int`][ez_int:Int] from a uniform distribution.
+#[cfg(feature = "implicint")]
+/// Generate a random [`Int`][implicint:Int] from a uniform distribution.
 ///
 /// Implemented using the [rand](https://docs.rs/rand) crate, see their
 /// docs for more information.
 pub fn int() -> Int {
-    ez_int::int(i128())
+    implicint::int(i128())
 }
 
-#[cfg(feature = "ez-int")]
-/// Generate a random [`Int`][ez_int:Int] between 0 and `upper_bound`
+#[cfg(feature = "implicint")]
+/// Generate a random [`Int`][implicint:Int] between 0 and `upper_bound`
 /// from a uniform distribution.
 ///
 /// `upper_bound` is exclusive so will never be returned.
@@ -67,7 +67,7 @@ pub fn int() -> Int {
 /// Implemented using the [rand](https://docs.rs/rand) crate, see their
 /// docs for more information.
 pub fn int_bound(upper_bound: Int) -> Int {
-    ez_int::int(thread_rng().gen_range(0..*upper_bound))
+    implicint::int(thread_rng().gen_range(0..*upper_bound))
 }
 
 rand_fns!(u8, u8_bound);
