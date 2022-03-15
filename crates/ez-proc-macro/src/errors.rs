@@ -83,10 +83,10 @@ pub fn wrap_return_with_result(return_type: ReturnType, error_type: Path) -> Ret
     match &return_type {
         ReturnType::Default => {
             parse_quote_spanned! { return_type.span() => -> ::ez::__::Result<(), #error_type> }
-        },
+        }
         ReturnType::Type(_, t) => {
             parse_quote_spanned! { return_type.span() => -> ::ez::__::Result<#t, #error_type> }
-        },
+        }
     }
 }
 

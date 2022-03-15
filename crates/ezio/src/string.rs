@@ -79,7 +79,7 @@ impl<'a> Read for Reader<'a> {
             Some(n) => {
                 let (line, rest) = self.0.split_at(n);
                 (line, &rest[1..])
-            },
+            }
             None => (self.0, ""),
         };
 

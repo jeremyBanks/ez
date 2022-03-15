@@ -102,7 +102,7 @@ impl<T: std::io::Read> Iterator for ReadIterator<T> {
             _ => {
                 buf.truncate(buf.len() - 1);
                 Some(buf)
-            },
+            }
         }
     }
 }

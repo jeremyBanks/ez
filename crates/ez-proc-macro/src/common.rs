@@ -5,6 +5,7 @@ use {
     },
     std::{
         borrow::{Borrow, BorrowMut},
+        convert::Infallible as Never,
         iter::Peekable,
     },
 };
@@ -107,13 +108,25 @@ pub trait TokenTreeIterExt: Borrow<TokenStreamIter> + BorrowMut<TokenStreamIter>
         if actual == expected {
             let iter = self.borrow_mut();
             for _ in puncts.iter() {
-                iter.next();
+                let _ = iter.next();
             }
             Ok(puncts)
         } else {
             let message = format!("expected `{expected}`", expected = expected);
             Err(syn::Error::new(tee.next().unwrap().span(), message))
         }
+    }
+
+    #[must_use]
+    fn err_on_next(&mut self, message: &str) -> Result<Never, syn::Error> {
+        Err(syn::Error::new(
+            self.borrow_mut()
+                .clone()
+                .next()
+                .map(|tt| tt.span())
+                .unwrap_or_else(Span::call_site),
+            message,
+        ))
     }
 }
 

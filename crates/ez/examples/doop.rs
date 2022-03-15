@@ -24,6 +24,10 @@ fn main() {
             println!("{}", stringify!(X));
         }
 
+        for (name, value) in [(a, 2), (b, 3), (c, 4)] {
+            println!("{} = {}", name, value);
+        }
+
         for X in [1, 2, 3] + Literals - [0.0, "ignored missing value"] {
             let literal = X;
             println!("{literal}");
@@ -37,9 +41,11 @@ fn main() {
 
         let Ops = [+, -, /, *];
 
-        for OP in Ops
-        for PLUS_MINUS in [+, -] {
-            println!("{}", 4 OP 2 PLUS_MINUS 10);
+        for @ in Ops
+        for +- in [+, -] {
+            println!("{}", 4 @ 2 +- 10);
         }
+
+        // TODO: Destrucutring assignment of multiple items, eh! Don't forget. It's important.
     }
 }

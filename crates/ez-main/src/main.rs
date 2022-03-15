@@ -76,7 +76,7 @@ pub fn entry_point<
                      with '�':\n  {lossy:?}"
                 );
                 lossy
-            },
+            }
         });
 
     let env = std::env::vars_os().filter_map(|(name, value)| {
