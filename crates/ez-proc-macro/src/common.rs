@@ -1,7 +1,7 @@
 use {
     itertools::Itertools,
     proc_macro2::{
-        token_stream::IntoIter as TokenStreamIter, Group, Ident, Punct, Span, TokenTree,
+        token_stream::IntoIter as TokenStreamIter, Group, Ident, Punct, Spacing, Span, TokenTree,
     },
     std::{
         borrow::{Borrow, BorrowMut},
@@ -91,17 +91,29 @@ pub trait TokenTreeIterExt: Borrow<TokenStreamIter> + BorrowMut<TokenStreamIter>
         self.next_if(|tt| tt.punct().ok(), "a punct(uation)")
     }
 
-    fn next_puncts_eq(&mut self, puncts: &str) -> Result<Vec<Punct>, syn::Error> {
-        // clone it, gather while connected
+    fn next_puncts_eq(&mut self, expected: &str) -> Result<Vec<Punct>, syn::Error> {
+        let mut tee = self.borrow_mut().clone();
 
-        let mut puncts = String::new();
+        let mut puncts = vec![];
         loop {
             let punct = self.next_punct()?;
+            puncts.push(punct.clone());
+            if punct.spacing() == Spacing::Alone {
+                break;
+            }
         }
 
-        let expected = format!("`{puncts}`");
-        let chars = puncts.chars().collect_vec();
-        self.next_if(|_| None, &expected)
+        let actual: String = puncts.iter().map(|p| p.as_char()).collect();
+        if actual == expected {
+            let iter = self.borrow_mut();
+            for _ in puncts.iter() {
+                iter.next();
+            }
+            Ok(puncts)
+        } else {
+            let message = format!("expected `{expected}`", expected = expected);
+            Err(syn::Error::new(tee.next().unwrap().span(), message))
+        }
     }
 }
 

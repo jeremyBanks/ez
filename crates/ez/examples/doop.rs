@@ -6,8 +6,6 @@ fn main() {
         // will be removed if an item is wrapped in them. This is neccessary for
         // cases where your items contain a comma that is not in a group, so it
         // can't be distinguished from the comma delimiting items.
-        let Literals = {
-
         let Literals = [
             "a", 'b', {'c', 'c'}, [['d', 'd']]
         ];

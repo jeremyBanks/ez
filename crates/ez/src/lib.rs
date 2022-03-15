@@ -6,8 +6,10 @@ pub use ::ez_core::{throw, throws, try_throws, Error};
 pub use ::ez_main::ly;
 #[doc(inline)]
 pub use ::ez_main::main;
-pub use ::ezio::{file, random, stdio, string};
-pub use ::implicint::{int, Int};
+pub use {
+    ::ezio::{file, random, stdio, string},
+    ::implicint::{int, Int},
+};
 
 pub mod prelude {
     #[doc(inline)]
