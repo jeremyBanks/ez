@@ -19,7 +19,7 @@
             "editorInlayHint.typeBackground": "#30603010",
             "editorInlayHint.typeForeground": "#808080"
         },
-        "workbench.colorTheme": "Atom One Light",
+        "workbench.colorTheme": "1337",
         "editor.tokenColorCustomizations": {
             "textMateRules": [
                 {
