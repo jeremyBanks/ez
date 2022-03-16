@@ -1,5 +1,7 @@
 use orerr::{throws, try_throws};
 
+fn main() {}
+
 #[throws(struct)]
 fn thing() {}
 // #[derive(thiserror::Error)]

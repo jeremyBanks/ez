@@ -109,11 +109,12 @@ pub mod input {
                 }
 
                 "for" => {
-                    let body;
-                    let mut bindings = vec![];
 
-                    // let loop_binding = token.next().please()?;
-                    root.items.push(Item::For { bindings, body });
+                    // let body;
+                    // let mut bindings = vec![];
+
+                    // // let loop_binding = token.next().please()?;
+                    // root.items.push(Item::For { bindings, body });
                 }
 
                 _ => {
