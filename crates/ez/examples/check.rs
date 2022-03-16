@@ -1,12 +1,18 @@
+/*
 use orerr::{throws, try_throws};
 
-fn main() {}
+fn main() {
+
+}
 
 #[throws(struct)]
 fn thing() {}
 // #[derive(thiserror::Error)]
 // struct ThingError;
 // Result<(), ThingError>
+
+#[throws(struct NamedDynamicError(ez::Error))]
+fn thing() {}
 
 #[throws(ThingError)]
 fn alternate() {
@@ -29,4 +35,11 @@ pub fn banjo() {
     #[error = "hello whatever"]
     AnotherError(AnotherError),
 })]
-pub fn bingo() {}
+pub fn bingo() {
+
+}
+
+// Does anyhow add the appropriate adapters here?
+ */
+
+fn main() {}
