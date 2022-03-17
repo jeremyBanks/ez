@@ -95,7 +95,7 @@ pub struct DoopLetItem {
 
 #[derive(Parse, Debug, Clone)]
 pub struct RestTerm {
-    pub operation: PlusOrMinus,
+    pub operation: AddOrSub,
     pub term: BindingTerm,
 }
 
@@ -110,11 +110,11 @@ impl RestTerm {
 }
 
 #[derive(Parse, Debug, Clone)]
-pub enum PlusOrMinus {
-    #[peek(Token![+], name = "plus")]
-    Plus(Token![+]),
-    #[peek(Token![-], name = "minus")]
-    Minus(Token![-]),
+pub enum AddOrSub {
+    #[peek(Token![+], name = "add")]
+    Add(Token![+]),
+    #[peek(Token![-], name = "sub")]
+    Sub(Token![-]),
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -157,6 +157,7 @@ pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let input: DoopBlock = syn::parse2(tokens)?;
 
     println!("{input:#?}");
+    eprintln!("{input:#?}");
 
     let mut output = TokenStream::new();
 
