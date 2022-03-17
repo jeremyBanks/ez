@@ -16,15 +16,13 @@ doc = false
 proc-macro = true
 
 [dependencies]
+derive-syn-parse = "0.1.5"
 eyre = "0.6.6"
 indexmap = "1.8.0"
 itertools = "0.10.3"
 proc-macro2 = { version = "1.0.36", features = ["span-locations"] }
 quote = "1.0.15"
 syn = { version = "1.0.86", features = ["full", "visit", "visit-mut", "fold", "derive", "parsing", "printing", "clone-impls", "extra-traits", "proc-macro"] }
-
-[dev-dependencies]
-ez-macros = { path = "../ez-macros", version = "=0.0.7-dev" }
 
 [package.metadata.release]
 consolidate-commits = true

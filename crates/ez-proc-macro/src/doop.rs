@@ -2,142 +2,139 @@
 #![allow(dead_code)]
 
 use {
+    crate::common::{TokenTreeExt, TokenTreeIterExt},
+    derive_syn_parse::Parse,
     indexmap::{IndexMap, IndexSet},
     proc_macro2::{Group, Ident, Span, TokenStream, TokenTree},
     quote::ToTokens,
+    syn::{parse::Parse, Token},
 };
 
-pub mod input {
-    use {
-        crate::common::{TokenTreeExt, TokenTreeIterExt},
-        proc_macro2::{Group, Ident, Span, TokenStream},
-    };
+// #[derive(Parse, Debug, Clone)]
+// pub struct DoopBlock {
+//     pub items: Vec<Item>,
+// }
 
-    #[derive(Debug, Clone, Default)]
-    pub struct Root {
-        pub items: Vec<Item>,
+#[derive(Parse, Debug, Clone)]
+pub enum Item {
+    #[peek(Token![let], name = "let")]
+    Let { target: Ident, binding: Binding },
+    #[peek(Token![for], name = "for")]
+    For {
+        target: ForBindingTarget,
+        bindings: Vec<Binding>,
+        body: Group,
+    },
+}
+
+#[derive(Parse, Debug, Clone)]
+pub enum ForBindingTarget {
+    #[peek(syn::token::Paren, name = "tuple")]
+    Tuple(Vec<Ident>),
+    #[peek(syn::Ident, name = "array")]
+    Ident(Ident),
+}
+
+#[derive(Parse, Debug, Clone)]
+pub struct Binding {
+    pub ident: Ident,
+    pub terms: Vec<Term>,
+}
+
+#[derive(Parse, Debug, Clone)]
+pub enum Term {
+    #[peek(Token![-], name = "remove")]
+    Remove { items: Vec<Binding> },
+    #[peek(Token![+], name = "add")]
+    Add { items: Vec<Binding> },
+}
+
+pub fn next_terms(iter: &mut proc_macro2::token_stream::IntoIter) -> Result<Vec<Term>, syn::Error> {
+    let mut terms = Vec::new();
+    let mut negated = false;
+
+    loop {
+        let term = iter.clone().next_tt()?;
+        let mut items = Vec::new();
+
+        if let Ok(group) = term.group() {
+        } else if let Ok(ident) = term.ident() {
+        } else {
+            iter.err_on_next("expected an identifier or group")?;
+        }
+        let _ = iter.next();
+
+        terms.push(if negated {
+            Term::Remove { items }
+        } else {
+            Term::Add { items }
+        });
+
+        if iter.next_puncts_eq("+").is_ok() {
+            negated = false;
+            continue;
+        } else if iter.next_puncts_eq("-").is_ok() {
+            negated = true;
+            continue;
+        } else {
+            break;
+        }
     }
 
-    #[derive(Debug, Clone)]
-    pub enum Item {
-        Let {
-            target: Ident,
-            binding: Binding,
-        },
-        For {
-            target: ForBindingTarget,
-            bindings: Vec<Binding>,
-            body: Group,
-        },
-    }
+    Ok(terms)
+}
 
-    #[derive(Debug, Clone)]
-    pub enum ForBindingTarget {
-        Ident(Ident),
-        Tuple(Vec<Ident>),
-    }
+pub fn from_tokens(tokens: TokenStream) -> Result<Root, eyre::Report> {
+    let mut root = Root::default();
 
-    #[derive(Debug, Clone)]
-    pub struct Binding {
-        pub ident: Ident,
-        pub terms: Vec<Binding>,
-    }
+    let mut iter = tokens.into_iter();
 
-    #[derive(Debug, Clone)]
-    pub enum Term {
-        Add { items: Vec<Binding> },
-        Remove { items: Vec<Binding> },
-    }
+    while !iter.is_empty() {
+        match iter.next_ident()?.to_string().as_ref() {
+            "let" => {
+                // let terms = vec![];
 
-    pub fn next_terms(
-        iter: &mut proc_macro2::token_stream::IntoIter,
-    ) -> Result<Vec<Term>, syn::Error> {
-        let mut terms = Vec::new();
-        let mut negated = false;
+                let ident = iter.next_ident()?;
+                iter.next_puncts_eq("=")?;
 
-        loop {
-            let term = iter.clone().next_tt()?;
-            let mut items = Vec::new();
+                if let Ok(group) = iter.next_group() {
+                } else if let Ok(ident) = iter.next_ident() {
+                } else {
+                    iter.err_on_next("expected group or identifier")?;
+                }
 
-            if let Ok(group) = term.group() {
-            } else if let Ok(ident) = term.ident() {
-            } else {
-                iter.err_on_next("expected an identifier or group")?;
+                // next_doop_binding
+                // which is made up of next_doop_bindings delimited by + or -
+
+                let group = iter.next_group()?;
+
+                iter.next_puncts_eq(";")?;
+
+                // let mut bindings = IndexSet::new();
+                // let _replaced_bindings = let_bindings.insert(ident,
+                // bindings);
+
+                // root.items.push(Item::Let {
+                //     binding: Binding { ident, terms },
+                // });
             }
-            let _ = iter.next();
 
-            terms.push(if negated {
-                Term::Remove { items }
-            } else {
-                Term::Add { items }
-            });
+            "for" => {
 
-            if iter.next_puncts_eq("+").is_ok() {
-                negated = false;
-                continue;
-            } else if iter.next_puncts_eq("-").is_ok() {
-                negated = true;
-                continue;
-            } else {
-                break;
+                // let body;
+                // let mut bindings = vec![];
+
+                // // let loop_binding = token.next().please()?;
+                // root.items.push(Item::For { bindings, body });
+            }
+
+            _ => {
+                iter.err_on_next("expected `let` or `for`")?;
             }
         }
-
-        Ok(terms)
     }
 
-    pub fn from_tokens(tokens: TokenStream) -> Result<Root, eyre::Report> {
-        let mut root = Root::default();
-
-        let mut iter = tokens.into_iter();
-
-        while !iter.is_empty() {
-            match iter.next_ident()?.to_string().as_ref() {
-                "let" => {
-                    // let terms = vec![];
-
-                    let ident = iter.next_ident()?;
-                    iter.next_puncts_eq("=")?;
-
-                    if let Ok(group) = iter.next_group() {
-                    } else if let Ok(ident) = iter.next_ident() {
-                    } else {
-                        iter.err_on_next("expected group or identifier")?;
-                    }
-
-                    // next_doop_binding
-                    // which is made up of next_doop_bindings delimited by + or -
-
-                    let group = iter.next_group()?;
-
-                    iter.next_puncts_eq(";")?;
-
-                    // let mut bindings = IndexSet::new();
-                    // let _replaced_bindings = let_bindings.insert(ident,
-                    // bindings);
-
-                    // root.items.push(Item::Let {
-                    //     binding: Binding { ident, terms },
-                    // });
-                }
-
-                "for" => {
-
-                    // let body;
-                    // let mut bindings = vec![];
-
-                    // // let loop_binding = token.next().please()?;
-                    // root.items.push(Item::For { bindings, body });
-                }
-
-                _ => {
-                    iter.err_on_next("expected `let` or `for`")?;
-                }
-            }
-        }
-
-        Ok(root)
-    }
+    Ok(root)
 }
 
 pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
