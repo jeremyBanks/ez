@@ -7,12 +7,26 @@ use {
     indexmap::{IndexMap, IndexSet},
     proc_macro2::{Group, Ident, Span, TokenStream, TokenTree},
     quote::ToTokens,
-    syn::{parse::Parse, punctuated::Punctuated, Token},
+    syn::{
+        parse::{Parse, ParseStream},
+        punctuated::Punctuated,
+        token, Token,
+    },
 };
 
-#[derive(Parse, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct DoopBlock {
     pub items: Vec<DoopItem>,
+}
+
+impl Parse for DoopBlock {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let mut items = Vec::new();
+        while !input.is_empty() {
+            items.push(input.parse()?);
+        }
+        Ok(DoopBlock { items })
+    }
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -25,6 +39,7 @@ pub enum DoopItem {
 
 #[derive(Parse, Debug, Clone)]
 pub struct DoopForItem {
+    #[call(DoopForBinding::parse_vec)]
     pub bindings: Vec<DoopForBinding>,
     #[brace]
     pub braces: syn::token::Brace,
@@ -38,7 +53,18 @@ pub struct DoopForBinding {
     pub target: ForBindingTarget,
     #[prefix(Token![in])]
     pub first_term: BindingTerm,
+    #[call(RestTerm::parse_vec)]
     pub rest_terms: Vec<RestTerm>,
+}
+
+impl DoopForBinding {
+    pub fn parse_vec(input: ParseStream) -> syn::Result<Vec<Self>> {
+        let mut for_binding = Vec::new();
+        while input.peek(Token![for]) {
+            for_binding.push(input.parse()?);
+        }
+        Ok(for_binding)
+    }
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -46,10 +72,11 @@ pub struct ForBindingTarget {}
 
 #[derive(Parse, Debug, Clone)]
 pub struct DoopLetItem {
-    pub _let: Token![let],
+    #[prefix(Token![let])]
     pub ident: Ident,
-    pub _eq: Token![=],
+    #[prefix(Token![=])]
     pub first_term: BindingTerm,
+    #[call(RestTerm::parse_vec)]
     pub rest_terms: Vec<RestTerm>,
     pub semi: Token![;],
 }
@@ -58,6 +85,16 @@ pub struct DoopLetItem {
 pub struct RestTerm {
     pub operation: PlusOrMinus,
     pub term: BindingTerm,
+}
+
+impl RestTerm {
+    pub fn parse_vec(input: ParseStream) -> syn::Result<Vec<Self>> {
+        let mut rest_terms = Vec::new();
+        while input.peek(Token![+]) || input.peek(Token![-]) {
+            rest_terms.push(input.parse()?);
+        }
+        Ok(rest_terms)
+    }
 }
 
 #[derive(Parse, Debug, Clone)]
