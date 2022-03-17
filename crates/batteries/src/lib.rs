@@ -24,7 +24,7 @@ pub mod batteries {
             crossbeam::{self, thread::scope as thread_scope},
             crossterm::{self, tty::IsTty},
             csv, digest,
-            doop::doop,
+            doop::{doop, dooped},
             dpc_pariter::IteratorExt,
             either::Either,
             euclid,

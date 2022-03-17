@@ -1,3 +1,6 @@
+// #[dooped(for X in [A, B, C])]
+// struct X;
+
 #[ez::ly]
 fn main() {
     doop! {
@@ -5,7 +8,9 @@ fn main() {
         // The only difference is that one layer of the outer bracket character
         // will be removed if an item is wrapped in them. This is neccessary for
         // cases where your items contain a comma that is not in a group, so it
-        // can't be distinguished from the comma delimiting items.
+        // can't be distinguished from the comma delimiting items. Wait, naw.
+        // Screw that, trailing commas are convenient. We'll require bracketing
+        // instead for the empty case, like [[]].
         let Literals = [
             "a", 'b', {'c', 'c'}, [['d', 'd']]
         ];
@@ -45,10 +50,15 @@ fn main() {
 
         let Ops = [+, -, /, *];
 
-        for (Trait, method, @) in [(std::ops::Add, add, +), (::core::ops::Sub, sub, -), (Mul, mul, *), (Div, div, /)] {
+        for (Trait, method, OP) in [
+                (std::ops::Add, add, +),
+                (::core::ops::Sub, sub, -),
+                (Mul, mul, *),
+                (Div, div, /)
+            ] {
             let a = 4;
             let b = 6;
-            assert_eq!(a @ b, Trait::method(a, b));
+            assert_eq!(a OP b, Trait::method(a, b));
         }
     }
 }

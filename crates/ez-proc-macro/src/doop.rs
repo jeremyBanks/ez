@@ -20,8 +20,21 @@ pub mod input {
 
     #[derive(Debug, Clone)]
     pub enum Item {
-        Let { binding: Binding },
-        For { bindings: Vec<Binding>, body: Group },
+        Let {
+            target: Ident,
+            binding: Binding,
+        },
+        For {
+            target: ForBindingTarget,
+            bindings: Vec<Binding>,
+            body: Group,
+        },
+    }
+
+    #[derive(Debug, Clone)]
+    pub enum ForBindingTarget {
+        Ident(Ident),
+        Tuple(Vec<Ident>),
     }
 
     #[derive(Debug, Clone)]
@@ -81,7 +94,7 @@ pub mod input {
         while !iter.is_empty() {
             match iter.next_ident()?.to_string().as_ref() {
                 "let" => {
-                    let terms = vec![];
+                    // let terms = vec![];
 
                     let ident = iter.next_ident()?;
                     iter.next_puncts_eq("=")?;
@@ -103,9 +116,9 @@ pub mod input {
                     // let _replaced_bindings = let_bindings.insert(ident,
                     // bindings);
 
-                    root.items.push(Item::Let {
-                        binding: Binding { ident, terms },
-                    });
+                    // root.items.push(Item::Let {
+                    //     binding: Binding { ident, terms },
+                    // });
                 }
 
                 "for" => {
