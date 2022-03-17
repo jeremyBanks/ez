@@ -42,9 +42,6 @@ pub enum DoopItem {
 pub struct DoopForItem {
     #[call(DoopForBinding::parse_vec)]
     pub bindings: Vec<DoopForBinding>,
-    #[brace]
-    pub braces: token::Brace,
-    #[inside(braces)]
     pub body: proc_macro2::TokenTree,
 }
 
