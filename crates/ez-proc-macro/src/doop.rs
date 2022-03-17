@@ -7,46 +7,101 @@ use {
     indexmap::{IndexMap, IndexSet},
     proc_macro2::{Group, Ident, Span, TokenStream, TokenTree},
     quote::ToTokens,
-    syn::{parse::Parse, Token},
+    syn::{parse::Parse, punctuated::Punctuated, Token},
 };
 
-// #[derive(Parse, Debug, Clone)]
-// pub struct DoopBlock {
-//     pub items: Vec<Item>,
-// }
+#[derive(Parse, Debug, Clone)]
+pub struct DoopBlock {
+    pub items: Vec<DoopItem>,
+}
 
 #[derive(Parse, Debug, Clone)]
-pub enum Item {
+pub enum DoopItem {
     #[peek(Token![let], name = "let")]
-    Let { target: Ident, binding: Binding },
+    Let(DoopLetItem),
     #[peek(Token![for], name = "for")]
-    For {
-        target: ForBindingTarget,
-        bindings: Vec<Binding>,
-        body: Group,
-    },
+    For(DoopForItem),
 }
 
 #[derive(Parse, Debug, Clone)]
-pub enum ForBindingTarget {
-    #[peek(syn::token::Paren, name = "tuple")]
-    Tuple(Vec<Ident>),
-    #[peek(syn::Ident, name = "array")]
-    Ident(Ident),
+pub struct DoopForItem {
+    pub bindings: Vec<DoopForBinding>,
+    #[brace]
+    pub braces: syn::token::Brace,
+    #[inside(braces)]
+    pub body: proc_macro2::TokenTree,
 }
 
 #[derive(Parse, Debug, Clone)]
-pub struct Binding {
+pub struct DoopForBinding {
+    #[prefix(Token![for])]
+    pub target: ForBindingTarget,
+    #[prefix(Token![in])]
+    pub first_term: BindingTerm,
+    pub rest_terms: Vec<RestTerm>,
+}
+
+#[derive(Parse, Debug, Clone)]
+pub struct ForBindingTarget {}
+
+#[derive(Parse, Debug, Clone)]
+pub struct DoopLetItem {
+    pub _let: Token![let],
     pub ident: Ident,
-    pub terms: Vec<Term>,
+    pub _eq: Token![=],
+    pub first_term: BindingTerm,
+    pub rest_terms: Vec<RestTerm>,
+    pub semi: Token![;],
 }
 
 #[derive(Parse, Debug, Clone)]
-pub enum Term {
-    #[peek(Token![-], name = "remove")]
-    Remove { items: Vec<Binding> },
-    #[peek(Token![+], name = "add")]
-    Add { items: Vec<Binding> },
+pub struct RestTerm {
+    pub operation: PlusOrMinus,
+    pub term: BindingTerm,
+}
+
+#[derive(Parse, Debug, Clone)]
+pub enum PlusOrMinus {
+    #[peek(Token![+], name = "plus")]
+    Plus(Token![+]),
+    #[peek(Token![-], name = "minus")]
+    Minus(Token![-]),
+}
+
+#[derive(Parse, Debug, Clone)]
+pub enum BindingTerm {
+    #[peek(syn::Ident, name = "ident")]
+    Ident(Ident),
+    #[peek(syn::token::Bracket, name = "bracket list")]
+    BracketedList(BracketList),
+    #[peek(syn::token::Paren, name = "paren list")]
+    ParenList(ParenList),
+    #[peek(syn::token::Bracket, name = "brace list")]
+    BraceList(BraceList),
+}
+
+#[derive(Parse, Debug, Clone)]
+pub struct BracketList {
+    #[bracket]
+    bracket: syn::token::Bracket,
+    #[inside(bracket)]
+    _todo: TokenStream,
+}
+
+#[derive(Parse, Debug, Clone)]
+pub struct ParenList {
+    #[paren]
+    paren: syn::token::Paren,
+    #[inside(paren)]
+    _todo: TokenStream,
+}
+
+#[derive(Parse, Debug, Clone)]
+pub struct BraceList {
+    #[brace]
+    brace: syn::token::Brace,
+    #[inside(brace)]
+    _todo: TokenStream,
 }
 
 pub fn next_terms(iter: &mut proc_macro2::token_stream::IntoIter) -> Result<Vec<Term>, syn::Error> {
