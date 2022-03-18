@@ -4,13 +4,13 @@ use {
 };
 
 pub struct Doop {
-    pub semantics: crate::semantics::Doop,
+    pub evaluation: crate::evaluation::Doop,
 }
 
-impl TryFrom<crate::semantics::Doop> for Doop {
+impl TryFrom<crate::evaluation::Doop> for Doop {
     type Error = syn::Error;
-    fn try_from(semantics: crate::semantics::Doop) -> Result<Self, Self::Error> {
-        Ok(Doop { semantics })
+    fn try_from(evaluation: crate::evaluation::Doop) -> Result<Self, Self::Error> {
+        Ok(Doop { evaluation })
     }
 }
 

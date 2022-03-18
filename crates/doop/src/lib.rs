@@ -1,22 +1,22 @@
-pub(crate) mod semantics;
-pub(crate) mod syntax;
+pub(crate) mod evaluation;
+pub(crate) mod input;
 pub(crate) mod synthesis;
 
 #[proc_macro]
 pub fn doop(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let tokens: proc_macro2::TokenStream = tokens.into();
 
-    let syntax: syntax::DoopBlock = match syn::parse2(tokens) {
-        Ok(syntax) => syntax,
+    let input: input::DoopBlock = match syn::parse2(tokens) {
+        Ok(input) => input,
         Err(report) => return report.to_compile_error().into(),
     };
 
-    let semantics: semantics::Doop = match syntax.try_into() {
-        Ok(semantics) => semantics,
+    let evaluation: evaluation::Doop = match input.try_into() {
+        Ok(evaluation) => evaluation,
         Err(report) => return report.to_compile_error().into(),
     };
 
-    let synthesis: synthesis::Doop = match semantics.try_into() {
+    let synthesis: synthesis::Doop = match evaluation.try_into() {
         Ok(synthesis) => synthesis,
         Err(report) => return report.to_compile_error().into(),
     };
@@ -36,17 +36,17 @@ pub fn dooped(
     let attr: proc_macro2::TokenStream = attr.into();
     let item: proc_macro2::TokenStream = item.into();
 
-    let syntax = match syntax::DoopItem::try_from_tokens(attr, item) {
-        Ok(syntax) => syntax,
+    let input = match input::DoopItem::try_from_tokens(attr, item) {
+        Ok(input) => input,
         Err(report) => return report.to_compile_error().into(),
     };
 
-    let semantics: semantics::Doop = match syntax.try_into() {
-        Ok(semantics) => semantics,
+    let evaluation: evaluation::Doop = match input.try_into() {
+        Ok(evaluation) => evaluation,
         Err(report) => return report.to_compile_error().into(),
     };
 
-    let synthesis: synthesis::Doop = match semantics.try_into() {
+    let synthesis: synthesis::Doop = match evaluation.try_into() {
         Ok(synthesis) => synthesis,
         Err(report) => return report.to_compile_error().into(),
     };

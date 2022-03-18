@@ -1,5 +1,4 @@
 [package]
-authors = ["Jeremy Banks <_@jeremy.ca>"]
 autoexamples = false
 description = "A collection of easy-to-use, beginner-friendly utilities for Rust."
 edition = "2021"
