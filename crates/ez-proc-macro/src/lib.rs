@@ -47,20 +47,6 @@ pub fn ly(
 ) -> proc_macro::TokenStream {
     crate::main::ly(attribute_tokens.into(), function_tokens.into()).unwrap_token()
 }
-
-#[proc_macro]
-pub fn doop(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    crate::doop::doop(tokens.into()).unwrap_token()
-}
-
-#[proc_macro_attribute]
-pub fn doop_attr(
-    tokens: proc_macro::TokenStream,
-    attr: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
-    return tokens;
-}
-
 trait ResultExt: Sized {
     fn result(self) -> Result<TokenStream, eyre::Report>;
 

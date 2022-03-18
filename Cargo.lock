@@ -541,7 +541,11 @@ checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
 name = "doop"
 version = "0.0.7-dev"
 dependencies = [
- "ez-macros",
+ "derive-syn-parse",
+ "indexmap",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

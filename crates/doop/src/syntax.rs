@@ -1,12 +1,6 @@
-#![allow(clippy::all)]
-#![allow(dead_code)]
-
 use {
-    crate::common::{TokenTreeExt, TokenTreeIterExt},
     derive_syn_parse::Parse,
-    indexmap::{IndexMap, IndexSet},
-    proc_macro2::{Group, Ident, Span, TokenStream, TokenTree},
-    quote::ToTokens,
+    proc_macro2::{Ident, TokenStream},
     syn::{
         ext::IdentExt,
         parse::{Parse, ParseStream},
@@ -17,7 +11,7 @@ use {
 
 #[derive(Debug, Clone)]
 pub struct DoopBlock {
-    pub items: Vec<DoopItem>,
+    pub items: Vec<DoopBlockItem>,
 }
 
 impl Parse for DoopBlock {
@@ -30,8 +24,29 @@ impl Parse for DoopBlock {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct DoopItem {
+    pub bindings: DoopForBindings,
+    pub item: TokenStream,
+}
+
+impl DoopItem {
+    pub fn try_from_tokens(attr: TokenStream, item: TokenStream) -> syn::Result<DoopItem> {
+        Ok(DoopItem {
+            bindings: syn::parse2(attr)?,
+            item,
+        })
+    }
+}
+
 #[derive(Parse, Debug, Clone)]
-pub enum DoopItem {
+pub struct DoopForBindings {
+    #[call(DoopForBinding::parse_vec)]
+    bindings: Vec<DoopForBinding>,
+}
+
+#[derive(Parse, Debug, Clone)]
+pub enum DoopBlockItem {
     #[peek(Token![let], name = "let")]
     Let(DoopLetItem),
     #[peek(Token![for], name = "for")]
@@ -40,8 +55,7 @@ pub enum DoopItem {
 
 #[derive(Parse, Debug, Clone)]
 pub struct DoopForItem {
-    #[call(DoopForBinding::parse_vec)]
-    pub bindings: Vec<DoopForBinding>,
+    pub bindings: DoopForBindings,
     pub body: proc_macro2::TokenTree,
 }
 
@@ -151,43 +165,4 @@ pub struct BraceList {
     brace: token::Brace,
     #[inside(brace)]
     _todo: TokenStream,
-}
-
-pub fn doop(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
-    let input: DoopBlock = syn::parse2(tokens)?;
-
-    println!("{input:#?}");
-    eprintln!("{input:#?}");
-
-    let mut output = TokenStream::new();
-
-    let mut let_bindings = IndexMap::<Ident, IndexSet<TokenStream>>::new();
-
-    Ok(output.into_iter().collect())
-}
-
-// We should also support punctuation subsitution?
-fn replace_ident_in_token_stream(
-    input: TokenStream,
-    ident: &Ident,
-    replacement: TokenStream,
-) -> Result<TokenStream, syn::Error> {
-    let mut output = TokenStream::new();
-    for token in input {
-        match token {
-            TokenTree::Ident(ref candidate) =>
-                if *candidate == *ident {
-                    output.extend(replacement.clone().into_token_stream());
-                } else {
-                    output.extend([token.clone()]);
-                },
-
-            TokenTree::Group(group) => output.extend([TokenTree::Group(Group::new(
-                group.delimiter(),
-                replace_ident_in_token_stream(group.stream(), ident, replacement.clone())?,
-            ))]),
-            _ => output.extend([token.clone()]),
-        }
-    }
-    Ok(output)
 }
