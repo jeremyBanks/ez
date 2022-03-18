@@ -21,6 +21,8 @@ pub mod prelude {
 
 pub use ::batteries::batteries;
 
+pub mod _posts;
+
 #[doc(hidden)]
 pub mod __ {
     //! **⚠️ INTERNAL! DO NOT USE!**

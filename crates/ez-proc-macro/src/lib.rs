@@ -1,7 +1,6 @@
 use proc_macro2::{Span, TokenStream};
 
 mod common;
-mod doop;
 mod errors;
 mod main;
 
