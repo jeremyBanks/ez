@@ -9,7 +9,8 @@
         "ms-vscode.theme-1337",
         "tamasfe.even-better-toml",
         "Tyriar.sort-lines",
-        "usernamehw.errorlens"
+        "usernamehw.errorlens",
+        "vadimcn.vscode-lldb"
     ],
     "settings": {
         "workbench.colorCustomizations": {
