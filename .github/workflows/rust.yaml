@@ -10,7 +10,7 @@ jobs:
       matrix:
         include:
         - name: maximum versions
-          rust_toolchain: nightly
+          rust_toolchain: beta
         - name: minimum versions
           rust_toolchain: 1.59.0
           bootstrap: RUSTC_BOOTSTRAP=1

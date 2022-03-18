@@ -22,4 +22,4 @@ RUN rustup toolchain add stable nightly beta 1.59.0 \
 
 RUN curl https://wasmtime.dev/install.sh -sSf | bash
 
-RUN cargo install baking cargo-edit cargo-expand cargo-format cargo-geiger cargo-udeps cargo-wasi git-uncommit save tokio-console
+RUN cargo install baking cargo-edit cargo-expand cargo-format cargo-geiger cargo-udeps cargo-wasi git-uncommit https save tokio-console

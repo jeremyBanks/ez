@@ -21,8 +21,6 @@ pub mod prelude {
 
 pub use ::batteries::batteries;
 
-pub mod _posts;
-
 #[doc(hidden)]
 pub mod __ {
     //! **⚠️ INTERNAL! DO NOT USE!**
@@ -35,4 +33,27 @@ pub mod __ {
     pub use ::ez_core::__::*;
     #[doc(inline)]
     pub use ::ez_main::__::*;
+}
+
+#[cfg(doc)]
+pub mod docs {
+    //! Documents
+
+    macro_rules! docs {
+        ($( $ident:ident ),* $(,)?) => {
+            $(
+                pub mod $ident {
+                    //! <!-- -->
+                    //!
+                    //! [🔗](./)
+                    //!
+                    #![doc = include_str!(concat!("../docs/", stringify!($ident), ".md"))]
+                }
+            )*
+        }
+    }
+
+    docs! {
+        overview,
+    }
 }
