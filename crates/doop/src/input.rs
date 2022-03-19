@@ -1,8 +1,7 @@
-use proc_macro2::TokenTree;
-
 use {
     derive_syn_parse::Parse,
-    proc_macro2::{Ident, TokenStream},
+    proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree},
+    quote::ToTokens,
     syn::{
         ext::IdentExt,
         parse::{Parse, ParseStream},
@@ -149,41 +148,9 @@ pub enum BindingTerm {
 pub struct BracketList {
     #[bracket]
     _bracket: token::Bracket,
-    #[call(BracketList::parse_entries)]
-    entries: Vec<TokenStream>,
-}
-
-impl BracketList {
-    pub fn parse_entries(input: ParseStream) -> syn::Result<Vec<TokenStream>> {
-        let mut entries = Vec::new();
-        let mut next_entry = TokenStream::new();
-
-        while !input.is_empty() {
-            if input.peek(Token![,]) {
-                entries.push(next_entry);
-                next_entry = TokenStream::new();
-                input.parse::<Token![,]>()?;
-                continue;
-            }
-
-            // match token {
-            //     syn::token::Comma => {
-            //         entries.push(next_entry);
-            //         next_entry = TokenStream::new();
-            //     }
-
-
-            //     TokenTree::Group(group) => {
-            //         next_entry.extend(group.stream());
-            //     }
-            //     _ => {
-            //         next_entry.extend(token.into());
-            //     }
-            // }
-        }
-
-        Ok(entries)
-    }
+    #[inside(_bracket)]
+    #[call(Self::parse_entries)]
+    pub entries: Vec<TokenStream>,
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -191,7 +158,8 @@ pub struct ParenList {
     #[paren]
     _paren: token::Paren,
     #[inside(_paren)]
-    _todo: TokenStream,
+    #[call(Self::parse_entries)]
+    pub entries: Vec<TokenStream>,
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -199,5 +167,55 @@ pub struct BraceList {
     #[brace]
     _brace: token::Brace,
     #[inside(_brace)]
-    _todo: TokenStream,
+    #[call(Self::parse_entries)]
+    pub entries: Vec<TokenStream>,
+}
+
+trait GroupList {
+    const DELIMITER: Delimiter;
+
+    fn parse_entries(input: ParseStream) -> syn::Result<Vec<TokenStream>> {
+        let mut entries = Vec::new();
+
+        while !input.is_empty() {
+            if input.peek(Token![,]) {
+                entries.push(Vec::new());
+                input.parse::<Token![,]>()?;
+            } else {
+                let token = input.parse::<TokenTree>()?;
+                if entries.is_empty() {
+                    entries.push(Vec::new());
+                }
+                entries.last_mut().unwrap().push(token);
+            }
+        }
+
+        let entries = entries
+            .into_iter()
+            .map(|mut entry| {
+                if entry.len() == 1 {
+                    if let TokenTree::Group(ref mut group) = entry[0] {
+                        if group.delimiter() == Self::DELIMITER {
+                            entry = group.stream().into_iter().collect();
+                        }
+                    }
+                }
+                TokenStream::from_iter(entry)
+            })
+            .collect();
+
+        Ok(entries)
+    }
+}
+
+impl GroupList for BracketList {
+    const DELIMITER: Delimiter = Delimiter::Bracket;
+}
+
+impl GroupList for ParenList {
+    const DELIMITER: Delimiter = Delimiter::Parenthesis;
+}
+
+impl GroupList for BraceList {
+    const DELIMITER: Delimiter = Delimiter::Brace;
 }

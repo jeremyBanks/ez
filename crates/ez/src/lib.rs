@@ -38,6 +38,7 @@ pub mod __ {
 #[cfg(doc)]
 pub mod docs {
     //! Documents
+    use super::*;
 
     macro_rules! docs {
         ($( $ident:ident ),* $(,)?) => {
@@ -58,5 +59,6 @@ pub mod docs {
     docs! {
         overview,
         introducing_doop,
+        introducing_erro,
     }
 }

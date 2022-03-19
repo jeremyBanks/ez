@@ -4,40 +4,27 @@
         "akamud.vscode-theme-onelight",
         "denoland.vscode-deno",
         "eamodio.gitlens",
+        "GitHub.github-vscode-theme",
         "github.github-vscode-theme",
         "matklad.rust-analyzer",
         "ms-vscode.theme-1337",
         "tamasfe.even-better-toml",
         "Tyriar.sort-lines",
         "usernamehw.errorlens",
-        "vadimcn.vscode-lldb",
-        "GitHub.github-vscode-theme"
+        "vadimcn.vscode-lldb"
     ],
     "settings": {
-        "workbench.colorCustomizations": {
-            "editorInlayHint.foreground": "#898a60",
-            "editorInlayHint.parameterBackground": "#60303010",
-            "editorInlayHint.parameterForeground": "#968383",
-            "editorInlayHint.typeBackground": "#30603010",
-            "editorInlayHint.typeForeground": "#808080"
-        },
-        "workbench.colorTheme": "1337",
         "editor.tokenColorCustomizations": {
-            "textMateRules": [
-                {
-                    "scope": "punctuation.definition.comment",
-                    "settings": {
-                        "foreground": "#0A44",
-                        "fontStyle": "bold"
+            "[1337]": {
+                "textMateRules": [
+                    {
+                        "scope": "comment",
+                        "settings": {
+                            "foreground": "#FFF"
+                        }
                     }
-                },
-                {
-                    "scope": "comment",
-                    "settings": {
-                        "fontStyle": ""
-                    }
-                }
-            ],
+                ]
+            },
             "[Atom One Dark]": {
                 "textMateRules": [
                     {
@@ -48,12 +35,12 @@
                     }
                 ]
             },
-            "[1337]": {
+            "[Atom One Light]": {
                 "textMateRules": [
                     {
                         "scope": "comment",
                         "settings": {
-                            "foreground": "#FFF"
+                            "foreground": "#000"
                         }
                     }
                 ]
@@ -78,16 +65,31 @@
                     }
                 ]
             },
-            "[Atom One Light]": {
-                "textMateRules": [
-                    {
-                        "scope": "comment",
-                        "settings": {
-                            "foreground": "#000"
-                        }
+            "textMateRules": [
+                {
+                    "scope": "punctuation.definition.comment",
+                    "settings": {
+                        "fontStyle": "bold",
+                        "foreground": "#0A44"
                     }
-                ]
-            }
-        }
+                },
+                {
+                    "scope": "comment",
+                    "settings": {
+                        "fontStyle": ""
+                    }
+                }
+            ]
+        },
+        "rust-analyzer.checkOnSave.command": "doc",
+        "rust-analyzer.checkOnSave.allTargets": false,
+        "workbench.colorCustomizations": {
+            "editorInlayHint.foreground": "#898a60",
+            "editorInlayHint.parameterBackground": "#60303010",
+            "editorInlayHint.parameterForeground": "#968383",
+            "editorInlayHint.typeBackground": "#30603010",
+            "editorInlayHint.typeForeground": "#808080"
+        },
+        "workbench.colorTheme": "1337"
     }
 }
