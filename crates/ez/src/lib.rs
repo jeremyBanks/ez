@@ -44,13 +44,18 @@ pub mod docs {
         ($( $ident:ident ),* $(,)?) => {
             $(
                 pub mod $ident {
-                    //! <!-- -->
+                    //! [🔗][self#!]
                     //!
-                    //! [🔗](./#!)
-                    //!
+                    //! <details>
+                    //! <summary>&nbsp;</summary>
+                    //! <br />
                     //! <div id="!"></div>
                     //!
                     #![doc = include_str!(concat!("../docs/", stringify!($ident), ".md"))]
+                    //!
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! </details>
                 }
             )*
         }

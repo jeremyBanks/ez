@@ -1,6 +1,3 @@
-// #[dooped(for X in [A, B, C])]
-// struct X;
-
 #[ez::ly]
 fn main() {
     #[dooped(for (name, value) in [(a, 1), (b, 2), (c, 3)])]
