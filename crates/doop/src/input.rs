@@ -1,7 +1,6 @@
 use {
     derive_syn_parse::Parse,
     proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree},
-    quote::ToTokens,
     syn::{
         ext::IdentExt,
         parse::{Parse, ParseStream},
@@ -25,18 +24,23 @@ impl Parse for DoopBlock {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Parse, Debug, Clone)]
 pub struct DoopItem {
-    pub bindings: DoopForBindings,
+    #[call(DoopLetItem::parse_vec)]
+    pub let_declarations: Vec<DoopLetItem>,
+    pub for_bindings: DoopForBindings,
     pub item: TokenStream,
 }
 
-impl DoopItem {
-    pub fn try_from_tokens(attr: TokenStream, item: TokenStream) -> syn::Result<DoopItem> {
-        Ok(DoopItem {
-            bindings: syn::parse2(attr)?,
-            item,
-        })
+impl From<DoopItem> for DoopBlock {
+    fn from(item: DoopItem) -> Self {
+        let mut items = vec![];
+        items.extend(item.let_declarations.into_iter().map(DoopBlockItem::Let));
+        items.push(DoopBlockItem::For(DoopForItem {
+            bindings: item.for_bindings,
+            body: Group::new(Delimiter::Brace, item.item).into(),
+        }));
+        DoopBlock { items }
     }
 }
 
@@ -68,6 +72,16 @@ pub struct DoopForBinding {
     pub first_term: BindingTerm,
     #[call(RestTerm::parse_vec)]
     pub rest_terms: Vec<RestTerm>,
+}
+
+impl DoopLetItem {
+    pub fn parse_vec(input: ParseStream) -> syn::Result<Vec<Self>> {
+        let mut for_binding = Vec::new();
+        while input.peek(Token![let]) {
+            for_binding.push(input.parse()?);
+        }
+        Ok(for_binding)
+    }
 }
 
 impl DoopForBinding {

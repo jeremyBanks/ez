@@ -4,20 +4,6 @@ use {
     std::hash::{Hash, Hasher},
 };
 
-pub struct BindingEntries {
-    bindings: IndexSet<BindingEntry>,
-}
-
-impl BindingEntries {
-    pub fn add(&mut self, binding: BindingEntry) {
-        self.bindings.insert(binding);
-    }
-
-    pub fn remove(&mut self, binding: BindingEntry) {
-        self.bindings.remove(&binding);
-    }
-}
-
 pub struct BindingEntry {
     tokens: Vec<TokenTree>,
     as_strings: Vec<String>,
@@ -80,6 +66,12 @@ impl Eq for BindingEntry {}
 
 pub struct Doop {
     pub items: Vec<DoopItem>,
+}
+
+impl Doop {
+    pub fn new() -> Self {
+        Doop { items: Vec::new() }
+    }
 }
 
 pub struct DoopItem {

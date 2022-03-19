@@ -10,7 +10,6 @@ fn main() {
             "a", 'b', {'c', 'c'}, [['d', 'd']]
         ];
 
-
         let Identifiers = [a, b, see, _3, Trait, Type];
         let Keywords = [fn, loop, let];
         let Paths = [::std, u64, std::collections::HashMap<i8, u64>];
