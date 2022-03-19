@@ -20,24 +20,53 @@ impl BindingEntries {
 
 pub struct BindingEntry {
     tokens: Vec<TokenTree>,
-    as_string: String,
+    as_strings: Vec<String>,
+}
+
+impl BindingEntry {
+    pub fn iter(&self) -> impl Iterator<Item = &TokenTree> {
+        self.tokens.iter()
+    }
+}
+
+impl FromIterator<TokenTree> for BindingEntry {
+    fn from_iter<T: IntoIterator<Item = TokenTree>>(tokens: T) -> Self {
+        let tokens: Vec<TokenTree> = tokens.into_iter().collect();
+        let as_strings = tokens.iter().map(|token| token.to_string()).collect();
+        BindingEntry { tokens, as_strings }
+    }
+}
+
+impl IntoIterator for BindingEntry {
+    type Item = TokenTree;
+    type IntoIter = ::std::vec::IntoIter<TokenTree>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.tokens.into_iter()
+    }
+}
+
+impl BindingEntry {
+    pub fn tokens(&self) -> &[TokenTree] {
+        &self.tokens
+    }
 }
 
 impl Hash for BindingEntry {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.as_string.hash(state);
+        self.as_strings.hash(state);
     }
 }
 
 impl PartialEq for BindingEntry {
     fn eq(&self, other: &Self) -> bool {
-        self.as_string == other.as_string
+        self.as_strings == other.as_strings
     }
 }
 
 impl Ord for BindingEntry {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.as_string.cmp(&other.as_string)
+        self.as_strings.cmp(&other.as_strings)
     }
 }
 

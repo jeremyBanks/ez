@@ -2,110 +2,59 @@
 
 _April 1, 2022_
 
-I would like to introduce my new crate, [`doop`](https://crates.io/crates/doop). Doop–pronounced
-like "dupe" and spelled like "loop"is a new procedural macro for local code duplication using a
-loop-style syntax. Doop improves on existing options by providing a more familiar and readable
-syntax for developers.
+I would like to introduce my new crate, [`doop`](https://crates.io/crates/doop). Doop—pronounced
+like "dupe" and spelled like "loop"—is a new procedural macro for local code duplication using a
+loop-style syntax. Doop improves on existing options by providing a more simple and familiar syntax,
+while retaining enough flexibility to cover most uses.
 
-Let's start with a hypothetical integer wrapper type, which we only to allow to be set to odd
-values.
+Doop can be used as the [`doop!{ … }`][self] function-style macro or, in cases where you're
+duplicating one [item](https://doc.rust-lang.org/reference/items.html), as the
+[`#[dooped( … )]`][self] attribute macro.
+
+## Examples
 
 ```rust
-use doop::{doop, dooped};
+trait MyTrait: Default {
+    fn some() -> Self;
+}
 
-#[Derive(Debug, Clone)]
-struct OddInteger(i164);
-
-#[derive(Debug, Clone)]
-struct IsNotOddError;
-
-impl OddInteger {
-    pub fn try_new(integer: i64) -> Result<OddInteger, IsNotOddError> {
-        if integer % 2 == 1 {
-            Ok(OddInteger(other))
-        } else {
-            Err(IsNotOddError)
-        }
+#[dooped(for SomeType in [u8, i8, u16, i16, u32, i32, i64])]
+impl MyTrait for SomeType {
+    fn some() -> SomeType {
+        42
     }
 }
 ```
 
-We could implement [`TryFrom`] for some of the built-in integer types using the `doop!` macro's
-for-loop-style syntax, like this:
+## Full Syntax
 
-```rust
-doop! {
-    for IntType in [u8, i8, u16, i16, u32, i32, i64] {
-        impl TryFrom<IntType> for OddInteger {
-            type Error = IsNotOddError;
-            fn try_from(other: IntType) -> Result<OddInteger, IsNotOddError> {
-                OddInteger::try_new(i64::from(other))
-            }
-        }
-    }
-}
-```
+### Macros
 
-<details>
-<summary>
-## Alternative
-</summary>
+### Lists
 
-Hello world
+### `let` Bindings
 
-</details>
+### `for` Repetitions
 
-Our code block will be copied `IntType` will be
+### Operations
 
-```rust
-    for (Name, Inner) in [ (Int, i64), (Float, f64), (Bytes, Vec<u8>) ] {
-        pub struct Name {
-            inner: Inner
-        }
+#### Add `+`
 
-        impl From<Inner> for Name {
-            fn from(inner: Inner): Name {
-                Name { inner }
-            }
-        }
+#### Remove `-`
 
-        impl From<Name> for Inner {
-            fn from(x: Name): Inner {
-                x.inner
-            }
-        }
-    }
-```
+#### Cartesian Product as Tuples `*`
 
-## Details
+#### Concatenation/Zipping as Tuples `&`
 
-They're kind-of neat.
+## Stability and MSRV
 
-## Operations
+The initial release is version `0.1`. Backwards-incompatible changes are not anticipated, but may
+happen until version `1.0`.
 
-Precedence is all left-to-right. Use parentheses. If you need something more specific, you need to
-use let expressions.
+The minimum supported Rust version is 1.59; if this is ever increased it will be considered a
+semver-breaking change.
 
-Cartesian product using `*`, which you can then exclude specific ones from. Repetition per-item
-using * with an integer? So you can do like
+## Feedback
 
-let Types = [u8, u16, u32]; let Pairs = (Types * Types) - (Types * 2)
-
-Yeah, I like this.
-
-### Attribute-Style
-
-If you are duplicating a single item, you may use the `#[dooped(...)]` attribute form instead.
-
-```rust
-use doop::dooped;
-
-struct MyType(u16);
-
-#[dooped(for Other in [u8, u16, u32, u64])]
-impl From<Other> for MyType {
-    fn from(x: Other) -> MyType {
-        MyType(x.into())
-    }
-}
-```
+Bug reports, requests, questions, and other feedback are welcome
+[as GitHub issues](https://github.com/jeremyBanks/ez/issues/new).

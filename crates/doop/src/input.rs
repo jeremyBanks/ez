@@ -138,8 +138,6 @@ pub enum BindingTerm {
     Ident(Ident),
     #[peek(token::Bracket, name = "bracket list")]
     BracketedList(BracketList),
-    #[peek(token::Paren, name = "paren list")]
-    ParenList(ParenList),
     #[peek(token::Bracket, name = "brace list")]
     BraceList(BraceList),
 }
@@ -149,15 +147,6 @@ pub struct BracketList {
     #[bracket]
     _bracket: token::Bracket,
     #[inside(_bracket)]
-    #[call(Self::parse_entries)]
-    pub entries: Vec<TokenStream>,
-}
-
-#[derive(Parse, Debug, Clone)]
-pub struct ParenList {
-    #[paren]
-    _paren: token::Paren,
-    #[inside(_paren)]
     #[call(Self::parse_entries)]
     pub entries: Vec<TokenStream>,
 }
@@ -210,10 +199,6 @@ trait GroupList {
 
 impl GroupList for BracketList {
     const DELIMITER: Delimiter = Delimiter::Bracket;
-}
-
-impl GroupList for ParenList {
-    const DELIMITER: Delimiter = Delimiter::Parenthesis;
 }
 
 impl GroupList for BraceList {

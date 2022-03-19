@@ -1,10 +1,5 @@
 #[ez::ly]
 fn main() {
-    #[dooped(for (name, value) in [(a, 1), (b, 2), (c, 3)])]
-    fn name() {
-        value
-    }
-
     doop! {
         // You can use any of ({[/]}) to bracket the items.
         // The only difference is that one layer of the outer bracket character
