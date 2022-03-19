@@ -103,20 +103,7 @@ impl TryFrom<crate::input::DoopBlock> for Doop {
     type Error = syn::Error;
     fn try_from(input: crate::input::DoopBlock) -> Result<Self, Self::Error> {
         Ok(Doop {
-            items: panic!("{input:#?}"),
+            items: todo!("{}", &format!("{input:#?}")[..=256]),
         })
-    }
-}
-
-impl TryFrom<crate::input::DoopItem> for Doop {
-    type Error = syn::Error;
-    fn try_from(input: crate::input::DoopItem) -> Result<Self, Self::Error> {
-        todo!()
-        // Ok(Doop {
-        // items: vec![DoopItem {
-        //     for_bindings: input.bindings.into(),
-        //     body: input.item,
-        // }],
-        // })
     }
 }

@@ -25,26 +25,6 @@ impl Parse for DoopBlock {
 }
 
 #[derive(Parse, Debug, Clone)]
-pub struct DoopItem {
-    #[call(DoopLetItem::parse_vec)]
-    pub let_declarations: Vec<DoopLetItem>,
-    pub for_bindings: DoopForBindings,
-    pub item: TokenStream,
-}
-
-impl From<DoopItem> for DoopBlock {
-    fn from(item: DoopItem) -> Self {
-        let mut items = vec![];
-        items.extend(item.let_declarations.into_iter().map(DoopBlockItem::Let));
-        items.push(DoopBlockItem::For(DoopForItem {
-            bindings: item.for_bindings,
-            body: Group::new(Delimiter::Brace, item.item).into(),
-        }));
-        DoopBlock { items }
-    }
-}
-
-#[derive(Parse, Debug, Clone)]
 pub struct DoopForBindings {
     #[call(DoopForBinding::parse_vec)]
     bindings: Vec<DoopForBinding>,
