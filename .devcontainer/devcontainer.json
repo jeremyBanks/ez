@@ -10,7 +10,8 @@
         "tamasfe.even-better-toml",
         "Tyriar.sort-lines",
         "usernamehw.errorlens",
-        "vadimcn.vscode-lldb"
+        "vadimcn.vscode-lldb",
+        "GitHub.github-vscode-theme"
     ],
     "settings": {
         "workbench.colorCustomizations": {

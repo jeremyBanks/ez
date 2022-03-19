@@ -45,7 +45,9 @@ pub mod docs {
                 pub mod $ident {
                     //! <!-- -->
                     //!
-                    //! [🔗](./)
+                    //! [🔗](./#!)
+                    //!
+                    //! <div id="!"></div>
                     //!
                     #![doc = include_str!(concat!("../docs/", stringify!($ident), ".md"))]
                 }
@@ -55,5 +57,6 @@ pub mod docs {
 
     docs! {
         overview,
+        introducing_doop,
     }
 }

@@ -1,3 +1,5 @@
+use proc_macro2::TokenTree;
+
 use {
     derive_syn_parse::Parse,
     proc_macro2::{Ident, TokenStream},
@@ -146,23 +148,56 @@ pub enum BindingTerm {
 #[derive(Parse, Debug, Clone)]
 pub struct BracketList {
     #[bracket]
-    bracket: token::Bracket,
-    #[inside(bracket)]
-    _todo: TokenStream,
+    _bracket: token::Bracket,
+    #[call(BracketList::parse_entries)]
+    entries: Vec<TokenStream>,
+}
+
+impl BracketList {
+    pub fn parse_entries(input: ParseStream) -> syn::Result<Vec<TokenStream>> {
+        let mut entries = Vec::new();
+        let mut next_entry = TokenStream::new();
+
+        while !input.is_empty() {
+            if input.peek(Token![,]) {
+                entries.push(next_entry);
+                next_entry = TokenStream::new();
+                input.parse::<Token![,]>()?;
+                continue;
+            }
+
+            // match token {
+            //     syn::token::Comma => {
+            //         entries.push(next_entry);
+            //         next_entry = TokenStream::new();
+            //     }
+
+
+            //     TokenTree::Group(group) => {
+            //         next_entry.extend(group.stream());
+            //     }
+            //     _ => {
+            //         next_entry.extend(token.into());
+            //     }
+            // }
+        }
+
+        Ok(entries)
+    }
 }
 
 #[derive(Parse, Debug, Clone)]
 pub struct ParenList {
     #[paren]
-    paren: token::Paren,
-    #[inside(paren)]
+    _paren: token::Paren,
+    #[inside(_paren)]
     _todo: TokenStream,
 }
 
 #[derive(Parse, Debug, Clone)]
 pub struct BraceList {
     #[brace]
-    brace: token::Brace,
-    #[inside(brace)]
+    _brace: token::Brace,
+    #[inside(_brace)]
     _todo: TokenStream,
 }

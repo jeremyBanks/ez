@@ -675,6 +675,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ezrs"
+version = "0.0.7-dev"
+
+[[package]]
 name = "fastrand"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
