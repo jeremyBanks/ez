@@ -1,6 +1,5 @@
 use {
     proc_macro::{Delimiter, Group, TokenStream, TokenTree},
-    quote::quote,
 };
 
 pub(crate) mod evaluation;
