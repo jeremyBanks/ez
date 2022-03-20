@@ -9,8 +9,8 @@ while retaining enough flexibility to cover most uses.
 
 Doop can be used as the [`doop!{ … }`][self] function-style macro or, in cases where you're
 duplicating one [item](https://doc.rust-lang.org/reference/items.html), as the
-[`#[dooped( … )]`][self] attribute macro. I'll show examples of the different ways it
-can be used, then elaborate on the details of the syntax.
+[`#[dooped( … )]`][self] attribute macro. I'll show examples of the different ways it can be used,
+then elaborate on the details of the syntax.
 
 ## Examples
 
@@ -69,6 +69,7 @@ doop! {
     }
 }
 ```
+
 </summary>
 
 ```rust
@@ -97,10 +98,10 @@ doop! {
     }
 }
 ```
+
 </summary>
 
 ```rust
-
 ```
 
 </details><br /><details><summary><strong>Nested iterations:</strong>
@@ -115,10 +116,10 @@ doop! {
     }
 }
 ```
+
 </summary>
 
 ```rust
-
 ```
 
 </details>

@@ -1,6 +1,4 @@
-use {
-    proc_macro::{Delimiter, Group, TokenStream, TokenTree},
-};
+use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 
 pub(crate) mod evaluation;
 pub(crate) mod input;
