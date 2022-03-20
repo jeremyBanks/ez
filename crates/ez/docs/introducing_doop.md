@@ -4,8 +4,8 @@ _April 1, 2022_
 
 I would like to introduce my new crate, [`doop`](https://crates.io/crates/doop). Doop—pronounced
 like "dupe" and spelled like "loop"—is a new procedural macro for local code duplication using a
-loop-style syntax. Doop improves on existing options by providing a more simple and familiar syntax,
-while retaining enough flexibility to cover most uses.
+loop-style syntax. Doop improves on existing options by providing a simple and familiar syntax while
+retaining enough flexibility to cover most uses.
 
 Doop can be used as the [`doop!{ … }`][self] function-style macro or, in cases where you're
 duplicating one [item](https://doc.rust-lang.org/reference/items.html), as the
@@ -16,7 +16,7 @@ then elaborate on the details of the syntax.
 
 You can click any example to display its full macro expansion below.
 
-<details><summary><strong>Duplicating a single item with a simple replacement:</strong>
+<br /><details><summary><strong>Duplicating a single item with a simple replacement:</strong>
 
 ```rust
 #[dooped(for SomeType in [u8, i8, u16, i16])]
@@ -83,7 +83,7 @@ let unit: () = Default::default();
 println!("{:?}", unit);
 ```
 
-</details><br /><details><summary><strong>Binding lists of replacements using pseudo <code>let</code> statements:</strong>
+</details><br /><details><summary><strong>Binding lists of replacements using pseudo <code>let</code> </strong>statements:
 
 ```rust
 doop! {
@@ -102,17 +102,26 @@ doop! {
 </summary>
 
 ```rust
+println!("{#:?}", i8::default());
+println!("{#:?}", u8::default());
+println!("{#:?}", i16::default());
+println!("{#:?}", u16::default());
+
+println!("{#:?}", i8::default() + 1);
+println!("{#:?}", u8::default() + 1);
+println!("{#:?}", i16::default() + 1);
+println!("{#:?}", u16::default() + 1);
 ```
 
 </details><br /><details><summary><strong>Nested iterations:</strong>
 
 ```rust
 doop! {
-    for value in [1, 2, 3]
-    for SUFFIX in [+ x, - x, * x, .pow(x)]
+    for (name, value) in [(apple, 1), (banana, 2), (cherry, 3)]
+    for SUFFIX in [+ name, - 42, * 123, .pow(3)]
     for Type in [i8, u8] {
-        let x: Type = value;
-        let y = x SUFFIX;
+        let name: Type = value;
+        let after = x SUFFIX;
     }
 }
 ```
@@ -120,6 +129,93 @@ doop! {
 </summary>
 
 ```rust
+let apple: i8 = 1;
+let after = apple + apple;
+let apple: u8 = 1;
+let after = apple + apple;
+let apple: i8 = 1;
+let after = apple - 42;
+let apple: u8 = 1;
+let after = apple - 42;
+let apple: i8 = 1;
+let after = apple * 123;
+let apple: u8 = 1;
+let after = apple * 123;
+let apple: i8 = 1;
+let after = apple.pow(3);
+let apple: u8 = 1;
+let after = apple.pow(3);
+let banana: i8 = 2;
+let after = banana + banana;
+let banana: u8 = 2;
+let after = banana + banana;
+let banana: i8 = 2;
+let after = banana - 42;
+let banana: u8 = 2;
+let after = banana - 42;
+let banana: i8 = 2;
+let after = banana * 123;
+let banana: u8 = 2;
+let after = banana * 123;
+let banana: i8 = 2;
+let after = banana.pow(3);
+let banana: u8 = 2;
+let after = banana.pow(3);
+let cherry: i8 = 3;
+let after = cherry + cherry;
+let cherry: u8 = 3;
+let after = cherry + cherry;
+let cherry: i8 = 3;
+let after = cherry - 42;
+let cherry: u8 = 3;
+let after = cherry - 42;
+let cherry: i8 = 3;
+let after = cherry * 123;
+let cherry: u8 = 3;
+let after = cherry * 123;
+let cherry: i8 = 3;
+let after = cherry.pow(3);
+let cherry: u8 = 3;
+let after = cherry.pow(3);
+```
+
+</details><br /><details><summary><strong>Combining lists using <code>+</code>:</strong>
+
+```rust
+#[dooped(for SomeType in [u8, i8, u16, i16])]
+impl MyTrait for SomeType {
+    fn some() -> SomeType {
+        42
+    }
+}
+```
+
+</summary>
+
+```rust
+impl MyTrait for u8 {
+    fn some() -> u8 {
+        42
+    }
+}
+
+impl MyTrait for i8 {
+    fn some() -> u16 {
+        42
+    }
+}
+
+impl MyTrait for u16 {
+    fn some() -> u16 {
+        42
+    }
+}
+
+impl MyTrait for i16 {
+    fn some() -> u16 {
+        42
+    }
+}
 ```
 
 </details>
