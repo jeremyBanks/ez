@@ -14,9 +14,9 @@ then elaborate on the details of the syntax.
 
 ## Examples
 
-You can click any example to display its full macro expansion below.
+> 💡 <em>You can</em> 👉 <em>click</em> 👈 <em>on any example to display its full macro expansion.</em>
 
-<br /><details><summary><strong>Duplicating a single item with a simple replacement:</strong>
+<details><summary><strong>Duplicating a single item with a simple replacement:</strong>
 
 ```rust
 #[dooped(for SomeType in [u8, i8, u16, i16])]
@@ -55,7 +55,7 @@ impl MyTrait for i16 {
 }
 ```
 
-</details><br /><details><summary><strong>Duplicating statements with tuple-style destructuring of replacements:</strong>
+</details><details><summary><strong>Duplicating statements with tuple-style destructuring of replacements:</strong>
 
 ```rust
 doop! {
@@ -83,7 +83,7 @@ let unit: () = Default::default();
 println!("{:?}", unit);
 ```
 
-</details><br /><details><summary><strong>Binding lists of replacements using pseudo <code>let</code> </strong>statements:
+</details><details><summary><strong>Binding lists of replacements using pseudo <code>let</code> </strong>statements:
 
 ```rust
 doop! {
@@ -113,7 +113,7 @@ println!("{#:?}", i16::default() + 1);
 println!("{#:?}", u16::default() + 1);
 ```
 
-</details><br /><details><summary><strong>Nested iterations:</strong>
+</details><details><summary><strong>Nested iterations:</strong>
 
 ```rust
 doop! {
@@ -179,7 +179,7 @@ let cherry: u8 = 3;
 let after = cherry.pow(3);
 ```
 
-</details><br /><details><summary><strong>Combining lists using <code>+</code>:</strong>
+</details><details><summary><strong>Combining lists using <code>+</code>:</strong>
 
 ```rust
 #[dooped(for SomeType in [u8, i8, u16, i16])]
