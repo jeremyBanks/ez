@@ -82,7 +82,6 @@
                 }
             ]
         },
-        "rust-analyzer.checkOnSave.command": "doc",
         "rust-analyzer.checkOnSave.allTargets": false,
         "workbench.colorCustomizations": {
             "editorInlayHint.foreground": "#898a60",

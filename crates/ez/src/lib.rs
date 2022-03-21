@@ -36,8 +36,10 @@ pub mod __ {
 }
 
 #[cfg(doc)]
-pub mod docs {
-    //! Documents
+pub mod r#pub {
+    //! Documents and posts, for reading by humans.
+    //!
+    //! This module only contains documentation and can not be imported.
 
     macro_rules! docs {
         ($( $ident:ident ),* $(,)?) => {
