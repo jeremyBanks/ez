@@ -12,12 +12,13 @@ RUN mkdir -p /deno \
 
 USER codespace
 
-RUN    rustup toolchain add             1.59.0 stable  beta   \
-    && rustup component add --toolchain 1.59.0 rustfmt clippy \
-    && rustup component add --toolchain stable rustfmt clippy \
-    && rustup component add --toolchain beta   rustfmt clippy \
+RUN    rustup toolchain add             1.59.0  stable  beta   nightly \
+    && rustup component add --toolchain 1.59.0  rustfmt clippy         \
+    && rustup component add --toolchain stable  rustfmt clippy         \
+    && rustup component add --toolchain beta    rustfmt clippy         \
+    && rustup component add --toolchain nightly rustfmt clippy         \
     && rustup target    add wasm32-wasi wasm32-unknown-unknown
 
 RUN curl https://wasmtime.dev/install.sh -sSf | bash
 
-RUN cargo install baking bindgen cargo-audit cargo-crev cargo-edit cargo-deny cargo-expand cargo-format cargo-geiger cargo-supply-chain cargo-udeps cargo-wasi cargo-watch git-uncommit https ripgrep save tokio-console
+RUN cargo install baking bindgen cargo-audit cargo-crev cargo-edit cargo-deny cargo-expand cargo-format cargo-geiger cargo-insta cargo-supply-chain cargo-udeps cargo-wasi cargo-watch git-uncommit https ripgrep save tokio-console

@@ -83,6 +83,8 @@
             ]
         },
         "rust-analyzer.checkOnSave.allTargets": false,
+        "rust-analyzer.inlayHints.lifetimeElisionHints": "skip_trivial",
+        "rust-analyzer.inlayHints.lifetimeElisionHints.useParameterNames": true,
         "workbench.colorCustomizations": {
             "editorInlayHint.foreground": "#898a60",
             "editorInlayHint.parameterBackground": "#60303010",

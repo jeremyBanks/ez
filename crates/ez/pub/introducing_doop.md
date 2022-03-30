@@ -14,7 +14,8 @@ then elaborate on the details of the syntax.
 
 ## Examples
 
-> 💡 <em>You can</em> 👉 <em>click</em> 👈 <em>on any example to display its full macro expansion.</em>
+> 💡 <em>tip: You can</em> 👉 <em>click</em> 👈 <em>on any example to display its full macro
+> expansion.</em>
 
 <details><summary><strong>Duplicating a single item with a simple replacement:</strong>
 

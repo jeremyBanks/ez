@@ -45,14 +45,14 @@ pub mod r#pub {
         ($( $ident:ident ),* $(,)?) => {
             $(
                 pub mod $ident {
-                    //! [🔗][self#!]
+                    #![doc = concat!("[🔗 _", stringify!($ident), "_][self#!]")]
                     //!
                     //! <details>
                     //! <summary>&nbsp;</summary>
                     //! <br />
                     //! <div id="!"></div>
                     //!
-                    #![doc = include_str!(concat!("../docs/", stringify!($ident), ".md"))]
+                    #![doc = include_str!(concat!("../pub/", stringify!($ident), ".md"))]
                     //!
                     //! <br /><br /><br /><br /><br /><br /><br /><br />
                     //! <br /><br /><br /><br /><br /><br /><br /><br />
@@ -68,5 +68,8 @@ pub mod r#pub {
 
     docs! {
         introducing_doop,
+        introducing_erro,
+        introducing_ez,
+        proposed_batteries,
     }
 }
