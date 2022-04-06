@@ -31,7 +31,7 @@ pub fn main(
 /// > _easily,_  \
 /// > _let's get carried away_
 ///
-/// >  ― [Red Hot Chili Peppers](https://genius.com/25345758)
+/// > ― [Red Hot Chili Peppers](https://genius.com/25345758)
 ///
 /// ```
 /// #[ez::ly]

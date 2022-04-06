@@ -1,19 +1,5 @@
 # What crates should be in a "batteries-included" package for Rust?
 
-Rust's standard library is very high-quality, but it isn't huge. It doesn't need to be, because
-Cargo makes it easy to use third-party crates. However, for users who are new to the language, it
-can be a source of friction if they need to repeatedly find and evaluate crates for what might be
-built-in functionality in more "batteries-included" languages such as Python.
-
-I've registered the crate name **`batteries`** and will use it to re-export a collection of
-broadly-useful crates, to help improve discoverability for new users. **What do you think should be
-included?**
-
-There have been several past threads about "de-facto standard" or "must use" crates, but most of
-them are old and some of their suggestions have fallen out of use. I've created a rough list of some
-potential inclusions below, but would appreciate any feedback on items that you think would be
-important to include (or exclude!).
-
 - **strings:** `regex`, `unicode-segmentation`
 - **bytes:** `bytes`, `hex`, `base64`
 - **math:** `num`, `rand`
