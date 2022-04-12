@@ -1,8 +1,13 @@
-use crossterm::style::Stylize;
+use {crossterm::style::Stylize, std::path::PathBuf};
 
 #[ez::ly]
 pub fn main() {
-    let r = git2::Repository::open_from_env()?;
+    let index_path =
+        cargo_home()?.tap_mut(|path| path.push("registry/index/github.com-1ecc6299db9ec823/.git"));
+    let index_repo = git2::Repository::open(index_path)?;
+    let index_head = index_repo.head()?;
+
+    println!("{:?}", index_head.name());
 
     // Step 1: fetch all index mirrors
     //         If this is our first fetch, verify that the only root commit
@@ -11,19 +16,19 @@ pub fn main() {
     //         commit, such as d3309ab55b6adc1151b1d1004ff23e9240d55279.
     //
     // Step 2: verify index/mirrors are consistent with each other and with
-    //         our previous local head, and that none of the intermediate commits
-    //         violate any constraints:
-    //          (a) single parent, or no parents if squashed, but squashes should still
-    //              include a reference to the effective parent in the messages.
-    //          (b) no checksums should be changed.
+    //         our previous local head, and that none of the intermediate
+    // commits         violate any constraints:
+    //          (a) single parent, or no parents if squashed, but squashes
+    // should still              include a reference to the effective parent
+    // in the messages.          (b) no checksums should be changed.
     //          (c) no versions should be removed
-    //              (this probably needs to allow some exceptions, as long as no new
-    //               versions are added with conflicting checksums.)
+    //              (this probably needs to allow some exceptions, as long as no
+    // new               versions are added with conflicting checksums.)
     //
-    //         The local state we keep will probably be a sled-or-similar database
-    //         with all { (name, version) -> checksum } pairs and our latest head
-    //         commit ID. If possible, we could then truncate all git history
-    //         before the HEAD.
+    //         The local state we keep will probably be a sled-or-similar
+    // database         with all { (name, version) -> checksum } pairs and
+    // our latest head         commit ID. If possible, we could then
+    // truncate all git history         before the HEAD.
     //
     // Step 3: drop any git history we don't need
     //
@@ -41,26 +46,32 @@ pub fn main() {
     //         the version number, with or without a prefix v, maybe.
     //
     // Step 9: if we have a release commit, check for any files in the released
-    //         bundle which do not match those in the git repository. The obvious
-    //         exception is the normalization of Cargo.toml, but we should at
-    //         least verify that they are semantically equivalent except for
-    //         the expected variations.
+    //         bundle which do not match those in the git repository. The
+    // obvious         exception is the normalization of Cargo.toml, but we
+    // should at         least verify that they are semantically equivalent
+    // except for         the expected variations.
+    //
+    // Step 10: If the cargo bundle has any duplicate files, flag as malicious.
 
     // Brainstorming:
     // - Maybe we should have a way to record the index version that was
 }
 
+/// The canonical Git repository URL for the crates.io package index.
 pub static INDEX_CANONICAL_REPO: &str = "https://github.com/rust-lang/crates.io-index";
 
-pub static INDEX_HEAD_ORACLES: [&str] = [
-    "https://crates.jeremy.ca/index"
-];
-
-pub static INDEX_HEAD_REPOS: [&str] = [
+/// Git repository URLs for all known mirrors of the crates.io package index.
+pub static INDEX_HEAD_REPOS: [&str; 2] = [
     INDEX_CANONICAL_REPO,
     "https://gitlab.com/rust-lang/crates.io-index",
 ];
 
-pub static INDEX_ARCHIVE_REPOS: [&str] = [
-    "https://github.com/rust-lang/crates.io-index-archive",
-];
+/// Other sources that provide their last-verified index commit hash ID,
+/// without actually providing the index data.
+pub static INDEX_HEAD_SOURCES: [&str; 1] = ["https://crates.jeremy.ca/index.json"];
+
+/// Repositories that will be fetched in order to find archived
+/// previous index commits that have been squashed from the
+/// main index.
+pub static INDEX_ARCHIVE_REPOS: [&str; 1] =
+    ["https://github.com/rust-lang/crates.io-index-archive"];
