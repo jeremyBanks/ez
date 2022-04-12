@@ -14,10 +14,13 @@ pub fn main() {
     for repo in INDEX_HEAD_REPOS {
         let mut remote = git2::Remote::create_detached(repo)?;
         remote.connect(git2::Direction::Fetch)?;
-        // remote.fetch(&["HEAD"], None, None)?;
+
         let default_branch =
             String::from_utf8(remote.default_branch()?.into_iter().cloned().collect())?;
-        dbg!(remote.connected(), default_branch);
+
+        let heads = remote.list()?;
+
+        dbg!(remote.connected(), default_branch, heads);
     }
 
     let project_manifest: Toml = std::fs::read_to_string("Cargo.toml")?.parse()?;
