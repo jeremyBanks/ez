@@ -2,12 +2,27 @@ use {crossterm::style::Stylize, std::path::PathBuf};
 
 #[ez::ly]
 pub fn main() {
-    let index_path =
+    let local_index_path =
         cargo_home()?.tap_mut(|path| path.push("registry/index/github.com-1ecc6299db9ec823/.git"));
-    let index_repo = git2::Repository::open(index_path)?;
-    let index_head = index_repo.head()?;
+    let local_index_repo = git2::Repository::open(local_index_path)?;
+    let local_index_head = local_index_repo
+        .find_branch("origin/HEAD", git2::BranchType::Remote)?
+        .get()
+        .target()
+        .unwrap();
 
-    println!("{:?}", index_head.name());
+    for repo in INDEX_HEAD_REPOS {
+        let mut remote = local_index_repo.remote_anonymous(repo)?;
+        remote.connect(git2::Direction::Fetch)?;
+        remote.fetch(&["HEAD"], None, None)?;
+        let head = remote.default_branch()?;
+        let head: &[u8] = head.as_ref();
+        let headz = String::from_utf8_lossy(head);
+        dbg!(head, head.len(), headz);
+    }
+
+    let project_manifest: Toml = std::fs::read_to_string("Cargo.toml")?.parse()?;
+    let project_lockfile: Toml = std::fs::read_to_string("Cargo.lock")?.parse()?;
 
     // Step 1: fetch all index mirrors
     //         If this is our first fetch, verify that the only root commit
