@@ -12,13 +12,12 @@ pub fn main() {
         .unwrap();
 
     for repo in INDEX_HEAD_REPOS {
-        let mut remote = local_index_repo.remote_anonymous(repo)?;
+        let mut remote = git2::Remote::create_detached(repo)?;
         remote.connect(git2::Direction::Fetch)?;
-        remote.fetch(&["HEAD"], None, None)?;
-        let head = remote.default_branch()?;
-        let head: &[u8] = head.as_ref();
-        let headz = String::from_utf8_lossy(head);
-        dbg!(head, head.len(), headz);
+        // remote.fetch(&["HEAD"], None, None)?;
+        let default_branch =
+            String::from_utf8(remote.default_branch()?.into_iter().cloned().collect())?;
+        dbg!(remote.connected(), default_branch);
     }
 
     let project_manifest: Toml = std::fs::read_to_string("Cargo.toml")?.parse()?;
@@ -76,9 +75,9 @@ pub fn main() {
 pub static INDEX_CANONICAL_REPO: &str = "https://github.com/rust-lang/crates.io-index";
 
 /// Git repository URLs for all known mirrors of the crates.io package index.
-pub static INDEX_HEAD_REPOS: [&str; 2] = [
+pub static INDEX_HEAD_REPOS: [&str; 1] = [
     INDEX_CANONICAL_REPO,
-    "https://gitlab.com/rust-lang/crates.io-index",
+    // "https://gitlab.com/rust-lang/crates.io-index",
 ];
 
 /// Other sources that provide their last-verified index commit hash ID,
