@@ -1,4 +1,7 @@
+#![allow(unused)]
 use {crossterm::style::Stylize, std::path::PathBuf};
+
+mod sources;
 
 #[ez::ly]
 pub fn main() {
@@ -11,19 +14,29 @@ pub fn main() {
         .target()
         .unwrap();
 
-    for repo in INDEX_HEAD_REPOS {
+    for repo in sources::ALL_HEADS {
         let mut remote = git2::Remote::create_detached(repo)?;
-        println!("{}", remote.url().unwrap_or("<unknown>"));
+        let url = remote
+            .url()
+            .expect("remote somehow doesn't have a URL")
+            .to_string();
 
         remote.connect(git2::Direction::Fetch)?;
 
-        let default_branch =
-            String::from_utf8(remote.default_branch()?.into_iter().cloned().collect())?;
-
-        let heads = remote
+        let head = remote
             .list()?
             .iter()
-            .for_each(|head| println!("    {} -> {}", head.name(), head.oid()));
+            .filter(|head| {
+                println!("{} {}", head.name(), head.oid());
+                head.name() == "HEAD"
+            })
+            .map(|head| head.oid())
+            .collect_vec()
+            .get(0)
+            .expect("HEAD not found")
+            .clone();
+
+        println!("{url}#HEAD = {head}");
     }
 
     let project_manifest: Toml = std::fs::read_to_string("Cargo.toml")?.parse()?;
@@ -76,22 +89,3 @@ pub fn main() {
     // Brainstorming:
     // - Maybe we should have a way to record the index version that was
 }
-
-/// The canonical Git repository URL for the crates.io package index.
-pub static INDEX_CANONICAL_REPO: &str = "https://github.com/rust-lang/crates.io-index";
-
-/// Git repository URLs for all known mirrors of the crates.io package index.
-pub static INDEX_HEAD_REPOS: [&str; 2] = [
-    INDEX_CANONICAL_REPO,
-    "https://gitlab.com/rust-lang/crates.io-index",
-];
-
-/// Other sources that provide their last-verified index commit hash ID,
-/// without actually providing the index data.
-pub static INDEX_HEAD_SOURCES: [&str; 1] = ["https://crates.jeremy.ca/index.json"];
-
-/// Repositories that will be fetched in order to find archived
-/// previous index commits that have been squashed from the
-/// main index.
-pub static INDEX_ARCHIVE_REPOS: [&str; 1] =
-    ["https://github.com/rust-lang/crates.io-index-archive"];
