@@ -2,7 +2,7 @@ use ez::batteries::hex;
 
 pub static URL: &str = "https://github.com/rust-lang/crates.io-index";
 
-pub static KNOWN_REVISIONS: &[(u64, [u8; 20], &str)] = &[
+pub static TRUSTED_COMMITS: &[(u64, [u8; 20], &str)] = &[
     (000_000, hex!["a33de1c98898dc1baf541ee2c5162e7baea7c838"], "starting-2014-11-04"),
     (111_423, hex!["9110daee6752e903379f3af955506d6116315273"], "snapshot-2018-09-26"),
     (111_424, hex!["c2c8a0e18edca7d2861cf7af3c40ad9a554ea8c2"], "squashed-2018-09-26"),

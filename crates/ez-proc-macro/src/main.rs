@@ -83,6 +83,7 @@ pub fn ly(
     let item = main(attribute_tokens, function_tokens)?;
     Ok(quote! {
         use ::ez::prelude::*;
+        use ::ez::{throws};
 
         #item
     })
