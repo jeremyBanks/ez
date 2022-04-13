@@ -1,7 +1,20 @@
 #![allow(unused)]
-use {crossterm::style::Stylize, std::path::PathBuf};
+use {crossterm::style::Stylize, git2::Oid, std::path::PathBuf};
 
 mod sources;
+
+#[derive(Debug, Clone)]
+pub struct State {
+    validated_head: Oid,
+}
+
+impl Default for State {
+    fn default() -> Self {
+        Self {
+            validated_head: Oid::zero(),
+        }
+    }
+}
 
 #[ez::ly]
 pub fn main() {

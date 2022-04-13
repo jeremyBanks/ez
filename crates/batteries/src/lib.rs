@@ -29,6 +29,7 @@ pub mod batteries {
             dpc_pariter::IteratorExt,
             elor::Either,
             euclid, git2,
+            hex_literal::hex,
             home::{cargo_home, home_dir, rustup_home},
             hyper, indexmap,
             indexmap::{IndexMap as OrderedMap, IndexSet as OrderedSet},
