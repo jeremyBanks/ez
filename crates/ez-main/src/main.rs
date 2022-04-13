@@ -42,19 +42,13 @@ pub fn entry_point<
 
     if std::env::var("RUST_LOG").unwrap_or_default().is_empty() {
         if cfg!(debug_assertions) {
-            std::env::set_var(
-                "RUST_LOG",
-                format!("warn,{main_package_name}=debug,ez=debug"),
-            );
+            std::env::set_var("RUST_LOG", format!("warn,{main_package_name}=debug,ez=debug"));
         } else {
             std::env::set_var("RUST_LOG", format!("warn,{main_package_name}=info,ez=info"));
         }
     }
 
-    if std::env::var("RUST_SPANTRACE")
-        .unwrap_or_default()
-        .is_empty()
-    {
+    if std::env::var("RUST_SPANTRACE").unwrap_or_default().is_empty() {
         std::env::set_var("RUST_SPANTRACE", "1");
     }
 
@@ -65,19 +59,17 @@ pub fn entry_point<
         .with(tracing_tree::HierarchicalLayer::new(2).with_indent_lines(true))
         .init();
 
-    let args = std::env::args_os()
-        .skip(1)
-        .map(|s| match s.to_string_lossy() {
-            Cow::Borrowed(lossless) => lossless.to_owned(),
-            Cow::Owned(lossy) => {
-                tracing::warn!(
-                    target: "ez",
-                    "Invalid UTF-8 in command-line argument. Invalid sequences have been replaced \
-                     with '�':\n  {lossy:?}"
-                );
-                lossy
-            }
-        });
+    let args = std::env::args_os().skip(1).map(|s| match s.to_string_lossy() {
+        Cow::Borrowed(lossless) => lossless.to_owned(),
+        Cow::Owned(lossy) => {
+            tracing::warn!(
+                target: "ez",
+                "Invalid UTF-8 in command-line argument. Invalid sequences have been replaced \
+                 with '�':\n  {lossy:?}"
+            );
+            lossy
+        }
+    });
 
     let env = std::env::vars_os().filter_map(|(name, value)| {
         let name = name

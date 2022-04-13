@@ -10,9 +10,7 @@ pub struct State {
 
 impl Default for State {
     fn default() -> Self {
-        Self {
-            validated_head: Oid::zero(),
-        }
+        Self { validated_head: Oid::zero() }
     }
 }
 
@@ -29,10 +27,7 @@ pub fn main() {
 
     for repo in sources::ALL_HEADS {
         let mut remote = git2::Remote::create_detached(repo)?;
-        let url = remote
-            .url()
-            .expect("remote somehow doesn't have a URL")
-            .to_string();
+        let url = remote.url().expect("remote somehow doesn't have a URL").to_string();
 
         remote.connect(git2::Direction::Fetch)?;
 

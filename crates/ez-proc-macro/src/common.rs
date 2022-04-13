@@ -67,10 +67,7 @@ pub trait TokenTreeIterExt: Borrow<TokenStreamIter> + BorrowMut<TokenStreamIter>
     }
 
     fn next_group(&mut self) -> Result<Group, syn::Error> {
-        self.next_if(
-            |tt| tt.group().ok(),
-            "a group (wrapped in braces, brackets, or parentheses)",
-        )
+        self.next_if(|tt| tt.group().ok(), "a group (wrapped in braces, brackets, or parentheses)")
     }
 
     fn next_ident_eq(&mut self, ident: &str) -> Result<Ident, syn::Error> {
@@ -120,11 +117,7 @@ pub trait TokenTreeIterExt: Borrow<TokenStreamIter> + BorrowMut<TokenStreamIter>
     #[must_use]
     fn err_on_next(&mut self, message: &str) -> Result<Never, syn::Error> {
         Err(syn::Error::new(
-            self.borrow_mut()
-                .clone()
-                .next()
-                .map(|tt| tt.span())
-                .unwrap_or_else(Span::call_site),
+            self.borrow_mut().clone().next().map(|tt| tt.span()).unwrap_or_else(Span::call_site),
             message,
         ))
     }
@@ -161,10 +154,7 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
         if let TokenTree::Ident(i) = self.borrow() {
             Ok(i.clone())
         } else {
-            Err(syn::Error::new(
-                self.borrow().span(),
-                "expected an identifier",
-            ))
+            Err(syn::Error::new(self.borrow().span(), "expected an identifier"))
         }
     }
 
@@ -180,10 +170,7 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
         if let TokenTree::Punct(p) = self.borrow() {
             Ok(p.clone())
         } else {
-            Err(syn::Error::new(
-                self.borrow().span(),
-                "expected punctuation",
-            ))
+            Err(syn::Error::new(self.borrow().span(), "expected punctuation"))
         }
     }
 }

@@ -14,9 +14,7 @@ use {
 /// Panics if there is no file at `path`, or the file cannot be opened.
 #[try_throws]
 pub fn reader(path: impl AsRef<Path>) -> Reader {
-    Reader(std::io::BufReader::new(
-        std::fs::File::open(path).wrap_err("Couldn't open file")?,
-    ))
+    Reader(std::io::BufReader::new(std::fs::File::open(path).wrap_err("Couldn't open file")?))
 }
 
 /// Create an object to write to a file.
@@ -70,9 +68,7 @@ impl Write for Writer {
     fn try_write_str(&mut self, s: &str) {
         use std::io::Write;
 
-        self.0
-            .write_all(s.as_bytes())
-            .wrap_err("Failed to write to stdout")?;
+        self.0.write_all(s.as_bytes()).wrap_err("Failed to write to stdout")?;
     }
 }
 
@@ -92,9 +88,7 @@ impl Read for Reader {
         use std::io::Read;
 
         let mut buf = String::new();
-        self.0
-            .read_to_string(&mut buf)
-            .wrap_err("Failed to read from stdin")?;
+        self.0.read_to_string(&mut buf).wrap_err("Failed to read from stdin")?;
         buf
     }
 
@@ -103,9 +97,7 @@ impl Read for Reader {
         use std::io::BufRead;
 
         let mut buf = String::new();
-        self.0
-            .read_line(&mut buf)
-            .wrap_err("Failed to read from stdin")?;
+        self.0.read_line(&mut buf).wrap_err("Failed to read from stdin")?;
 
         if !buf.is_empty() {
             buf.truncate(buf.len() - 1);

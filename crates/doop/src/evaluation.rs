@@ -102,8 +102,6 @@ pub enum ForBindingTarget {
 impl TryFrom<crate::input::DoopBlock> for Doop {
     type Error = syn::Error;
     fn try_from(input: crate::input::DoopBlock) -> Result<Self, Self::Error> {
-        Ok(Doop {
-            items: todo!("{}", &format!("{input:#?}")[..=256]),
-        })
+        Ok(Doop { items: todo!("{}", &format!("{input:#?}")[..=256]) })
     }
 }

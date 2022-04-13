@@ -10,10 +10,7 @@ pub fn main(
     function_tokens: TokenStream,
 ) -> Result<TokenStream, eyre::Report> {
     if !attribute_tokens.is_empty() {
-        syn::Error::new(
-            attribute_tokens.span(),
-            "#[ez::main] macro takes no arguments",
-        );
+        syn::Error::new(attribute_tokens.span(), "#[ez::main] macro takes no arguments");
     };
 
     let function_tokens = tryify_trailing_block(function_tokens)?;

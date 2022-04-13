@@ -32,9 +32,6 @@ pub fn doop(tokens: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 pub fn dooped(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
-    tokens.extend(TokenStream::from(TokenTree::from(Group::new(
-        Delimiter::Brace,
-        item,
-    ))));
+    tokens.extend(TokenStream::from(TokenTree::from(Group::new(Delimiter::Brace, item))));
     doop(tokens)
 }
