@@ -5,77 +5,21 @@ use {
     std::{io::Write, path::PathBuf},
 };
 
-mod sources;
+mod index_sources;
 
 type GitId = [u8; 20];
 
 #[derive(Debug, Clone)]
 pub struct State {
-    validated_head: Oid,
-}
-
-impl Default for State {
-    fn default() -> Self {
-        Self { validated_head: Oid::zero() }
-    }
-}
-
-/// Returns all of the refs advertised by a Git repository.
-#[throws]
-fn discover_refs(git_url: &str) -> OrderedMap<String, GitId> {
-    let mut remote = git2::Remote::create_detached(git_url)?;
-    remote.connect(git2::Direction::Fetch)?;
-    remote
-        .list()?
-        .iter()
-        .map(|head| (head.name().to_string(), head.oid().as_bytes().try_into().unwrap()))
-        .collect()
-}
-
-/// Returns a formatted ref advertisement as would be returned by a Git
-/// repository in response to a `info/refs?service=git-upload-pack` discovery
-/// request.
-#[throws]
-fn announce_refs(mut refs: OrderedMap<String, GitId>) -> Vec<u8> {
-    let mut buf = Vec::with_capacity(512);
-    let mut lines: Vec<Vec<u8>> = Vec::with_capacity(8);
-
-    lines.push(b"# service=git-upload-pack\n".to_vec());
-    lines.push(vec![]);
-
-    let canonical_head = refs.remove("HEAD").into_iter().map(|head| ("HEAD".to_string(), head));
-
-    for (i, head) in itertools::chain(canonical_head, refs).enumerate() {
-        let (name, git_id) = head;
-        let hex_id = hex_encode(git_id);
-
-        let mut line = format!("{name} {hex_id}");
-        if i == 0 {
-            line.push('\0');
-        }
-        line.push('\n');
-
-        lines.push(line.as_bytes().to_vec());
-    }
-
-    lines.push(vec![]);
-
-    for line in lines {
-        if line.is_empty() {
-            buf.extend(b"0000");
-        } else {
-            buf.extend(format!("{:04x}", line.len()).as_bytes().to_vec());
-            buf.extend(line.to_vec());
-        }
-    }
-
-    buf
+    validated_head: GitId,
+    proposed_heads: Vec<GitId>,
 }
 
 #[ez::ly]
 pub fn main() {
     let local_index_path =
         cargo_home()?.tap_mut(|path| path.push("registry/index/github.com-1ecc6299db9ec823/.git"));
+
     let local_index_repo = git2::Repository::open(local_index_path)?;
     let local_index_head = local_index_repo
         .find_branch("origin/HEAD", git2::BranchType::Remote)?
@@ -83,13 +27,13 @@ pub fn main() {
         .target()
         .unwrap();
 
-    for repo in sources::ALL_HEADS {
+    for repo in index_sources::head_repos()? {
         let heads = discover_refs(&repo)?;
-        let head = hex_encode(heads["HEAD"]);
+        let head = heads.get("HEAD").map(hex_encode).unwrap_or("<None??>".to_string());
 
-        println!("\n\n{repo}#HEAD = {head}");
+        println!("{repo}\n  is at {head}\n");
 
-        std::io::stdout().write_all(&announce_refs(heads)?)?;
+        println!("\n\n");
     }
 
     let project_manifest: Toml = std::fs::read_to_string("Cargo.toml")?.parse()?;
@@ -141,4 +85,56 @@ pub fn main() {
 
     // Brainstorming:
     // - Maybe we should have a way to record the index version that was
+}
+
+/// Returns all of the refs advertised by a Git repository.
+#[throws]
+fn discover_refs(git_url: &str) -> OrderedMap<String, GitId> {
+    let mut remote = git2::Remote::create_detached(git_url)?;
+    remote.connect(git2::Direction::Fetch)?;
+    remote
+        .list()?
+        .iter()
+        .map(|head| (head.name().to_string(), head.oid().as_bytes().try_into().unwrap()))
+        .collect()
+}
+
+/// Returns a formatted ref advertisement as would be returned by a Git
+/// repository in response to an `info/refs?service=git-upload-pack` discovery
+/// request.
+#[throws]
+fn announce_refs(mut refs: OrderedMap<String, GitId>) -> Vec<u8> {
+    let mut buf = Vec::with_capacity(512);
+    let mut lines: Vec<Vec<u8>> = Vec::with_capacity(8);
+
+    lines.push(b"# service=git-upload-pack\n".to_vec());
+    lines.push(vec![]);
+
+    let canonical_head = refs.remove("HEAD").into_iter().map(|head| ("HEAD".to_string(), head));
+
+    for (i, head) in itertools::chain(canonical_head, refs.into_iter().sorted()).enumerate() {
+        let (name, git_id) = head;
+        let hex_id = hex_encode(git_id);
+
+        let mut line = format!("{name} {hex_id}");
+        if i == 0 {
+            line.push('\0');
+        }
+        line.push('\n');
+
+        lines.push(line.as_bytes().to_vec());
+    }
+
+    lines.push(vec![]);
+
+    for line in lines {
+        if line.is_empty() {
+            buf.extend(b"0000");
+        } else {
+            buf.extend(format!("{:04x}", line.len()).as_bytes().to_vec());
+            buf.extend(line.to_vec());
+        }
+    }
+
+    buf
 }
