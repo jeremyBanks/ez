@@ -3,8 +3,8 @@ use ez::{prelude::*, throws};
 static OFFICIAL: &str = "https://github.com/rust-lang/crates.io-index";
 static OFFICIAL_ARCHIVE: &str = "https://github.com/rust-lang/crates.io-index-archive";
 static UNOFFICIAL_MIRRORS: (&str, &str) = (
-    "https://gitlab.com/integer32llc/crates.io-index",
     "https://gitlab.com/rust-lang/crates.io-index",
+    "https://gitlab.com/integer32llc/crates.io-index",
 );
 static EXPERIMENTAL_HEAD: &str = "https://crates.jeremy.ca";
 static KNOWN_COMMITS: &[(u64, [u8; 20], &str)] = &[
@@ -31,9 +31,9 @@ static KNOWN_COMMITS: &[(u64, [u8; 20], &str)] = &[
     (533_012, hex!["d511f68fa91e266ba7a20b5f37e7a4801423c289"], "squashed-2022-03-02"),
 ];
 
-#[throws]
 pub fn local_cargo_index() -> String {
-    cargo_home()?
+    cargo_home()
+        .unwrap()
         .tap_mut(|path| path.push("registry/index/github.com-1ecc6299db9ec823/.git"))
         .into_os_string()
         .into_string()
@@ -44,11 +44,10 @@ pub fn local_cargo_index() -> String {
 /// index. These should be ordered from most-trusted to least-trusted. Any
 /// divergence should be alarming, but if the lower priority repositories are
 /// stale or unavailable, that might not be.
-#[throws]
 pub fn head_repos() -> Vec<String> {
     vec![
         OFFICIAL.to_string(),
-        local_cargo_index()?,
+        local_cargo_index(),
         EXPERIMENTAL_HEAD.to_string(),
         UNOFFICIAL_MIRRORS.0.to_string(),
         UNOFFICIAL_MIRRORS.1.to_string(),
@@ -57,10 +56,9 @@ pub fn head_repos() -> Vec<String> {
 
 /// A list of repositories to be pulled from when looking for a missing commit,
 /// in the order they should be tried.
-#[throws]
 pub fn data_repos() -> Vec<String> {
     vec![
-        local_cargo_index()?,
+        local_cargo_index(),
         OFFICIAL.to_string(),
         OFFICIAL_ARCHIVE.to_string(),
         UNOFFICIAL_MIRRORS.0.to_string(),
@@ -75,7 +73,10 @@ pub fn data_repos() -> Vec<String> {
 /// These are trusted absolutely; nothing should ever conflict with them. Only
 /// the latest one is really neccessary for verifying the current index state,
 /// but the others may be useful when testing the validation logic.
-#[throws]
 pub fn known_commits() -> SortedMap<u64, [u8; 20]> {
-    KNOWN_COMMITS.iter().map(|(rev, hash, _)| (*rev, *hash)).collect()
+    KNOWN_COMMITS.iter().map(|(index, hash, _)| (*index, *hash)).collect()
+}
+
+pub fn known_refs() -> OrderedMap<String, [u8; 20]> {
+    KNOWN_COMMITS.iter().map(|(_, hash, name)| (name.to_string(), *hash)).collect()
 }

@@ -2,12 +2,16 @@
 use {
     crossterm::style::Stylize,
     git2::Oid,
+    itertools::chain,
     std::{io::Write, path::PathBuf},
 };
 
 mod index_sources;
 
+/// Git object identifier, a SHA-1 digest.
 type GitId = [u8; 20];
+/// Crate release hash, a SHA-256 digest.
+type ReleaseHash = [u8; 32];
 
 #[derive(Debug, Clone)]
 pub struct State {
@@ -17,27 +21,62 @@ pub struct State {
 
 #[ez::ly]
 pub fn main() {
-    let local_index_path =
-        cargo_home()?.tap_mut(|path| path.push("registry/index/github.com-1ecc6299db9ec823/.git"));
+    let app_repo = home_dir().unwrap().tap_mut(|path| path.push(".cargo-merk/.git"));
+    let app_repo = git2::Repository::init_opts(
+        app_repo,
+        git2::RepositoryInitOptions::new().bare(true).initial_head("trunk"),
+    )?;
 
-    let local_index_repo = git2::Repository::open(local_index_path)?;
-    let local_index_head = local_index_repo
-        .find_branch("origin/HEAD", git2::BranchType::Remote)?
-        .get()
-        .target()
-        .unwrap();
+    for data_repo in index_sources::data_repos() {
+        info!("Connecting to {data_repo}.");
+        let mut data_repo = app_repo.remote_anonymous(&data_repo)?;
+        data_repo.connect(git2::Direction::Fetch)?;
 
-    for repo in index_sources::head_repos()? {
-        let heads = discover_refs(&repo)?;
-        let head = heads.get("HEAD").map(hex_encode).unwrap_or("<None??>".to_string());
+        let heads: OrderedMap<String, GitId> = data_repo
+            .list()?
+            .iter()
+            .map(|head| (head.name().to_string(), head.oid().as_bytes().try_into().unwrap()))
+            .collect();
 
-        println!("{repo}\n  is at {head}\n");
+        let head_names = heads.iter().map(|(name, _)| name.as_str()).collect_vec();
 
-        println!("\n\n");
+        info!("Downloading {head_names:?}.");
+
+        data_repo.download(
+            &head_names,
+            Some(
+                git2::FetchOptions::default()
+                    .download_tags(git2::AutotagOption::None)
+                    .prune(git2::FetchPrune::Off)
+                    .update_fetchhead(false),
+            ),
+        )?;
+
+        for id in heads.values() {
+            debug!("Tagging {id:?}.");
+            let hex_id = hex_encode(id);
+            app_repo.tag_lightweight(
+                &hex_id,
+                &app_repo.find_object(Oid::from_bytes(&*id)?, Some(git2::ObjectType::Commit))?,
+                true,
+            )?;
+        }
     }
 
-    let project_manifest: Toml = std::fs::read_to_string("Cargo.toml")?.parse()?;
-    let project_lockfile: Toml = std::fs::read_to_string("Cargo.lock")?.parse()?;
+    // for repo in index_sources::head_repos() {
+    //     let heads = discover_refs(&repo)?;
+    //     let head =
+    // heads.get("HEAD").map(hex_encode).unwrap_or("<None??>".to_string());
+
+    //     println!("{repo}\n  is at {head}\n");
+
+    //     println!("\n\n");
+    // }
+
+    // let project_manifest: Toml =
+    // std::fs::read_to_string("Cargo.toml")?.parse()?;
+    // let project_lockfile: Toml =
+    // std::fs::read_to_string("Cargo.lock")?.parse()?;
 
     // Step 1: fetch all index mirrors
     //         If this is our first fetch, verify that the only root commit
@@ -112,7 +151,7 @@ fn announce_refs(mut refs: OrderedMap<String, GitId>) -> Vec<u8> {
 
     let canonical_head = refs.remove("HEAD").into_iter().map(|head| ("HEAD".to_string(), head));
 
-    for (i, head) in itertools::chain(canonical_head, refs.into_iter().sorted()).enumerate() {
+    for (i, head) in chain(canonical_head, refs.into_iter().sorted()).enumerate() {
         let (name, git_id) = head;
         let hex_id = hex_encode(git_id);
 

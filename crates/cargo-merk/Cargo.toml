@@ -1,0 +1,15 @@
+[package]
+edition = "2021"
+name = "cargo-merk"
+publish = false
+version = "0.0.0"
+
+[[bin]]
+name = "cargo-merk"
+doc = false
+
+[dependencies]
+ez = { path = "../ez" }
+
+[package.metadata.release]
+release = false
