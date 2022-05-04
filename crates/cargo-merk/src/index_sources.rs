@@ -31,6 +31,22 @@ static KNOWN_COMMITS: &[(u64, [u8; 20], &str)] = &[
     (533_012, hex!["d511f68fa91e266ba7a20b5f37e7a4801423c289"], "squashed-2022-03-02"),
 ];
 
+/*
+archive_head = None
+for snapshot in snapshots:
+    archive_head = new_commit(
+        `\
+            r1234567 // total number of commits in branches, excluding these "archive" commits
+            tree      8f99e3661a1956afbfb8f026fa0a5dcd8438da2d // should be identical for both parents
+            snapshot 9110daee6752e903379f3af955506d6116315273
+            squashed c2c8a0e18edca7d2861cf7af3c40ad9a554ea8c2
+        `
+        parents = [snapshot, ...archive_head],
+        timestamp = max of parents + 1s,
+    )
+
+*/
+
 pub fn local_cargo_index() -> String {
     cargo_home()
         .unwrap()
@@ -42,8 +58,7 @@ pub fn local_cargo_index() -> String {
 
 /// A list of repositories whose heads should all track the linear crates.io
 /// index. These should be ordered from most-trusted to least-trusted. Any
-/// divergence should be alarming, but if the lower priority repositories are
-/// stale or unavailable, that might not be.
+/// forking should be alarming.
 pub fn head_repos() -> Vec<String> {
     vec![
         OFFICIAL.to_string(),
@@ -71,7 +86,7 @@ pub fn data_repos() -> Vec<String> {
 /// sense) commits.
 ///
 /// These are trusted absolutely; nothing should ever conflict with them. Only
-/// the latest one is really neccessary for verifying the current index state,
+/// the latest one is really necessary for verifying the current index state,
 /// but the others may be useful when testing the validation logic.
 pub fn known_commits() -> SortedMap<u64, [u8; 20]> {
     KNOWN_COMMITS.iter().map(|(index, hash, _)| (*index, *hash)).collect()
