@@ -2,21 +2,67 @@
 fn main() {
     let mut svg = brush::SVGPath::new();
 
-    // let zig_zag = ZigZagBrush::new(svg);
+    let mut zig_zag = ZigZagBrush::from(svg);
 
-    svg.move_to(0.5, 0.5);
+    zig_zag.move_to(0.5, 0.5);
 
-    jeb(&mut svg, 0.25);
+    jeb(&mut zig_zag, 0.25);
 
-    svg.stroke(0.25);
-    svg.rotate_left(0.25);
-    svg.stroke(0.25);
-    svg.rotate_right(0.50);
-    svg.stroke(0.50);
+    zig_zag.stroke(0.25);
+    zig_zag.rotate_left(0.25);
+    zig_zag.stroke(0.25);
+    zig_zag.rotate_right(0.50);
+    zig_zag.stroke(0.50);
+
+    let svg = brush::MetaBrush::take(zig_zag);
 
     let doc = templates::document(&format!("<path d=\"\n{}\n\" />", svg.path()));
 
     println!("{doc}");
+}
+use std::{
+    f64::consts::{SQRT_2, TAU},
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
+
+#[derive(Debug, Clone)]
+struct ZigZagBrush<Inner: Brush> {
+    inner: Inner,
+}
+
+impl<Inner: Brush> brush::MetaBrush for ZigZagBrush<Inner> {
+    type Inner = Inner;
+
+    fn take(self) -> Inner {
+        self.inner
+    }
+}
+
+impl<Inner: Brush> Brush for ZigZagBrush<Inner> {
+    fn stroke(&mut self, width: f64) {
+        self.rotate(0.25);
+        self.inner.stroke(width);
+    }
+}
+
+impl<Inner: Brush> From<Inner> for ZigZagBrush<Inner> {
+    fn from(inner: Inner) -> Self {
+        Self { inner }
+    }
+}
+
+impl<Inner: Brush> Deref for ZigZagBrush<Inner> {
+    type Target = Inner;
+    fn deref(&self) -> &Inner {
+        &self.inner
+    }
+}
+
+impl<Inner: Brush> DerefMut for ZigZagBrush<Inner> {
+    fn deref_mut(&mut self) -> &mut Inner {
+        &mut self.inner
+    }
 }
 
 use patterns::*;
@@ -52,7 +98,7 @@ use brush::{Brush, SVGPath};
 mod brush {
     use std::{
         f64::consts::{SQRT_2, TAU},
-        ops::DerefMut,
+        ops::{Deref, DerefMut},
     };
 
     pub trait Brush {
@@ -95,11 +141,13 @@ mod brush {
         }
     }
 
-    pub trait MetaBrush: Brush + DerefMut<Target = Self::Inner> {
+    pub trait MetaBrush: Brush + DerefMut<Target = Self::Inner> + From<Self::Inner> {
         type Inner: Brush;
+
+        fn take(self) -> Self::Inner;
     }
 
-    impl<AllMetaBrush: MetaBrush> Brush for AllMetaBrush {
+    impl<AllMetaBrush: DerefMut + MetaBrush> Brush for AllMetaBrush {
         fn move_to(&mut self, x: f64, y: f64) {
             self.deref_mut().move_to(x, y)
         }
