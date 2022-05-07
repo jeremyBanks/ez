@@ -68,8 +68,8 @@ pub struct Doop {
     pub items: Vec<DoopItem>,
 }
 
-impl Doop {
-    pub fn new() -> Self {
+impl Default for Doop {
+    fn default() -> Self {
         Doop { items: Vec::new() }
     }
 }
@@ -86,11 +86,10 @@ pub struct ForBinding {
 
 impl From<crate::input::DoopForBinding> for ForBinding {
     fn from(binding: crate::input::DoopForBinding) -> Self {
-        todo!()
-        // Self {
-        //     target: binding.target.into(),
-        //     entries: vec![vec![binding.first_term],
-        // binding.rest_terms].flatten(), }
+        Self {
+            target: todo!(),  // binding.target.into(),
+            entries: todo!(), // vec![vec![binding.first_term], binding.rest_terms].flatten(), }
+        }
     }
 }
 
@@ -101,7 +100,19 @@ pub enum ForBindingTarget {
 
 impl TryFrom<crate::input::DoopBlock> for Doop {
     type Error = syn::Error;
-    fn try_from(input: crate::input::DoopBlock) -> Result<Self, Self::Error> {
-        Ok(Doop { items: todo!("{}", &format!("{input:#?}")[..=256]) })
+    fn try_from(input: crate::input::DoopBlock) -> Result<Doop, Self::Error> {
+        todo!()
+        // let items = vec![];
+
+        // for item in input.items {
+        //     match DoopItem::try_from(item) {
+        //         Ok(item) => items.push(item),
+        //         Err(report) => return Err(report),
+        //     }
+        //     items.push(.map_err(|err| err.to_compile_error())?);
+        //     items.push(item);
+        // }
+
+        // Ok(Doop { items })
     }
 }
