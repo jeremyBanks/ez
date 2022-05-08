@@ -99,9 +99,9 @@ impl Surface for SVGPath {
         let (dx, dy): (Ratio, Ratio) = self.dx_dy(scale, revolutions(0.0));
         self.x += dx;
         self.y += dy;
-        let x_px = self.x_px();
-        let y_px = self.y_px();
-        self.path += &format!("L {x_px}, {y_px}\n");
+        let dx_px = dx.get::<pixels>();
+        let dy_px = dy.get::<pixels>();
+        self.path += &format!("l {dx_px}, {dy_px}\n");
     }
 
     fn end(self) -> String {
