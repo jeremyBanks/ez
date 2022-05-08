@@ -1,0 +1,16 @@
+[package]
+edition = "2021"
+name = "jeb"
+publish = false
+version = "0.0.0-please-clap"
+
+[[bin]]
+name = "jeb"
+doc = false
+
+[dependencies]
+ez = { path = "../ez" }
+uom = "*"
+
+[package.metadata.release]
+release = false
