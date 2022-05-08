@@ -1052,6 +1052,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "inherent"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "daa5135cb6aa90ee17b4f0a0fb2908059b0830f90fda333f12816f275b21820c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "instant"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1092,6 +1103,7 @@ name = "jeb"
 version = "0.0.0-please-clap"
 dependencies = [
  "ez",
+ "inherent",
  "uom",
 ]
 
