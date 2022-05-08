@@ -1,30 +1,18 @@
-#![allow(non_camel_case_types)]
-
-use {inherent::inherent, uom::si};
-
-pub type Revolutions = si::f64::Angle;
-pub type revolutions = si::angle::revolution;
-pub fn revolutions(value: f64) -> Revolutions {
-    Revolutions::new::<revolutions>(value)
-}
-
-pub type Ratio = si::f64::Ratio;
-pub type ratio = si::ratio::ratio;
-pub fn ratio(value: f64) -> Ratio {
-    Ratio::new::<ratio>(value)
-}
-
-pub type Pixels = si::f64::Length;
-pub type pixels = si::length::point_computer;
-pub fn pixels(value: impl Into<f64>) -> Pixels {
-    Pixels::new::<pixels>(value.into())
-}
+use {
+    crate::units::*,
+    inherent::inherent,
+    std::{
+        cell::RefCell,
+        rc::{Rc, Weak},
+    },
+};
 
 pub fn main() {
     let svg = SVGDocument::new();
-    let path = svg.start(ratio(0.5), ratio(0.5), revolutions(0.125));
-    let brush = SurfaceBrush::new(path);
-    let brush = svg.with(RoundedTurns(ratio(0.5)));
+    let surface = svg.start(ratio(0.5), ratio(0.5), revolutions(0.125));
+    let brush = SurfaceBrush::new(surface).with(RoundedTurns(ratio(0.5))).with(ZigZagStrokes);
+
+    let svg = brush.take().take().take().take();
 }
 
 trait Surface {
@@ -50,7 +38,7 @@ trait Brush: Sized {
 }
 
 struct SurfaceBrush<Surface: self::Surface> {
-    surface: Surface,
+    surface: Rc<Surface>,
 }
 
 impl<Surface: self::Surface> SurfaceBrush<Surface> {
