@@ -1,0 +1,59 @@
+svg[data-interactive] {
+    background: white;
+}
+
+.axis line {
+    stroke: #CCC;
+}
+
+.diag line {
+    stroke: #EEE;
+}
+
+path {
+    mix-blend-mode: multiply;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: #F8F8F8;
+    stroke-width: 0.002px;
+    stroke: black;
+}
+
+path:not(:only-child):nth-child(6n + 1) {
+    stroke: #440;
+    fill: #FFFFF0;
+}
+
+path:not(:only-child):nth-child(6n + 2) {
+    stroke: #044;
+    fill: #F0FFFF;
+}
+
+path:not(:only-child):nth-child(6n + 3) {
+        stroke: #404;
+        fill: #FFF0FF;
+}
+
+path:not(:only-child):nth-child(6n + 4) {
+    stroke: #008;
+    fill: #F8F8FF;
+}
+
+path:not(:only-child):nth-child(6n + 5) {
+    stroke: #080;
+    fill: #F8FFF8;
+}
+
+path:not(:only-child):nth-child(6n + 6) {
+    stroke: #800;
+    fill: #FFF8F8;
+}
+
+.background {
+    fill: white;
+}
+
+.grid {
+    mix-blend-mode: multiply;
+}
+

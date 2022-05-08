@@ -1,7 +1,10 @@
-mod surface;
+mod behaviors;
+mod brush;
+mod metabrush;
+mod svg;
 mod units;
 
-pub use crate::units::*;
+pub use crate::{behaviors::*, brush::*, metabrush::*, svg::*, units::*};
 
 #[ez::ly]
 fn main() {
@@ -234,140 +237,4 @@ use std::{
 //     }
 // }
 use templates::*;
-mod templates {
-    pub fn document(contents: &str) -> String {
-        let style = style();
-        let script = script();
-        format!(
-            r#"<?xml version="1.0" encoding="UTF-8"?>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
-                <style>{style}</style>
-
-                <defs>
-                    <pattern id="g1" viewBox="0 0 0.25 0.25" width="0.25" height="0.25">
-                        <g class="axis">
-                            <line x1="0.0" x2="0.0" y1="0" y2="0.25" stroke-width="0.00125" />
-                            <line x1="0.0" x2="0.25" y1="0" y2="0" stroke-width="0.00125" />
-                        </g>
-                        <g class="diag">
-                            <line x1="0.25" x2="0.25" y1="0" y2="0.25" stroke-width="0.00125" />
-                            <line x1="0.0" x2="0.25" y1="0.25" y2="0.25" stroke-width="0.00125" />
-                            <line x1="0" x2="0.25" y1="0" y2="0.25" stroke-width="0.00125" />
-                            <line x1="0.25" x2="0" y1="0" y2="0.25" stroke-width="0.00125" />
-                        </g>
-                    </pattern>
-
-                    <pattern id="g2" viewBox="0 0 0.50 0.50" width="0.50" height="0.50">
-                        <rect fill="url(#g1)" width="0.50" height="0.50" />
-                    </pattern>
-
-                    <pattern id="g3" viewBox="0 0 0.50 0.50" width="0.50" height="0.50">
-                        <rect fill="url(#g2)" width="0.50" height="0.50" />
-                    </pattern>
-
-                    <pattern id="g4" viewBox="0 0 0.50 0.50" width="0.50" height="0.50">
-                        <rect fill="url(#g3)" width="0.50" height="0.50" />
-                    </pattern>
-
-                    <pattern id="grid" viewBox="0 0 1 1" width="1" height="1">
-                        <rect fill="url(#g1)" width="1" height="1" />
-                        <rect fill="url(#g2)" width="1" height="1" />
-                        <rect fill="url(#g3)" width="1" height="1" />
-                        <rect fill="url(#g4)" width="1" height="1" />
-                    </pattern>
-                </defs>
-
-                <defs class="interactive">
-                    <rect x="0" y="0" width="1" height="1" class="background" />
-                </defs>
-
-                <g class="static">{contents}</g>
-
-                <defs class="interactive">
-                    <rect x="0" y="0" width="1" height="1" class="grid" />
-                </defs>
-
-                <script>{script}</script>
-            </svg>"#
-        )
-    }
-
-    fn style() -> String {
-        r#"
-            svg.interactive {
-                background: white;
-            }
-
-            .axis line {
-                stroke: #CCC;
-            }
-
-            .diag line {
-                stroke: #EEE;
-            }
-
-            path {
-                mix-blend-mode: multiply;
-                stroke-linecap: round;
-                stroke-linejoin: round;
-                fill: #F8F8F8;
-                stroke-width: 0.002px;
-                stroke: black;
-            }
-
-            path:not(:only-child):nth-child(6n + 1) {
-                stroke: #440;
-                fill: #FFFFF0;
-            }
-
-            path:not(:only-child):nth-child(6n + 2) {
-                stroke: #044;
-                fill: #F0FFFF;
-            }
-
-            path:not(:only-child):nth-child(6n + 3) {
-                    stroke: #404;
-                    fill: #FFF0FF;
-            }
-
-            path:not(:only-child):nth-child(6n + 4) {
-                stroke: #008;
-                fill: #F8F8FF;
-            }
-
-            path:not(:only-child):nth-child(6n + 5) {
-                stroke: #080;
-                fill: #F8FFF8;
-            }
-
-            path:not(:only-child):nth-child(6n + 6) {
-                stroke: #800;
-                fill: #FFF8F8;
-            }
-
-            .background {
-                fill: white;
-            }
-
-            .grid {
-                mix-blend-mode: multiply;
-                fill: url(#grid);
-            }
-        "#
-        .to_owned()
-    }
-
-    fn script() -> String {
-        r#"
-            "use strict";
-            document.documentElement.classList.add("interactive");
-            for (const def of document.querySelectorAll("defs.interactive")) {
-                for (const child of def.children) {
-                    def.before(child);
-                }
-                def.remove();
-            }
-        "#
-        .to_owned()
-    }
-}
+mod templates {}
