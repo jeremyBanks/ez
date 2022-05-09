@@ -55,16 +55,7 @@ impl SVGPath {
     }
 }
 
-#[derive(Default, Debug, Clone)]
-pub struct SVGDocument {
-    paths: Vec<Rc<RefCell<SVGPath>>>,
-}
-
 impl SVGDocument {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn start(&mut self, x: Ratio, y: Ratio, orientation: Revolutions) -> Rc<RefCell<SVGPath>> {
         self.paths.push(SVGPath::start(x, y, orientation));
         self.paths.last_mut().unwrap()

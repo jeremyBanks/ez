@@ -1,26 +1,34 @@
+use std::marker::PhantomData;
+
 use crate::*;
 
-pub struct MetaBrush<Brush: crate::brush::Brush, Behavior: MetaBrushBehavior = NoBehavior> {
-    brush: Brush,
-    behavior: Behavior,
+pub struct MetaBrush<Inner: Brush, Behavior: MetaBrushBehavior> {
+    inner: Inner,
+    behavior: PhantomData<Behavior>,
+}
+
+impl<Inner: Brush, Behavior: MetaBrushBehavior> MetaBrush<Inner, Behavior> {
+    pub fn new(behavior: Behavior, inner: Inner) -> Self {
+        Self { inner, behavior: PhantomData }
+    }
 }
 
 pub trait MetaBrushBehavior {
-    fn stroke(&mut self, inner: &mut impl crate::brush::Brush, distance: Ratio) {
+    fn stroke(inner: &mut impl Brush, distance: Ratio) {
         inner.stroke(distance)
     }
 
-    fn rotate(&mut self, inner: &mut impl crate::brush::Brush, revolutions: Revolutions) {
+    fn rotate(inner: &mut impl Brush, revolutions: Revolutions) {
         inner.rotate(revolutions)
     }
 }
 
-// impl<Brush: crate::brush::Brush, Behavior: MetaBrushBehavior>
-// crate::brush::Brush for MetaBrush<Brush, Behavior> {     fn stroke(&mut self,
-// distance: Ratio) {         self.behavior.stroke(&mut self.brush, distance)
-//     }
+impl<Inner: Brush, Behavior: MetaBrushBehavior> Brush for MetaBrush<Inner, Behavior> {
+    fn stroke(&mut self, distance: Ratio) {
+        Behavior::stroke(&mut self.inner, distance)
+    }
 
-//     fn rotate(&mut self, revolutions: Revolutions) {
-//         self.behavior.rotate(&mut self.brush, revolutions)
-//     }
-// }
+    fn rotate(&mut self, revolutions: Revolutions) {
+        Behavior::rotate(&mut self.inner, revolutions)
+    }
+}

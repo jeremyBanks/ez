@@ -1,14 +1,15 @@
 use crate::*;
 
-pub trait Brush {
+pub trait Brush: Sized {
     /// Extends the path in the current direction by the given distance.
     fn stroke(&mut self, distance: Ratio);
+
     /// Rotates the orientation by the given number of revolutions.
     fn rotate(&mut self, revolutions: Revolutions);
 
     fn right_turn(&mut self, distance: Ratio) {
         self.stroke(0.5 * distance);
-        self.rotate(Revolutions::new(0.25));
+        self.rotate(revolutions(0.25));
         self.stroke(0.5 * distance);
     }
 
@@ -19,15 +20,12 @@ pub trait Brush {
     fn with<Behavior: MetaBrushBehavior + Sized>(
         self,
         behaviour: Behavior,
-    ) -> MetaBrush<Self, Behavior>
-    where
-        Self: Sized,
-    {
+    ) -> MetaBrush<Self, Behavior> {
         MetaBrush::new(behaviour, self)
     }
 
-    fn scaled(self, scale: Ratio) -> MetaBrush<Self, Scaled> {
-        self.with(Scaled(scale))
+    fn scaled<const RATIO: Ratio>(self) -> MetaBrush<Self, Scaled<RATIO>> {
+        self.with(Scaled)
     }
 
     fn mirrored(self) -> MetaBrush<Self, Mirrored> {

@@ -1,33 +1,31 @@
 use crate::*;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct TurnsFromArms;
-impl MetaBrushBehavior for TurnsFromArms {}
-
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct TurnsFromCurves;
-impl MetaBrushBehavior for TurnsFromCurves {}
-
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct RoundedTurns(pub Ratio);
-
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct Scaled(pub Ratio);
-
-impl MetaBrushBehavior for Scaled {}
-
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct ArmsFromStrokes;
-impl MetaBrushBehavior for ArmsFromStrokes {}
-
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug)]
 pub struct Mirrored;
-impl MetaBrushBehavior for Mirrored {}
+impl MetaBrushBehavior for Mirrored {
+    fn rotate(inner: &mut impl Brush, revolutions: Revolutions) {
+        inner.rotate(-revolutions);
+    }
+}
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct ZigZagStrokes;
-impl MetaBrushBehavior for ZigZagStrokes {}
+#[derive(Clone, Copy, Debug)]
+pub struct Scaled<const RATIO: Ratio>;
+impl<const RATIO: Ratio> MetaBrushBehavior for Scaled<RATIO> {
+    fn stroke(inner: &mut impl Brush, length: Ratio) {
+        inner.stroke(RATIO * length);
+    }
+}
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct CurveyStrokes;
-impl MetaBrushBehavior for CurveyStrokes {}
+#[derive(Clone, Copy, Debug)]
+pub struct ZigZag;
+impl MetaBrushBehavior for ZigZag {
+    fn stroke(inner: &mut impl Brush, distance: Ratio) {
+        inner.rotate(revolutions(-0.25));
+        inner.stroke(SQRT_2 / 4.0 * distance);
+        inner.rotate(revolutions(0.50));
+        inner.stroke(SQRT_2 / 2.0 * distance);
+        inner.rotate(revolutions(-0.50));
+        inner.stroke(SQRT_2 / 4.0 * distance);
+        inner.rotate(revolutions(0.25));
+    }
+}

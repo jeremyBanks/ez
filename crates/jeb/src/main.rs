@@ -1,10 +1,11 @@
 mod behaviors;
 mod brush;
+mod design;
 mod metabrush;
 mod svg;
 mod units;
 
-pub use crate::{behaviors::*, brush::*, metabrush::*, svg::*, units::*};
+pub use crate::{behaviors::*, brush::*, design::*, metabrush::*, svg::*, units::*};
 
 #[ez::ly]
 fn main() {
