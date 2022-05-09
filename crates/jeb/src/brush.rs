@@ -6,6 +6,16 @@ pub trait Brush {
     /// Rotates the orientation by the given number of revolutions.
     fn rotate(&mut self, revolutions: Revolutions);
 
+    fn right_turn(&mut self, distance: Ratio) {
+        self.stroke(0.5 * distance);
+        self.rotate(Revolutions::new(0.25));
+        self.stroke(0.5 * distance);
+    }
+
+    fn left_turn(&mut self, distance: Ratio) {
+        self.mirrored().right_turn(distance);
+    }
+
     fn with<Behavior: MetaBrushBehavior + Sized>(
         self,
         behaviour: Behavior,
@@ -22,25 +32,5 @@ pub trait Brush {
 
     fn mirrored(self) -> MetaBrush<Self, Mirrored> {
         self.with(Mirrored)
-    }
-
-    fn sharp_turns(self) -> MetaBrush<Self, SharpTurns> {
-        self.with(SharpTurns)
-    }
-
-    fn round_turns(self) -> MetaBrush<Self, RoundTurns> {
-        self.with(RoundTurns)
-    }
-
-    fn rounded_turns(self, roundness: Ratio) -> MetaBrush<Self, RoundedTurns> {
-        self.with(RoundedTurns(roundness))
-    }
-
-    fn zig_zag_strokes(self) -> MetaBrush<Self, ZigZagStrokes> {
-        self.with(ZigZagStrokes)
-    }
-
-    fn wavy_strokes(self) -> MetaBrush<Self, WavyStrokes> {
-        self.with(WavyStrokes)
     }
 }

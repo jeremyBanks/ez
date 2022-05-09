@@ -1,24 +1,33 @@
 use crate::*;
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct TurnsFromArms;
-impl crate::metabrush::MetaBrushBehavior for TurnsFromArms {}
+impl MetaBrushBehavior for TurnsFromArms {}
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct TurnsFromCurves;
-impl crate::metabrush::MetaBrushBehavior for TurnsFromCurves {}
+impl MetaBrushBehavior for TurnsFromCurves {}
 
-#[derive(Clone, Copy, Debug)]
-pub struct RoundedTurns(Ratio);
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub struct RoundedTurns(pub Ratio);
 
-#[derive(Clone, Copy, Debug)]
-pub struct Scaled(Ratio);
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub struct Scaled(pub Ratio);
 
-impl crate::metabrush::MetaBrushBehavior for Scaled {}
+impl MetaBrushBehavior for Scaled {}
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct ArmsFromStrokes;
-impl crate::metabrush::MetaBrushBehavior for ArmsFromStrokes {}
+impl MetaBrushBehavior for ArmsFromStrokes {}
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub struct Mirrored;
+impl MetaBrushBehavior for Mirrored {}
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct ZigZagStrokes;
-impl crate::metabrush::MetaBrushBehavior for ZigZagStrokes {}
+impl MetaBrushBehavior for ZigZagStrokes {}
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct CurveyStrokes;
-impl crate::metabrush::MetaBrushBehavior for CurveyStrokes {}
+impl MetaBrushBehavior for CurveyStrokes {}
