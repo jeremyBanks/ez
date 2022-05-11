@@ -26,14 +26,21 @@ pub trait Brush: Sized {
         self
     }
 
-    fn left_loop<'this>(&'this mut self, scale: Ratio) -> &mut Self {
+    fn left_loop<'this>(&'this mut self, scale: Ratio) -> &'this mut Self {
         self.left_turn(scale).left_turn(scale).left_turn(scale).left_turn(scale)
     }
 
-    fn right_loop<'this>(&'this mut self, scale: Ratio) -> &mut Self {
+    fn right_loop<'this>(&'this mut self, scale: Ratio) -> &'this mut Self {
         self.mirrored().left_loop(scale);
         self
     }
+
+    fn tap<'this, R>(&'this mut self, f: impl FnOnce(&mut Self) -> R) -> &'this mut Self {
+        f(&mut *self);
+        self
+    }
+
+    fn plug(&mut self) {}
 
     fn with<'this, Behavior: MetaBrushBehavior + Sized>(
         &'this mut self,

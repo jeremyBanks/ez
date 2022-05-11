@@ -5,18 +5,12 @@ mod metabrush;
 mod svg;
 mod units;
 
-use tap::Tap;
-
 pub use crate::{behaviors::*, brush::*, design::*, metabrush::*, svg::*, units::*};
 
 fn main() {
     let mut svg = SVGPath::default();
 
-    svg.tap_mut(|svg| {
-        svg
-            .scaled(0.75)
-            .right_loop(0.75);
-    })
+    svg.tap(|svg| svg.scaled(0.75).right_loop(0.75).plug())
         .scaled(0.5)
         .mirrored()
         .right_loop(0.5)
