@@ -14,7 +14,8 @@ pub trait Brush: Sized {
     }
 
     fn left_turn(&mut self, distance: Ratio) {
-        self.mirrored().right_turn(distance);
+        todo!()
+        // self.mirrored().right_turn(distance);
     }
 
     fn with<Behavior: MetaBrushBehavior + Sized>(
@@ -24,8 +25,8 @@ pub trait Brush: Sized {
         MetaBrush::new(behaviour, self)
     }
 
-    fn scaled<const RATIO: Ratio>(self) -> MetaBrush<Self, Scaled<RATIO>> {
-        self.with(Scaled)
+    fn scaled(self, scale: Ratio) -> MetaBrush<Self, Scaled> {
+        self.with(Scaled(scale))
     }
 
     fn mirrored(self) -> MetaBrush<Self, Mirrored> {

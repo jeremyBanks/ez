@@ -25,9 +25,9 @@ fn main() {
 
     // let svg = brush::MetaBrush::take(zig_zag);
 
-    let doc = templates::document(&format!("<path d=\"\n{}\n\" />", "svg.path()"));
+    // let doc = templates::document(&format!("<path d=\"\n{}\n\" />", "svg.path()"));
 
-    println!("{doc}");
+    // println!("{doc}");
 }
 use std::{
     f64::consts::{SQRT_2, TAU},

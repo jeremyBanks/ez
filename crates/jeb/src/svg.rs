@@ -18,8 +18,9 @@ impl SVGDocument {
     }
 
     pub fn new_path(&mut self, x: Ratio, y: Ratio, orientation: Revolutions) -> &mut SVGPath {
-        self.paths.push(SVGPath::start(x, y, orientation));
-        self.paths.last_mut().unwrap()
+        todo!()
+        // self.paths.push(SVGPath::new(x, y, orientation));
+        // self.paths.last_mut().unwrap()
     }
 }
 
@@ -29,7 +30,7 @@ impl ToString for SVGDocument {
             include_str!("./svg.svg"),
             style = include_str!("./svg.css"),
             script = include_str!("./svg.js"),
-            paths = self.paths.iter().map(|d| format!("<path d=\"\n{d}\n\" />")).join(""),
+            static = self.paths.iter().map(|p| format!("<path d=\"\n{d}\n\" />", d = p.path)).join(""),
         )
     }
 }
@@ -55,12 +56,7 @@ impl SVGPath {
     }
 }
 
-impl SVGDocument {
-    pub fn start(&mut self, x: Ratio, y: Ratio, orientation: Revolutions) -> Rc<RefCell<SVGPath>> {
-        self.paths.push(SVGPath::start(x, y, orientation));
-        self.paths.last_mut().unwrap()
-    }
-}
+impl SVGDocument {}
 
 impl crate::brush::Brush for SVGPath {
     fn rotate(&mut self, revolutions: Revolutions) {
@@ -68,11 +64,12 @@ impl crate::brush::Brush for SVGPath {
     }
 
     fn stroke(&mut self, scale: Ratio) {
-        let (dx, dy): (Ratio, Ratio) = self.dx_dy(scale, revolutions(0.0));
-        self.x += dx;
-        self.y += dy;
-        let dx_px = (dx * self.scale).get::<pixels>();
-        let dy_px = (dy * self.scale).get::<pixels>();
-        self.path += &format!("l {dx_px}, {dy_px}\n");
+        todo!()
+        // let (dx, dy): (Ratio, Ratio) = self.dx_dy(scale, revolutions(0.0));
+        // self.x += dx;
+        // self.y += dy;
+        // let dx_px = (dx * self.scale).get::<pixels>();
+        // let dy_px = (dy * self.scale).get::<pixels>();
+        // self.path += &format!("l {dx_px}, {dy_px}\n");
     }
 }

@@ -1104,7 +1104,6 @@ version = "0.0.0-please-clap"
 dependencies = [
  "ez",
  "inherent",
- "uom",
 ]
 
 [[package]]
@@ -2371,16 +2370,6 @@ name = "unicode-xid"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ccb82d61f80a663efe1f787a51b16b5a51e3314d6ac365b08639f52387b33f3"
-
-[[package]]
-name = "uom"
-version = "0.32.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffcb443c899d2adc34f4ae4c64d6e9867b6d3ead2fad03979a8732a4ab6d396f"
-dependencies = [
- "num-traits",
- "typenum",
-]
 
 [[package]]
 name = "url"

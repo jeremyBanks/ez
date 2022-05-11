@@ -10,7 +10,6 @@ doc = false
 
 [dependencies]
 ez = { path = "../ez" }
-uom = "*"
 inherent = "*"
 
 [package.metadata.release]
