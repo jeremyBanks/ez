@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::*;
 
 pub trait Brush: Sized {
@@ -6,62 +8,64 @@ pub trait Brush: Sized {
     fn rotate(&mut self, revolutions: Revolutions) -> &mut Self;
 
     fn rotate_left(&mut self, revolutions: Revolutions) -> &mut Self {
-        self.rotate(revolutions)
+        self.defaults().rotate_left(revolutions);
+        self
     }
 
     fn rotate_right(&mut self, revolutions: Revolutions) -> &mut Self {
-        self.mirrored().rotate_left(revolutions);
+        self.defaults().rotate_right(revolutions);
         self
     }
 
     fn left_turn(&mut self, scale: Ratio) -> &mut Self {
-        self.stroke(0.5 * scale);
-        self.rotate(0.25);
-        self.stroke(0.5 * scale);
+        self.defaults().left_turn(scale);
         self
     }
 
     fn right_turn(&mut self, scale: Ratio) -> &mut Self {
-        self.mirrored().left_turn(scale);
+        self.defaults().right_turn(scale);
         self
     }
 
-    fn left_loop<'this>(&'this mut self, scale: Ratio) -> &'this mut Self {
-        self.left_turn(scale).left_turn(scale).left_turn(scale).left_turn(scale)
+    fn left_loop(&mut self, scale: Ratio) -> &mut Self {
+        self.defaults().left_loop();
     }
 
-    fn right_loop<'this>(&'this mut self, scale: Ratio) -> &'this mut Self {
-        self.mirrored().left_loop(scale);
-        self
+    fn right_loop(&mut self, scale: Ratio) -> &mut Self {
+        self.defaults().right_loop();
     }
 
-    fn tap<'this, R>(&'this mut self, f: impl FnOnce(&mut Self) -> R) -> &'this mut Self {
-        f(&mut *self);
-        self
+    fn fill(&mut self, width: Ratio, height: Ratio) -> &mut Self {
+        self.defaults().fill(width, height);
     }
 
-    fn plug(&mut self) {}
-
-    fn with<'this, Behavior: MetaBrushBehavior + Sized>(
-        &'this mut self,
-        behaviour: Behavior,
-    ) -> MetaBrush<Behavior, Self> {
-        MetaBrush::new(behaviour, self)
+    fn scaled(&mut self, scale: Ratio) -> MetaBrush<Scaled, Self> {
+        MetaBrush::new(Scaled(scale), self)
     }
 
-    fn scaled<'this>(&'this mut self, scale: Ratio) -> MetaBrush<Scaled, Self> {
-        self.with(Scaled(scale))
+    fn mirrored(&mut self) -> MetaBrush<Mirrored, Self> {
+        MetaBrush::new(Mirrored, self)    }
+
+    fn zig_zag(&mut self) -> MetaBrush<ZigZag, Self> {
+        MetaBrush::new(ZigZag, self)
     }
 
-    fn mirrored<'this>(&'this mut self) -> MetaBrush<Mirrored, Self> {
-        self.with(Mirrored)
+    fn sharp_turns(&mut self) -> MetaBrush<SharpTurns, Self> {
+        MetaBrush::new(SharpTurns, self)
     }
 
-    fn zig_zag<'this>(&'this mut self) -> MetaBrush<ZigZag, Self> {
-        self.with(ZigZag)
+    fn turn_loops(&mut self) -> MetaBrush<SharpTurns, Self> {
+        MetaBrush::new(TurnLoops, self)
     }
 
-    fn sharp_turns<'this>(&'this mut self) -> MetaBrush<SharpTurns, Self> {
-        self.with(SharpTurns)
+    /// default brush layers to implement optional methods from required ones
+    fn defaults(&mut self) -> MetaBrush<TurnLoops, MetaBrush<SharpTurns, Self>> {
+        self.sharp_turns().turn_loops()
+    }
+}
+
+pub trait MetaBrushBehavior: Debug + Copy + Clone {
+    fn stroke<'inner, Inner: Brush>(&mut self, inner: &'inner mut Inner, scale: Ratio) {
+        inner.stroke(scale);
     }
 }

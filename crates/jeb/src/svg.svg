@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1" class="root">
     <defs>
         <pattern id="g1" viewBox="0 0 0.25 0.25" width="0.25" height="0.25">
             <g class="axis">
@@ -34,15 +34,11 @@
         </pattern>
     </defs>
 
-    <defs data-interactive>
-        <rect x="0" y="0" width="1" height="1" class="background" />
-    </defs>
-
-    <g class="static">{static}</g>
-
-    <defs data-interactive>
+    <defs class="interactive">
         <rect x="0" y="0" width="1" height="1" class="grid" fill="url(#grid)" />
     </defs>
+
+    <svg x="0" y="0" width="1" height="1" class="static" viewBox="0 0 1024 1024">{static}</svg>
 
     <style>{style}</style>
 

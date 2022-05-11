@@ -3,6 +3,7 @@ use {
     itertools::Itertools,
     std::{
         cell::RefCell,
+        fmt::Display,
         rc::{Rc, Weak},
     },
 };
@@ -13,29 +14,24 @@ pub struct SVGDocument {
 }
 
 impl SVGDocument {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn new_path(&mut self, x: Ratio, y: Ratio, orientation: Revolutions) -> &mut SVGPath {
-        todo!()
-        // self.paths.push(SVGPath::new(x, y, orientation));
-        // self.paths.last_mut().unwrap()
+    pub fn new(paths: Vec<SVGPath>) -> Self {
+        Self { paths }
     }
 }
 
-impl ToString for SVGDocument {
-    fn to_string(&self) -> String {
-        format!(
+impl Display for SVGDocument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
             include_str!("./svg.svg"),
             style = include_str!("./svg.css"),
             script = include_str!("./svg.js"),
-            static = self.paths.iter().map(|p| format!("<path d=\"\n{d}\n\" />", d = p.path)).join(""),
+            static = self.paths.iter().map(|p| format!("<path d=\"{d}\" />", d = p.path)).join(""),
         )
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct SVGPath {
     /// total width/height of the SVG context in pixels
     scale: Pixels,
@@ -51,8 +47,17 @@ pub struct SVGPath {
 }
 
 impl SVGPath {
-    fn scale(&self) -> Pixels {
-        self.scale
+    pub fn new(x: Ratio, y: Ratio, orientation: Revolutions) -> Self {
+        let scale = 1024.0;
+        let x_px = x * scale;
+        let y_px = y * scale;
+        Self { scale, x, y, orientation, path: format!("M{x_px},{y_px} ") }
+    }
+}
+
+impl Default for SVGPath {
+    fn default() -> Self {
+        Self::new(0.25, 0.25, 0.0)
     }
 }
 
@@ -65,12 +70,19 @@ impl crate::brush::Brush for SVGPath {
     }
 
     fn stroke(&mut self, scale: Ratio) -> &mut Self {
-        todo!()
-        // let (dx, dy): (Ratio, Ratio) = self.dx_dy(scale, revolutions(0.0));
-        // self.x += dx;
-        // self.y += dy;
-        // let dx_px = (dx * self.scale).get::<pixels>();
-        // let dy_px = (dy * self.scale).get::<pixels>();
-        // self.path += &format!("l {dx_px}, {dy_px}\n");
+        let dx = scale * (self.orientation * TAU).cos();
+        let dy = scale * (self.orientation * TAU).sin();
+        self.x += dx;
+        self.y += dy;
+        let dx_px = dx * self.scale;
+        let dy_px = dy * self.scale;
+        match (dx == 0.0, dy == 0.0) {
+            (true, true) => {}
+            (true, false) => self.path += &format!("v{dy_px} "),
+            (false, true) => self.path += &format!("h{dx_px} "),
+            (false, false) => self.path += &format!("l{dx_px},{dy_px} "),
+        };
+
+        self
     }
 }

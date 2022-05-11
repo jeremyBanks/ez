@@ -5,35 +5,27 @@ mod metabrush;
 mod svg;
 mod units;
 
+use tap::Tap;
+
 pub use crate::{behaviors::*, brush::*, design::*, metabrush::*, svg::*, units::*};
 
 fn main() {
-    let mut svg = SVGPath::default();
-
-    svg.tap(|svg| svg.scaled(0.75).right_loop(0.75).plug())
-        .scaled(0.5)
-        .mirrored()
-        .right_loop(0.5)
-        .left_loop(0.25)
-        .end()
-        .end();
-
-    // zig_zag.move_to(0.5, 0.5);
-
-    // jeb(&mut zig_zag, 0.25);
-
-    // zig_zag.stroke(0.25);
-    // zig_zag.rotate_left(0.25);
-    // zig_zag.stroke(0.25);
-    // zig_zag.rotate_right(0.50);
-    // zig_zag.stroke(0.50);
-
-    // let svg = brush::MetaBrush::take(zig_zag);
-
-    // let doc = templates::document(&format!("<path d=\"\n{}\n\" />",
-    // "svg.path()"));
-
-    // println!("{doc}");
+    println!(
+        "{}",
+        SVGDocument::new(vec![
+            SVGPath::new(0.5, 0.5, 0.0).tap_mut(|svg| {
+                svg.right_turn(0.125);
+                svg.left_turn(0.25);
+                svg.right_turn(0.5);
+            }),
+            SVGPath::new(0.25, 0.25, 0.0).tap_mut(|svg| {
+                svg.right_turn(0.125);
+            }),
+            SVGPath::new(0.75, 0.75, 0.0).tap_mut(|svg| {
+                svg.right_turn(0.125);
+            }),
+        ])
+    );
 }
 use std::{
     f64::consts::{SQRT_2, TAU},

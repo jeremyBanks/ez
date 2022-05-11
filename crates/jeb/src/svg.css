@@ -1,5 +1,14 @@
-svg[data-interactive] {
+svg.root {
     background: white;
+}
+
+svg {
+    overflow: auto;
+}
+
+svg.static {
+    --scale: 1024;
+    --milli: calc(var(--scale) / 1024);
 }
 
 .axis line {
@@ -15,7 +24,7 @@ path {
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: #F8F8F8;
-    stroke-width: 0.002px;
+    stroke-width: calc(4 * var(--milli)) ;
     stroke: black;
 }
 
@@ -30,8 +39,8 @@ path:not(:only-child):nth-child(6n + 2) {
 }
 
 path:not(:only-child):nth-child(6n + 3) {
-        stroke: #404;
-        fill: #FFF0FF;
+    stroke: #404;
+    fill: #FFF0FF;
 }
 
 path:not(:only-child):nth-child(6n + 4) {
