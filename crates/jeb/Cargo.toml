@@ -9,9 +9,7 @@ name = "jeb"
 doc = false
 
 [dependencies]
-ez = { path = "../ez" }
-inherent = "*"
-derive_more = "*"
+itertools = "*"
 
 [package.metadata.release]
 release = false

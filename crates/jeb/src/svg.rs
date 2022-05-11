@@ -1,6 +1,6 @@
 use {
     crate::*,
-    inherent::inherent,
+    itertools::Itertools,
     std::{
         cell::RefCell,
         rc::{Rc, Weak},
@@ -35,7 +35,7 @@ impl ToString for SVGDocument {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct SVGPath {
     /// total width/height of the SVG context in pixels
     scale: Pixels,
@@ -59,11 +59,12 @@ impl SVGPath {
 impl SVGDocument {}
 
 impl crate::brush::Brush for SVGPath {
-    fn rotate(&mut self, revolutions: Revolutions) {
+    fn rotate(&mut self, revolutions: Revolutions) -> &mut Self {
         self.orientation += revolutions;
+        self
     }
 
-    fn stroke(&mut self, scale: Ratio) {
+    fn stroke(&mut self, scale: Ratio) -> &mut Self {
         todo!()
         // let (dx, dy): (Ratio, Ratio) = self.dx_dy(scale, revolutions(0.0));
         // self.x += dx;

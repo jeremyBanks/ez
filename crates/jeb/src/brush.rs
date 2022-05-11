@@ -1,35 +1,60 @@
 use crate::*;
 
 pub trait Brush: Sized {
-    /// Extends the path in the current direction by the given distance.
-    fn stroke(&mut self, distance: Ratio);
+    fn stroke(&mut self, scale: Ratio) -> &mut Self;
 
-    /// Rotates the orientation by the given number of revolutions.
-    fn rotate(&mut self, revolutions: Revolutions);
+    fn rotate(&mut self, revolutions: Revolutions) -> &mut Self;
 
-    fn right_turn(&mut self, distance: Ratio) {
-        self.stroke(0.5 * distance);
-        self.rotate(revolutions(0.25));
-        self.stroke(0.5 * distance);
+    fn rotate_left(&mut self, revolutions: Revolutions) -> &mut Self {
+        self.rotate(revolutions)
     }
 
-    fn left_turn(&mut self, distance: Ratio) {
-        todo!()
-        // self.mirrored().right_turn(distance);
+    fn rotate_right(&mut self, revolutions: Revolutions) -> &mut Self {
+        self.mirrored().rotate_left(revolutions);
+        self
     }
 
-    fn with<Behavior: MetaBrushBehavior + Sized>(
-        self,
+    fn left_turn(&mut self, scale: Ratio) -> &mut Self {
+        self.stroke(0.5 * scale);
+        self.rotate(0.25);
+        self.stroke(0.5 * scale);
+        self
+    }
+
+    fn right_turn(&mut self, scale: Ratio) -> &mut Self {
+        self.mirrored().left_turn(scale);
+        self
+    }
+
+    fn left_loop<'this>(&'this mut self, scale: Ratio) -> &mut Self {
+        self.left_turn(scale).left_turn(scale).left_turn(scale).left_turn(scale)
+    }
+
+    fn right_loop<'this>(&'this mut self, scale: Ratio) -> &mut Self {
+        self.mirrored().left_loop(scale);
+        self
+    }
+
+    fn with<'this, Behavior: MetaBrushBehavior + Sized>(
+        &'this mut self,
         behaviour: Behavior,
-    ) -> MetaBrush<Self, Behavior> {
+    ) -> MetaBrush<Behavior, Self> {
         MetaBrush::new(behaviour, self)
     }
 
-    fn scaled(self, scale: Ratio) -> MetaBrush<Self, Scaled> {
+    fn scaled<'this>(&'this mut self, scale: Ratio) -> MetaBrush<Scaled, Self> {
         self.with(Scaled(scale))
     }
 
-    fn mirrored(self) -> MetaBrush<Self, Mirrored> {
+    fn mirrored<'this>(&'this mut self) -> MetaBrush<Mirrored, Self> {
         self.with(Mirrored)
+    }
+
+    fn zig_zag<'this>(&'this mut self) -> MetaBrush<ZigZag, Self> {
+        self.with(ZigZag)
+    }
+
+    fn sharp_turns<'this>(&'this mut self) -> MetaBrush<SharpTurns, Self> {
+        self.with(SharpTurns)
     }
 }

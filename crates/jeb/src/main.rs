@@ -7,11 +7,18 @@ mod units;
 
 pub use crate::{behaviors::*, brush::*, design::*, metabrush::*, svg::*, units::*};
 
-#[ez::ly]
 fn main() {
-    // let mut svg = brush::SVGPath::new();
+    let mut svg = SVGPath::default();
 
-    // let mut zig_zag = ZigZagBrush::from(svg);
+    svg.scaled(0.75)
+        .right_loop(0.75)
+        .end()
+        .scaled(0.5)
+        .mirrored()
+        .right_loop(0.5)
+        .left_loop(0.25)
+        .end()
+        .end();
 
     // zig_zag.move_to(0.5, 0.5);
 

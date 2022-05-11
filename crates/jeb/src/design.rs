@@ -11,9 +11,9 @@ pub trait Filling: Drawing {
 }
 
 pub trait Root: Drawing {
-    const X: Ratio = 0.5.into();
+    const X: Ratio = 0.5;
     const Y: Ratio = Self::X;
-    const ORIENTATION: Revolutions = revolutions(0.0);
+    const ORIENTATION: Revolutions = (0.0);
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -29,6 +29,6 @@ impl Drawing for FourSquare {
 }
 
 impl Root for FourSquare {
-    const X: Ratio = ratio(0.25);
-    const Y: Ratio = ratio(0.25);
+    const X: Ratio = (0.25);
+    const Y: Ratio = (0.25);
 }
