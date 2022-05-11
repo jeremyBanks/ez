@@ -10,6 +10,7 @@ doc = false
 
 [dependencies]
 itertools = "*"
+tap = "*"
 
 [package.metadata.release]
 release = false

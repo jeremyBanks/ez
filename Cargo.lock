@@ -1092,6 +1092,7 @@ name = "jeb"
 version = "0.0.0-please-clap"
 dependencies = [
  "itertools",
+ "tap",
 ]
 
 [[package]]
