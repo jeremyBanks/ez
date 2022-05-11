@@ -25,7 +25,8 @@ fn main() {
 
     // let svg = brush::MetaBrush::take(zig_zag);
 
-    // let doc = templates::document(&format!("<path d=\"\n{}\n\" />", "svg.path()"));
+    // let doc = templates::document(&format!("<path d=\"\n{}\n\" />",
+    // "svg.path()"));
 
     // println!("{doc}");
 }

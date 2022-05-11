@@ -11,6 +11,7 @@ doc = false
 [dependencies]
 ez = { path = "../ez" }
 inherent = "*"
+derive_more = "*"
 
 [package.metadata.release]
 release = false
