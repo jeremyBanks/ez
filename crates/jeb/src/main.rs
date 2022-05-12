@@ -1,31 +1,33 @@
-mod behaviors;
-mod brush;
-mod design;
-mod metabrush;
+// mod behaviors;
+// mod brush;
+// mod design;
+// mod metabrush;
 mod svg;
-mod units;
+// mod units;
+mod pen;
 
 use tap::Tap;
 
-pub use crate::{behaviors::*, brush::*, design::*, metabrush::*, svg::*, units::*};
+// pub use crate::{behaviors::*, brush::*, design::*, metabrush::*, svg::*,
+// units::*};
 
 fn main() {
-    println!(
-        "{}",
-        SVGDocument::new(vec![
-            SVGPath::new(0.5, 0.5, 0.0).tap_mut(|svg| {
-                svg.right_turn(0.125);
-                svg.left_turn(0.25);
-                svg.right_turn(0.5);
-            }),
-            SVGPath::new(0.25, 0.25, 0.0).tap_mut(|svg| {
-                svg.right_turn(0.125);
-            }),
-            SVGPath::new(0.75, 0.75, 0.0).tap_mut(|svg| {
-                svg.right_turn(0.125);
-            }),
-        ])
-    );
+    // println!(
+    //     "{}",
+    //     SVGDocument::new(vec![
+    //         SVGPath::new(0.5, 0.5, 0.0).tap_mut(|svg| {
+    //             svg.right_turn(0.125);
+    //             svg.left_turn(0.25);
+    //             svg.right_turn(0.5);
+    //         }),
+    //         SVGPath::new(0.25, 0.25, 0.0).tap_mut(|svg| {
+    //             svg.right_turn(0.125);
+    //         }),
+    //         SVGPath::new(0.75, 0.75, 0.0).tap_mut(|svg| {
+    //             svg.right_turn(0.125);
+    //         }),
+    //     ])
+    // );
 }
 use std::{
     f64::consts::{SQRT_2, TAU},
@@ -89,12 +91,12 @@ use std::{
 //             brush.stroke(scale);
 //         }
 //         let steps = &[
-//             right, right, left, left, right, right, left, right, left, right, left, right,
-//             straight, right, right, straight, left, left, straight, left, right, right,
-// left,             right, left, right, right, left, left, right, right, straight, straight,
-// right, right,             left, right, left, left, straight, straight, straight, straight,
-// straight, left, left,             right, left, right, right, straight, straight,
-//         ];
+//             right, right, left, left, right, right, left, right, left, right,
+// left, right,             straight, right, right, straight, left, left,
+// straight, left, right, right, left,             right, left, right, right,
+// left, left, right, right, straight, straight, right, right,             left,
+// right, left, left, straight, straight, straight, straight, straight, left,
+// left,             right, left, right, right, straight, straight,         ];
 //         for step in steps {
 //             step(brush, scale);
 //         }
@@ -150,8 +152,8 @@ use std::{
 //         }
 //     }
 
-//     pub trait MetaBrush: Brush + DerefMut<Target = Self::Inner> + From<Self::Inner> {
-//         type Inner: Brush;
+//     pub trait MetaBrush: Brush + DerefMut<Target = Self::Inner> +
+// From<Self::Inner> {         type Inner: Brush;
 
 //         fn take(self) -> Self::Inner;
 //     }
@@ -221,8 +223,8 @@ use std::{
 //         }
 
 //         fn rotate(&mut self, turns_clockwise: f64) {
-//             self.turns = (((self.turns + turns_clockwise) % 1.0) + 1.0) % 1.0;
-//         }
+//             self.turns = (((self.turns + turns_clockwise) % 1.0) + 1.0) %
+// 1.0;         }
 
 //         fn stroke(&mut self, scale: f64) {
 //             // use trig to calculate the dx and dy based on self.turns
@@ -235,5 +237,3 @@ use std::{
 //         }
 //     }
 // }
-use templates::*;
-mod templates {}

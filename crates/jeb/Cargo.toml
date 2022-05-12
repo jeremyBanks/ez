@@ -11,6 +11,7 @@ doc = false
 [dependencies]
 itertools = "*"
 tap = "*"
+derive_more = "*"
 
 [package.metadata.release]
 release = false
