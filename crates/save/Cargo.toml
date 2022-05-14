@@ -3,7 +3,6 @@ authors = ["Jeremy Banks <_@jeremy.ca>"]
 default-run = "save"
 description = "Would you like to SAVE the change?"
 edition = "2021"
-homepage = "https://lib.rs/save"
 license = "MIT OR Apache-2.0"
 name = "save"
 repository = "https://github.com/jeremyBanks/save"
@@ -14,7 +13,7 @@ clap = { features = ["derive", "env", "cargo", "unicode", "wrap_help"], version 
 color-eyre = "0.6.0"
 digest = "0.10.1"
 eyre = "0.6.5"
-git2 = "0.13.25"
+git2 = "*"
 hex = "0.4.3"
 home = "0.5.3"
 itertools = "0.10.3"
@@ -33,10 +32,6 @@ tracing = { features = ["log"], version = "0.1.29" }
 tracing-error = { features = ["traced-error"], version = "0.2.0" }
 tracing-subscriber = { features = ["env-filter"], version = "0.3.6" }
 typenum = "1.15.0"
-
-[profile.release]
-lto = "fat"
-codegen-units = 1
 
 [[bench]]
 name = "criterion"

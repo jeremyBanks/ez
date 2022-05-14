@@ -41,7 +41,6 @@ macro_rules! lazy_ref {
         },
         repository = env!("CARGO_PKG_REPOSITORY"))
     },
-    version = format!("v{}", env!("CARGO_PKG_VERSION")),
     max_term_width = max_term_width(),
     setting = AppSettings::DeriveDisplayOrder
             | AppSettings::DontCollapseArgsInUsage
