@@ -1,4 +1,5 @@
 use {
+    crate::*,
     derive_syn_parse::Parse,
     proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree},
     syn::{
@@ -9,6 +10,7 @@ use {
     },
 };
 
+/// The top-level `doop!{ ... }` macro invocation block.
 #[derive(Debug, Clone)]
 pub struct DoopBlock {
     pub items: Vec<DoopBlockItem>,
@@ -131,7 +133,7 @@ pub enum BindingTerm {
     #[peek(syn::Ident, name = "ident")]
     Ident(Ident),
     #[peek(token::Bracket, name = "bracket list")]
-    BracketedList(BracketList),
+    BracketList(BracketList),
     #[peek(token::Bracket, name = "brace list")]
     BraceList(BraceList),
 }

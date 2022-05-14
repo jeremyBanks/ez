@@ -1,9 +1,11 @@
 use {
-    indexmap::IndexSet,
+    crate::*,
+    indexmap::{IndexMap, IndexSet},
     proc_macro2::{TokenStream, TokenTree},
     std::hash::{Hash, Hasher},
 };
 
+#[derive(Clone, Debug)]
 pub struct BindingEntry {
     tokens: Vec<TokenTree>,
     as_strings: Vec<String>,
@@ -84,12 +86,11 @@ pub struct ForBinding {
     pub entries: Vec<TokenStream>,
 }
 
-impl From<crate::input::DoopForBinding> for ForBinding {
-    fn from(binding: crate::input::DoopForBinding) -> Self {
-        Self {
-            target: todo!(),  // binding.target.into(),
-            entries: todo!(), // vec![vec![binding.first_term], binding.rest_terms].flatten(), }
-        }
+impl From<input::DoopForBinding> for ForBinding {
+    fn from(binding: input::DoopForBinding) -> Self {
+        let mut entries = Default::default();
+
+        Self { target: ForBindingTarget::from(binding.target), entries }
     }
 }
 
@@ -98,21 +99,69 @@ pub enum ForBindingTarget {
     Tuple(Vec<syn::Ident>),
 }
 
-impl TryFrom<crate::input::DoopBlock> for Doop {
+impl From<input::ForBindingTarget> for ForBindingTarget {
+    fn from(target: input::ForBindingTarget) -> Self {
+        match target {
+            input::ForBindingTarget::Ident(ident) => Self::Ident(ident),
+            input::ForBindingTarget::Tuple(tuple) => todo!("tuple bindings not implemented"),
+        }
+    }
+}
+
+impl TryFrom<input::DoopBlock> for Doop {
     type Error = syn::Error;
-    fn try_from(input: crate::input::DoopBlock) -> Result<Doop, Self::Error> {
-        todo!()
-        // let items = vec![];
+    fn try_from(input: input::DoopBlock) -> Result<Doop, Self::Error> {
+        let mut let_bindings = IndexMap::<syn::Ident, IndexSet<BindingEntry>>::new();
+        let items = vec![];
 
-        // for item in input.items {
-        //     match DoopItem::try_from(item) {
-        //         Ok(item) => items.push(item),
-        //         Err(report) => return Err(report),
-        //     }
-        //     items.push(.map_err(|err| err.to_compile_error())?);
-        //     items.push(item);
-        // }
+        eprintln!("{input:#?}");
 
-        // Ok(Doop { items })
+        let evaluate_binding_entry =
+            |let_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
+             entry: &input::BindingTerm|
+             -> Result<IndexSet<BindingEntry>, syn::Error> {
+                Ok(match entry {
+                    input::BindingTerm::Ident(ident) =>
+                        let_bindings.get(ident).expect("undefined variable?").clone(),
+                    input::BindingTerm::BraceList(list) => list
+                        .entries
+                        .iter()
+                        .map(|entry| BindingEntry::from_iter(entry.clone().into_iter()))
+                        .collect(),
+                    input::BindingTerm::BracketList(list) => list
+                        .entries
+                        .iter()
+                        .map(|entry| BindingEntry::from_iter(entry.clone().into_iter()))
+                        .collect(),
+                })
+            };
+
+        for item in input.items {
+            match item {
+                input::DoopBlockItem::Let(binding) => {
+                    let mut terms = evaluate_binding_entry(&mut let_bindings, &binding.first_term)?;
+
+                    for rest in binding.rest_terms {
+                        let rest_term = evaluate_binding_entry(&mut let_bindings, &rest.term)?;
+                        match rest.operation {
+                            input::AddOrSub::Add(_) => terms.extend(rest_term),
+                            input::AddOrSub::Sub(_) =>
+                                terms = terms.difference(&rest_term).cloned().collect(),
+                        }
+                    }
+
+                    let_bindings.insert(binding.ident.clone(), terms);
+                }
+                input::DoopBlockItem::For(binding) => {
+                    eprintln!("{let_bindings:#?}");
+                    // let loop_bindings: IndexMap<syn::Ident, Vec<TokenTree>> =
+                    // Default::default();
+
+                    // this adds an item
+                }
+            }
+        }
+
+        Ok(Doop { items })
     }
 }

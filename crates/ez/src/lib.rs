@@ -6,9 +6,7 @@ pub use ::ez_core::{throw, throws, try_throws, Error};
 pub use ::ez_main::ly;
 #[doc(inline)]
 pub use ::ez_main::main;
-pub use {
-    ::implicint::{int, Int},
-};
+pub use ::implicint::{int, Int};
 
 pub mod prelude {
     #[doc(inline)]

@@ -1,6 +1,24 @@
+macro_rules! todoop {
+    ($($t:tt)*) => {};
+}
+
 #[ez::ly]
 fn main() {
     doop! {
+        let Literals = [
+            "a", 'b', vec!['c', 'c'], [['d', 'd']]
+        ];
+        let Literals = Literals - ["a"];
+
+        for A in Literals
+        for B in Literals {
+            println!("{:?}", (literal));
+        }
+    }
+
+    println!("done");
+
+    todoop! {
         // You can use any of ({[/]}) to bracket the items.
         // The only difference is that one layer of the outer bracket character
         // will be removed if an item is wrapped in them. This is neccessary for
