@@ -1,5 +1,6 @@
 [workspace]
 members = ["crates/*"]
+# default-members = ["crates/ez-examples"]
 
 [workspace.metadata.release]
 consolidate-commits = true
@@ -14,4 +15,3 @@ tag-name = "{{version}}"
 
 [profile.dev.package.backtrace]
 opt-level = 3
- 
