@@ -7,7 +7,6 @@ pub use ::ez_main::ly;
 #[doc(inline)]
 pub use ::ez_main::main;
 pub use {
-    ::ezio::{file, random, stdio, string},
     ::implicint::{int, Int},
 };
 
@@ -15,8 +14,6 @@ pub mod prelude {
     #[doc(inline)]
     pub use ::batteries::prelude::*;
     pub use ::ez_main::main;
-    #[doc(inline)]
-    pub use ::ezio::prelude::*;
 }
 
 pub use ::batteries::batteries;

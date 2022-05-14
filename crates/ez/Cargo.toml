@@ -9,9 +9,8 @@ rust-version = "1.59.0"
 version = "0.0.7-dev"
 
 [features]
-default = ["int", "batteries", "main", "io"]
+default = ["int", "batteries", "main"]
 int = ["implicint"]
-io = ["ezio"]
 main = ["ez-main"]
 
 [dependencies]
@@ -19,7 +18,6 @@ batteries = { path = "../batteries", version = "=0.0.7-dev", optional = true }
 ez-core = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
 implicint = { path = "../implicint", version = "=0.0.7-dev", optional = true }
 ez-main = { path = "../ez-main", version = "=0.0.7-dev", optional = true }
-ezio = { path = "../ezio", package = "ez-ezio", version = "=0.0.7-dev", features = ["implicint"], optional = true }
 paste = "1.0.6"
 
 [package.metadata.release]
