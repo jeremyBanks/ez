@@ -5,13 +5,33 @@ use {
 };
 
 pub struct Doop {
-    pub evaluation: crate::evaluation::Doop,
+    pub output: TokenStream,
 }
 
 impl TryFrom<crate::evaluation::Doop> for Doop {
     type Error = syn::Error;
     fn try_from(evaluation: crate::evaluation::Doop) -> Result<Self, Self::Error> {
-        Ok(Doop { evaluation })
+        let mut output = TokenStream::new();
+
+        for item in evaluation.items {
+            let mut body = item.body;
+
+            for binding in item.for_bindings {
+                let mut binding_body = TokenStream::new();
+
+                let ident = match binding.target {
+                    crate::evaluation::ForBindingTarget::Ident(ident) => ident,
+                    crate::evaluation::ForBindingTarget::Tuple(_) => todo!()
+                };
+                for entry in binding.entries {
+                    binding_body.extend(replace_ident_in_token_stream(body.clone(), &ident, entry))
+                }
+                body = binding_body;
+            }
+            output.extend(body);
+        }
+
+        Ok(Doop { output })
     }
 }
 
@@ -19,7 +39,7 @@ impl IntoIterator for Doop {
     type Item = proc_macro2::TokenTree;
     type IntoIter = proc_macro2::token_stream::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
-        TokenStream::new().into_iter()
+        self.output.into_iter()
     }
 }
 

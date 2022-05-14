@@ -12,7 +12,7 @@ fn main() {
 
         for A in Literals
         for B in Literals {
-            println!("{:?}", (literal));
+            println!("{:?}", (A, B));
         }
     }
 

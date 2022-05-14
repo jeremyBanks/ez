@@ -118,8 +118,6 @@ impl TryFrom<input::DoopBlock> for Doop {
         let mut let_bindings = IndexMap::<syn::Ident, IndexSet<BindingEntry>>::new();
         let mut items = vec![];
 
-        eprintln!("{input:#?}");
-
         fn evaluate_binding_term(
             let_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
             term: &input::BindingTerm,
@@ -171,7 +169,7 @@ impl TryFrom<input::DoopBlock> for Doop {
                 }
                 input::DoopBlockItem::For(item) => {
                     let body = item.body.into_token_stream();
-                    let for_bindings = Default::default();
+                    let mut for_bindings: Vec<ForBinding> = Default::default();
                     let input_bindings = item.bindings.bindings;
 
                     for binding in input_bindings {
@@ -180,6 +178,13 @@ impl TryFrom<input::DoopBlock> for Doop {
                             &binding.first_term,
                             &binding.rest_terms,
                         )?;
+                        for_bindings.push(ForBinding {
+                            target: ForBindingTarget::Ident(match binding {
+                                input::DoopForBinding { target: input::ForBindingTarget::Ident(ident), .. } => ident,
+                                _ => todo!(),
+                            }),
+                            entries: terms.into_iter().map(|term| term.into_iter().collect()).collect(),
+                        });
                     }
                     items.push(DoopItem { for_bindings, body });
                 }
