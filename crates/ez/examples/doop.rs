@@ -19,7 +19,7 @@ fn main() {
     println!("done");
 
     todoop! {
-        // You can use any of ({[/]}) to bracket the items.
+        // You can use either of ({[/]}) to bracket the items.
         // The only difference is that one layer of the outer bracket character
         // will be removed if an item is wrapped in them. This is neccessary for
         // cases where your items contain a comma that is not in a group, so it

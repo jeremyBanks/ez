@@ -2,7 +2,11 @@ use {
     crate::*,
     indexmap::{IndexMap, IndexSet},
     proc_macro2::{TokenStream, TokenTree},
-    std::hash::{Hash, Hasher},
+    quote::ToTokens,
+    std::{
+        cell::UnsafeCell,
+        hash::{Hash, Hasher},
+    },
 };
 
 #[derive(Clone, Debug)]
@@ -112,52 +116,72 @@ impl TryFrom<input::DoopBlock> for Doop {
     type Error = syn::Error;
     fn try_from(input: input::DoopBlock) -> Result<Doop, Self::Error> {
         let mut let_bindings = IndexMap::<syn::Ident, IndexSet<BindingEntry>>::new();
-        let items = vec![];
+        let mut items = vec![];
 
         eprintln!("{input:#?}");
 
-        let evaluate_binding_entry =
-            |let_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
-             entry: &input::BindingTerm|
-             -> Result<IndexSet<BindingEntry>, syn::Error> {
-                Ok(match entry {
-                    input::BindingTerm::Ident(ident) =>
-                        let_bindings.get(ident).expect("undefined variable?").clone(),
-                    input::BindingTerm::BraceList(list) => list
-                        .entries
-                        .iter()
-                        .map(|entry| BindingEntry::from_iter(entry.clone().into_iter()))
-                        .collect(),
-                    input::BindingTerm::BracketList(list) => list
-                        .entries
-                        .iter()
-                        .map(|entry| BindingEntry::from_iter(entry.clone().into_iter()))
-                        .collect(),
-                })
-            };
+        fn evaluate_binding_term(
+            let_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
+            term: &input::BindingTerm,
+        ) -> Result<IndexSet<BindingEntry>, syn::Error> {
+            Ok(match term {
+                input::BindingTerm::Ident(ident) =>
+                    let_bindings.get(ident).expect("undefined variable?").clone(),
+                input::BindingTerm::BraceList(list) => list
+                    .entries
+                    .iter()
+                    .map(|term| BindingEntry::from_iter(term.clone().into_iter()))
+                    .collect(),
+                input::BindingTerm::BracketList(list) => list
+                    .entries
+                    .iter()
+                    .map(|term| BindingEntry::from_iter(term.clone().into_iter()))
+                    .collect(),
+            })
+        }
+
+        fn evaluate_first_and_rest(
+            mut let_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
+            first: &input::BindingTerm,
+            rest: &[input::RestTerm],
+        ) -> Result<IndexSet<BindingEntry>, syn::Error> {
+            let mut terms = evaluate_binding_term(&mut let_bindings, &first)?;
+
+            for rest in rest {
+                let rest_term = evaluate_binding_term(&mut let_bindings, &rest.term)?;
+                match rest.operation {
+                    input::AddOrSub::Add(_) => terms.extend(rest_term),
+                    input::AddOrSub::Sub(_) =>
+                        terms = terms.difference(&rest_term).cloned().collect(),
+                }
+            }
+
+            Ok(terms)
+        }
 
         for item in input.items {
             match item {
                 input::DoopBlockItem::Let(binding) => {
-                    let mut terms = evaluate_binding_entry(&mut let_bindings, &binding.first_term)?;
-
-                    for rest in binding.rest_terms {
-                        let rest_term = evaluate_binding_entry(&mut let_bindings, &rest.term)?;
-                        match rest.operation {
-                            input::AddOrSub::Add(_) => terms.extend(rest_term),
-                            input::AddOrSub::Sub(_) =>
-                                terms = terms.difference(&rest_term).cloned().collect(),
-                        }
-                    }
-
+                    let terms = evaluate_first_and_rest(
+                        &mut let_bindings,
+                        &binding.first_term,
+                        &binding.rest_terms,
+                    )?;
                     let_bindings.insert(binding.ident.clone(), terms);
                 }
-                input::DoopBlockItem::For(binding) => {
-                    eprintln!("{let_bindings:#?}");
-                    // let loop_bindings: IndexMap<syn::Ident, Vec<TokenTree>> =
-                    // Default::default();
+                input::DoopBlockItem::For(item) => {
+                    let body = item.body.into_token_stream();
+                    let for_bindings = Default::default();
+                    let input_bindings = item.bindings.bindings;
 
-                    // this adds an item
+                    for binding in input_bindings {
+                        let terms = evaluate_first_and_rest(
+                            &mut let_bindings,
+                            &binding.first_term,
+                            &binding.rest_terms,
+                        )?;
+                    }
+                    items.push(DoopItem { for_bindings, body });
                 }
             }
         }

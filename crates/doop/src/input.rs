@@ -29,7 +29,7 @@ impl Parse for DoopBlock {
 #[derive(Parse, Debug, Clone)]
 pub struct DoopForBindings {
     #[call(DoopForBinding::parse_vec)]
-    bindings: Vec<DoopForBinding>,
+    pub bindings: Vec<DoopForBinding>,
 }
 
 #[derive(Parse, Debug, Clone)]
