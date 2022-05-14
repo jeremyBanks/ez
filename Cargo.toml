@@ -1,6 +1,6 @@
 [workspace]
 members = ["crates/*"]
-# default-members = ["crates/ez-examples"]
+default-members = ["crates/ez-examples"]
 
 [workspace.metadata.release]
 consolidate-commits = true

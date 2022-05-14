@@ -4,12 +4,9 @@ name = "cargo-merk"
 publish = false
 version = "0.0.0"
 
-autobins = false
-[lib]
-# [[bin]]
-# name = "cargo-merk"
+[[bin]]
+name = "cargo-merk"
 doc = false
-path = "src/main.rs"
 
 [dependencies]
 ez = { path = "../ez" }
