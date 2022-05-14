@@ -32,11 +32,7 @@ macro_rules! main {
     }
 }
 fn bench_hash_object_git2() {
-    black_box(Oid::hash_object(
-        ObjectType::Commit,
-        black_box(SMALL_BODY.as_ref()),
-    ))
-    .ok();
+    black_box(Oid::hash_object(ObjectType::Commit, black_box(SMALL_BODY.as_ref()))).ok();
 }
 
 fn bench_hash_object_save() {
@@ -44,11 +40,7 @@ fn bench_hash_object_save() {
 }
 
 fn bench_hash_object_git2_large() {
-    black_box(Oid::hash_object(
-        ObjectType::Commit,
-        black_box(LARGE_BODY.as_ref()),
-    ))
-    .ok();
+    black_box(Oid::hash_object(ObjectType::Commit, black_box(LARGE_BODY.as_ref()))).ok();
 }
 
 fn bench_hash_object_save_large() {

@@ -21,7 +21,7 @@ impl TryFrom<crate::evaluation::Doop> for Doop {
 
                 let ident = match binding.target {
                     crate::evaluation::ForBindingTarget::Ident(ident) => ident,
-                    crate::evaluation::ForBindingTarget::Tuple(_) => todo!()
+                    crate::evaluation::ForBindingTarget::Tuple(_) => todo!(),
                 };
                 for entry in binding.entries {
                     binding_body.extend(replace_ident_in_token_stream(body.clone(), &ident, entry))

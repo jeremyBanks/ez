@@ -180,10 +180,16 @@ impl TryFrom<input::DoopBlock> for Doop {
                         )?;
                         for_bindings.push(ForBinding {
                             target: ForBindingTarget::Ident(match binding {
-                                input::DoopForBinding { target: input::ForBindingTarget::Ident(ident), .. } => ident,
+                                input::DoopForBinding {
+                                    target: input::ForBindingTarget::Ident(ident),
+                                    ..
+                                } => ident,
                                 _ => todo!(),
                             }),
-                            entries: terms.into_iter().map(|term| term.into_iter().collect()).collect(),
+                            entries: terms
+                                .into_iter()
+                                .map(|term| term.into_iter().collect())
+                                .collect(),
                         });
                     }
                     items.push(DoopItem { for_bindings, body });

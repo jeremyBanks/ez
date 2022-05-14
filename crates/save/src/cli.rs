@@ -2,7 +2,7 @@
 
 use {
     crate::git2::*,
-    clap::{AppSettings, Parser, ArgGroup},
+    clap::{AppSettings, ArgGroup, Parser},
     eyre::{bail, Result, WrapErr},
     git2::{
         Commit, ErrorCode, Repository, RepositoryInitOptions, RepositoryState, Signature, Time,
@@ -138,10 +138,7 @@ pub struct Args {
 /// generating the `--help` text for `README.md`, which needs to be
 /// tightly wrapped to fit in available space on crates.io.
 fn max_term_width() -> usize {
-    option_env!("MAX_TERM_WIDTH")
-        .unwrap_or("100")
-        .parse()
-        .unwrap()
+    option_env!("MAX_TERM_WIDTH").unwrap_or("100").parse().unwrap()
 }
 
 /// CLI entry point.
@@ -169,7 +166,7 @@ pub fn main(args: Args) -> Result<()> {
         Err(err) if err.code() == ErrorCode::UnbornBranch => None,
         Err(err) => {
             bail!("Unexpected error from Git: {:#?}", err);
-        },
+        }
     };
 
     let (user_name, user_email) = get_git_user(&args, &repo, &head)?;
@@ -294,63 +291,37 @@ fn get_git_user(args: &Args, repo: &Repository, head: &Option<Commit>) -> Result
 
     let user_name: String = {
         if let Some(ref args_name) = args.name {
-            trace!(
-                "Using author name from command line argument: {:?}",
-                &args_name
-            );
+            trace!("Using author name from command line argument: {:?}", &args_name);
             args_name.clone()
         } else if let Ok(config_name) = config.get_string("user.name") {
-            debug!(
-                "Using author name from Git configuration: {:?}",
-                &config_name
-            );
+            debug!("Using author name from Git configuration: {:?}", &config_name);
             config_name
-        } else if let Some(previous_name) = head
-            .as_ref()
-            .and_then(|x| x.author().name().map(std::string::ToString::to_string))
+        } else if let Some(previous_name) =
+            head.as_ref().and_then(|x| x.author().name().map(std::string::ToString::to_string))
         {
-            info!(
-                "Using author name from previous commit: {:?}",
-                &previous_name
-            );
+            info!("Using author name from previous commit: {:?}", &previous_name);
             previous_name
         } else {
             let placeholder_name = "save";
-            warn!(
-                "No author name found, falling back to placeholder: {:?}",
-                &placeholder_name
-            );
+            warn!("No author name found, falling back to placeholder: {:?}", &placeholder_name);
             placeholder_name.to_string()
         }
     };
 
     let user_email: String = if let Some(ref args_email) = args.email {
-        trace!(
-            "Using author email from command line argument: {:?}",
-            &args_email
-        );
+        trace!("Using author email from command line argument: {:?}", &args_email);
         args_email.clone()
     } else if let Ok(config_email) = config.get_string("user.email") {
-        debug!(
-            "Using author email from Git configuration: {:?}",
-            &config_email
-        );
+        debug!("Using author email from Git configuration: {:?}", &config_email);
         config_email
-    } else if let Some(previous_email) = head
-        .as_ref()
-        .and_then(|x| x.author().email().map(std::string::ToString::to_string))
+    } else if let Some(previous_email) =
+        head.as_ref().and_then(|x| x.author().email().map(std::string::ToString::to_string))
     {
-        info!(
-            "Using author email from previous commit: {:?}",
-            &previous_email
-        );
+        info!("Using author email from previous commit: {:?}", &previous_email);
         previous_email
     } else {
         let placeholder_email = "save";
-        warn!(
-            "No author email found, falling back to placeholder: {:?}",
-            &placeholder_email
-        );
+        warn!("No author email found, falling back to placeholder: {:?}", &placeholder_email);
         placeholder_email.to_string()
     };
 
@@ -372,7 +343,7 @@ fn open_or_init_repo(args: &Args) -> Result<Repository> {
 
             debug!("Found Git repository: {:?}", repo.workdir().unwrap());
             repo
-        },
+        }
         Err(_err) => {
             let path = std::env::current_dir()?;
             let empty = fs::read_dir(&path)?.next().is_none();
@@ -393,19 +364,14 @@ fn open_or_init_repo(args: &Args) -> Result<Repository> {
                 }
                 Repository::init_opts(
                     path,
-                    RepositoryInitOptions::new()
-                        .initial_head("trunk")
-                        .no_reinit(true),
+                    RepositoryInitOptions::new().initial_head("trunk").no_reinit(true),
                 )?
             }
-        },
+        }
     };
 
     if repo.state() != RepositoryState::Clean {
-        bail!(
-            "Repository is in the middle of another operation: {:?}",
-            repo.state()
-        );
+        bail!("Repository is in the middle of another operation: {:?}", repo.state());
     }
 
     Ok(repo)

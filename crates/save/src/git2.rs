@@ -185,10 +185,7 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
         if cfg!(debug_assertions) {
             let digest = Oid::for_object("commit", &body);
             let id = commit.id();
-            assert_eq!(
-                digest, id,
-                "to_bytes produced a commit object with the wrong hash"
-            );
+            assert_eq!(digest, id, "to_bytes produced a commit object with the wrong hash");
         }
 
         body
@@ -231,10 +228,7 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
                 from: Option<Rc<RefCell<CommitNode>>>,
             }
 
-            let mut walks = vec![CommitWalking {
-                commit: head.clone(),
-                from: None,
-            }];
+            let mut walks = vec![CommitWalking { commit: head.clone(), from: None }];
 
             while let Some(CommitWalking { commit, from }) = walks.pop() {
                 let from = &from;
@@ -365,10 +359,8 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
                 .unwrap_or_default();
             let outgoing_weight = max_incoming_weight + 1;
 
-            let parents = graph
-                .edges_directed(node, Outgoing)
-                .map(|(a, b, w)| (a, b, *w))
-                .collect_vec();
+            let parents =
+                graph.edges_directed(node, Outgoing).map(|(a, b, w)| (a, b, *w)).collect_vec();
             for (a, b, existing_weight) in parents {
                 if outgoing_weight > existing_weight {
                     graph[(a, b)] = outgoing_weight;
@@ -438,9 +430,8 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
         max_timestamp: impl Into<Option<i64>>,
     ) -> BruteForcedCommit<'repo> {
         let commit = self.borrow();
-        let min_timestamp = min_timestamp
-            .into()
-            .unwrap_or_else(|| commit.author().when().seconds());
+        let min_timestamp =
+            min_timestamp.into().unwrap_or_else(|| commit.author().when().seconds());
 
         // TODO: actually short-circuit on full matches so this isn't always an infinite
         // loop
@@ -453,16 +444,14 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
             .iter()
             .position(|line| line.starts_with("author "))
             .expect("author line missing in commit");
-        let author_line_pieces = &base_commit_lines[author_line_index]
-            .split(' ')
-            .collect::<Vec<_>>();
+        let author_line_pieces =
+            &base_commit_lines[author_line_index].split(' ').collect::<Vec<_>>();
         let committer_line_index = base_commit_lines
             .iter()
             .position(|line| line.starts_with("committer "))
             .expect("committer line missing in commit");
-        let committer_line_pieces = &base_commit_lines[committer_line_index]
-            .split(' ')
-            .collect::<Vec<_>>();
+        let committer_line_pieces =
+            &base_commit_lines[committer_line_index].split(' ').collect::<Vec<_>>();
 
         let commit_create_buffer = |author_timestamp: i64, committer_timestamp: i64| {
             let mut commit_lines = base_commit_lines.clone();
@@ -485,34 +474,32 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
         };
 
         let (_best_score, best_committer_timestamp, best_author_timestamp, best_oid, best_body) =
-            ((min_timestamp..=max_timestamp)
-                .into_par_iter()
-                .map(|author_timestamp| {
-                    (author_timestamp..=max_timestamp)
-                        .into_par_iter()
-                        .map(|committer_timestamp| {
-                            let candidate_body =
-                                commit_create_buffer(author_timestamp, committer_timestamp);
-                            let candidate_oid = Oid::for_object("commit", candidate_body.as_ref());
+            ((min_timestamp..=max_timestamp).into_par_iter().map(|author_timestamp| {
+                (author_timestamp..=max_timestamp)
+                    .into_par_iter()
+                    .map(|committer_timestamp| {
+                        let candidate_body =
+                            commit_create_buffer(author_timestamp, committer_timestamp);
+                        let candidate_oid = Oid::for_object("commit", candidate_body.as_ref());
 
-                            let score = candidate_oid
-                                .as_bytes()
-                                .iter()
-                                .zip(target_prefix.iter())
-                                .map(|(a, b)| (a ^ b))
-                                .collect::<Vec<u8>>();
+                        let score = candidate_oid
+                            .as_bytes()
+                            .iter()
+                            .zip(target_prefix.iter())
+                            .map(|(a, b)| (a ^ b))
+                            .collect::<Vec<u8>>();
 
-                            (
-                                score,
-                                committer_timestamp,
-                                author_timestamp,
-                                candidate_oid,
-                                candidate_body,
-                            )
-                        })
-                        .min()
-                        .unwrap()
-                }))
+                        (
+                            score,
+                            committer_timestamp,
+                            author_timestamp,
+                            candidate_oid,
+                            candidate_body,
+                        )
+                    })
+                    .min()
+                    .unwrap()
+            }))
             .min()
             .unwrap();
 
@@ -551,14 +538,10 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
 
         if best_oid.as_bytes().starts_with(target_prefix) {
             debug!("Brute-forced a complete prefix match: {best_oid} for {target_prefix:02x?}");
-            BruteForcedCommit::Complete {
-                commit: brute_forced_commit,
-            }
+            BruteForcedCommit::Complete { commit: brute_forced_commit }
         } else {
             debug!("Brute-forced a partial prefix match: {best_oid} for {target_prefix:02x?}");
-            BruteForcedCommit::Incomplete {
-                commit: brute_forced_commit,
-            }
+            BruteForcedCommit::Incomplete { commit: brute_forced_commit }
         }
     }
 }

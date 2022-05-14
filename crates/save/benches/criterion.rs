@@ -51,10 +51,9 @@ fn bench_hash_git_object(c: &mut Criterion) {
     let mut c = c.benchmark_group("hashing git commits");
     c.measurement_time(12 * Duration::from_secs(1));
 
-    for (elements, average_size, label) in [
-        (65_536, 512, "64K 512B objects"),
-        (1_024, 16_384, "1K 16KB objects"),
-    ] {
+    for (elements, average_size, label) in
+        [(65_536, 512, "64K 512B objects"), (1_024, 16_384, "1K 16KB objects")]
+    {
         let mut rng = Pcg64::seed_from_u64(0);
         let mut bodies = vec![];
         let mut total_len = 0;
@@ -111,12 +110,7 @@ fn bench_hash_git_object(c: &mut Criterion) {
             format!("{label} rayon-parallel for_object (save)"),
             &bodies,
             |b, bodies| {
-                b.iter(|| {
-                    bodies
-                        .par_iter()
-                        .map(|body| Oid::for_object("commit", body))
-                        .max()
-                })
+                b.iter(|| bodies.par_iter().map(|body| Oid::for_object("commit", body)).max())
             },
         );
     }
