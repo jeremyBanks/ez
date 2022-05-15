@@ -18,8 +18,7 @@ fn main() {
 
         for LITERAL in Literals - Literals + Literals
         for (LEFT, RIGHT) in Pairs + [("ONE", "MORE")] {
-            println!("{:?} cross ({:?} and {:?})", LITERAL, LEFT, RIGHT);
-            println!();
+            println!("{:?} cross {:?} and {:?}", LITERAL, LEFT, RIGHT);
         }
     }
 

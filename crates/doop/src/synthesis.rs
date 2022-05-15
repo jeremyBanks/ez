@@ -8,32 +8,30 @@ pub struct Doop {
     pub output: TokenStream,
 }
 
-impl TryFrom<crate::evaluation::Doop> for Doop {
+impl TryFrom<evaluation::Doop> for Doop {
     type Error = syn::Error;
-    fn try_from(evaluation: crate::evaluation::Doop) -> Result<Self, Self::Error> {
+    fn try_from(evaluation: evaluation::Doop) -> Result<Self, Self::Error> {
         let mut output = TokenStream::new();
 
         for item in evaluation.items {
             let mut body = item.body;
 
-            for binding in item.for_bindings {
+            for binding in item.for_bindings.into_iter().rev() {
                 let mut binding_body = TokenStream::new();
 
                 match binding.target {
-                    crate::evaluation::ForBindingTarget::Ident(ident) => {
+                    evaluation::ForBindingTarget::Ident(ident) =>
                         for entry in binding.entries {
                             binding_body.extend(replace_ident_in_token_stream(
                                 body.clone(),
                                 &ident,
                                 entry,
                             ))
-                        }
-                    }
-                    crate::evaluation::ForBindingTarget::Tuple(idents) => {
+                        },
+                    evaluation::ForBindingTarget::Tuple(idents) =>
                         for entry in binding.entries {
                             let mut tuple_binding_body = body.clone();
 
-                            eprintln!("{:?}", &entry);
                             if let TokenTree::Group(group) =
                                 &entry.into_iter().next().expect("no tuple?")
                             {
@@ -80,8 +78,7 @@ impl TryFrom<crate::evaluation::Doop> for Doop {
                             }
 
                             binding_body.extend(tuple_binding_body)
-                        }
-                    }
+                        },
                 };
                 body = binding_body;
             }
