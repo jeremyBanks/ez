@@ -90,14 +90,6 @@ pub struct ForBinding {
     pub entries: Vec<TokenStream>,
 }
 
-impl From<input::DoopForBinding> for ForBinding {
-    fn from(binding: input::DoopForBinding) -> Self {
-        let mut entries = Default::default();
-
-        Self { target: ForBindingTarget::from(binding.target), entries }
-    }
-}
-
 pub enum ForBindingTarget {
     Ident(syn::Ident),
     Tuple(Vec<syn::Ident>),
@@ -107,7 +99,7 @@ impl From<input::ForBindingTarget> for ForBindingTarget {
     fn from(target: input::ForBindingTarget) -> Self {
         match target {
             input::ForBindingTarget::Ident(ident) => Self::Ident(ident),
-            input::ForBindingTarget::Tuple(tuple) => todo!("tuple bindings not implemented"),
+            input::ForBindingTarget::Tuple(tuple) => Self::Tuple(tuple.items.into_iter().collect()),
         }
     }
 }
@@ -179,13 +171,12 @@ impl TryFrom<input::DoopBlock> for Doop {
                             &binding.rest_terms,
                         )?;
                         for_bindings.push(ForBinding {
-                            target: ForBindingTarget::Ident(match binding {
-                                input::DoopForBinding {
-                                    target: input::ForBindingTarget::Ident(ident),
-                                    ..
-                                } => ident,
-                                _ => todo!(),
-                            }),
+                            target: match binding.target {
+                                input::ForBindingTarget::Ident(ident) =>
+                                    ForBindingTarget::Ident(ident),
+                                input::ForBindingTarget::Tuple(tuple) =>
+                                    ForBindingTarget::Tuple(tuple.items.into_iter().collect()),
+                            },
                             entries: terms
                                 .into_iter()
                                 .map(|term| term.into_iter().collect())

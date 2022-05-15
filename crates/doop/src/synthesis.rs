@@ -19,13 +19,56 @@ impl TryFrom<crate::evaluation::Doop> for Doop {
             for binding in item.for_bindings {
                 let mut binding_body = TokenStream::new();
 
-                let ident = match binding.target {
-                    crate::evaluation::ForBindingTarget::Ident(ident) => ident,
-                    crate::evaluation::ForBindingTarget::Tuple(_) => todo!(),
+                match binding.target {
+                    crate::evaluation::ForBindingTarget::Ident(ident) => {
+                        for entry in binding.entries {
+                            binding_body.extend(replace_ident_in_token_stream(body.clone(), &ident, entry))
+                        }
+                    },
+                    crate::evaluation::ForBindingTarget::Tuple(idents) => {
+                        for entry in binding.entries {
+                            let mut tuple_binding_body = body.clone();
+
+                            if let TokenTree::Group(group) = &entry.into_iter().next().unwrap() {
+                                if group.delimiter() != proc_macro2::Delimiter::Parenthesis {
+                                    return Err(syn::Error::new(
+                                        group.span(),
+                                        "expected tuple binding to be wrapped in parentheses",
+                                    ));
+                                }
+
+                                // idiot, you need to comma-delimit stuff yourself
+                                let tuple_tokens = groupw.stream().into_iter().collect::<Vec<_>>();
+
+                                let expected_len = if idents.is_empty() {
+                                    0
+                                } else {
+                                    idents.len() - 1
+                                };
+                                assert_eq!(tuple_replacements.len(), expected_len, "wrong number of replacements");
+                                let tuple_replacements = tuple_replacements.into_iter();
+
+                                let replacements = vec![];
+                                for (i, ident) in idents.iter().enumerate() {
+                                    let replacement = tuple_replacements.next().unwrap();
+                                    tuple_binding_body = replace_ident_in_token_stream(tuple_binding_body, &ident, replacement)?;
+                                    tuple_replacements.next();
+                                }
+
+                                // HACK
+                                let items = group.stream().into_iter().filter(|tt| tt.to_string() != ",").collect::<Vec<_>>();
+
+                                for (ident, entry) in idents.iter().zip(items) {
+                                    tuple_binding_body = replace_ident_in_token_stream(tuple_binding_body, ident, entry)?;
+                                }
+                            } else {
+                                panic!("bad tuple binding")
+                            }
+
+                            binding_body.extend(tuple_binding_body)
+                        }
+                    },
                 };
-                for entry in binding.entries {
-                    binding_body.extend(replace_ident_in_token_stream(body.clone(), &ident, entry))
-                }
                 body = binding_body;
             }
             output.extend(body);

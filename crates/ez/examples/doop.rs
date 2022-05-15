@@ -6,13 +6,20 @@ macro_rules! todoop {
 fn main() {
     doop! {
         let Literals = [
-            "a", 'b', vec!['c', 'c'], [['d', 'd']]
+            'a', 2, "c", 4.0
         ];
-        let Literals = Literals - ["a"];
 
-        for A in Literals
-        for B in Literals {
-            println!("{:?}", (A, B));
+        let Pairs = [
+            ("see", "saw"),
+            ("ego", 2),
+            ("fee", 4.0),
+            ("foe", "fum"),
+        ];
+
+        for LITERAL in Literals - Literals + Literals
+        for (LEFT, RIGHT) in Pairs + [("ONE", "MORE")] {
+            println!("{:?} cross ({:?} and {:?})", LITERAL, LEFT, RIGHT);
+            println!();
         }
     }
 
