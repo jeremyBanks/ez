@@ -13,7 +13,7 @@ fn main() {
             ("see", "saw"),
             ("ego", 2),
             ("fee", 4.0),
-            ("foe", "fum"),
+            ("foe", "fum")
         ];
 
         for LITERAL in Literals - Literals + Literals

@@ -22,14 +22,21 @@ impl TryFrom<crate::evaluation::Doop> for Doop {
                 match binding.target {
                     crate::evaluation::ForBindingTarget::Ident(ident) => {
                         for entry in binding.entries {
-                            binding_body.extend(replace_ident_in_token_stream(body.clone(), &ident, entry))
+                            binding_body.extend(replace_ident_in_token_stream(
+                                body.clone(),
+                                &ident,
+                                entry,
+                            ))
                         }
-                    },
+                    }
                     crate::evaluation::ForBindingTarget::Tuple(idents) => {
                         for entry in binding.entries {
                             let mut tuple_binding_body = body.clone();
 
-                            if let TokenTree::Group(group) = &entry.into_iter().next().unwrap() {
+                            eprintln!("{:?}", &entry);
+                            if let TokenTree::Group(group) =
+                                &entry.into_iter().next().expect("no tuple?")
+                            {
                                 if group.delimiter() != proc_macro2::Delimiter::Parenthesis {
                                     return Err(syn::Error::new(
                                         group.span(),
@@ -37,29 +44,36 @@ impl TryFrom<crate::evaluation::Doop> for Doop {
                                     ));
                                 }
 
-                                // idiot, you need to comma-delimit stuff yourself
-                                let tuple_tokens = groupw.stream().into_iter().collect::<Vec<_>>();
+                                let tuple_tokens = group.stream().into_iter().collect::<Vec<_>>();
 
-                                let expected_len = if idents.is_empty() {
-                                    0
-                                } else {
-                                    idents.len() - 1
-                                };
-                                assert_eq!(tuple_replacements.len(), expected_len, "wrong number of replacements");
-                                let tuple_replacements = tuple_replacements.into_iter();
-
-                                let replacements = vec![];
-                                for (i, ident) in idents.iter().enumerate() {
-                                    let replacement = tuple_replacements.next().unwrap();
-                                    tuple_binding_body = replace_ident_in_token_stream(tuple_binding_body, &ident, replacement)?;
-                                    tuple_replacements.next();
+                                let mut tuple_streams = vec![];
+                                let mut next_tuple_stream = vec![];
+                                for token in tuple_tokens {
+                                    if token.to_string() == "," {
+                                        tuple_streams.push(next_tuple_stream);
+                                        next_tuple_stream = vec![];
+                                    } else {
+                                        next_tuple_stream.push(token);
+                                    }
+                                }
+                                if !(tuple_streams.is_empty() && next_tuple_stream.is_empty()) {
+                                    tuple_streams.push(next_tuple_stream);
                                 }
 
-                                // HACK
-                                let items = group.stream().into_iter().filter(|tt| tt.to_string() != ",").collect::<Vec<_>>();
+                                assert_eq!(
+                                    idents.len(),
+                                    tuple_streams.len(),
+                                    "wrong number of replacements"
+                                );
 
-                                for (ident, entry) in idents.iter().zip(items) {
-                                    tuple_binding_body = replace_ident_in_token_stream(tuple_binding_body, ident, entry)?;
+                                for (ident, replacement) in
+                                    idents.clone().into_iter().zip(tuple_streams)
+                                {
+                                    tuple_binding_body = replace_ident_in_token_stream(
+                                        tuple_binding_body,
+                                        &ident,
+                                        replacement.into_iter().collect(),
+                                    )?;
                                 }
                             } else {
                                 panic!("bad tuple binding")
@@ -67,7 +81,7 @@ impl TryFrom<crate::evaluation::Doop> for Doop {
 
                             binding_body.extend(tuple_binding_body)
                         }
-                    },
+                    }
                 };
                 body = binding_body;
             }
