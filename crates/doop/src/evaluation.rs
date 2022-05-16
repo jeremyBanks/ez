@@ -4,6 +4,7 @@ use {
     proc_macro2::{Group, TokenStream, TokenTree},
     quote::ToTokens,
     std::hash::{Hash, Hasher},
+    std::iter::empty,
 };
 
 #[derive(Clone, Debug)]
@@ -83,23 +84,8 @@ pub struct DoopItem {
 }
 
 pub struct ForBinding {
-    pub target: ForBindingTarget,
+    pub target: Option<syn::Ident>,
     pub entries: Vec<TokenStream>,
-}
-
-pub enum ForBindingTarget {
-    Ident(Option<syn::Ident>),
-    Tuple(Vec<Option<syn::Ident>>),
-}
-
-impl From<input::ForBindingTarget> for ForBindingTarget {
-    fn from(target: input::ForBindingTarget) -> Self {
-        match target {
-            input::ForBindingTarget::Ident(ident) => Self::Ident(ident.ident()),
-            input::ForBindingTarget::Tuple(tuple) =>
-                Self::Tuple(tuple.items.into_iter().map(|ident| ident.ident()).collect()),
-        }
-    }
 }
 
 impl TryFrom<input::DoopBlock> for Doop {
@@ -107,18 +93,38 @@ impl TryFrom<input::DoopBlock> for Doop {
     fn try_from(input: input::DoopBlock) -> Result<Doop, Self::Error> {
         let mut let_bindings = IndexMap::<syn::Ident, IndexSet<BindingEntry>>::new();
         let mut items = vec![];
+        let mut for_bindings = IndexMap::<syn::Ident, IndexSet<BindingEntry>>::new();
+
+        fn get_either<'a>(
+            let_bindings: &'a mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
+            for_bindings: &'a mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
+            ident: &syn::Ident,
+        ) -> Result<&'a IndexSet<BindingEntry>, syn::Error> {
+            let let_match = let_bindings.get(ident);
+            let for_match = for_bindings.get(ident);
+
+            if let_match.is_some() && for_match.is_some() {
+                return Err(syn::Error::new_spanned(
+                    ident,
+                    format!("loop variables aren't allowed to shadows let variables: {ident:?}"),
+                ));
+            } else if let Some(let_match) = let_match {
+                Ok(let_match)
+            } else if let Some(for_match) = for_match {
+                Ok(for_match)
+            } else {
+                Err(syn::Error::new_spanned(ident, format!("undefined doop variable: {ident:?}")))
+            }
+        }
 
         fn evaluate_binding_term(
             let_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
+            for_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
             term: &input::BindingTerm,
         ) -> Result<IndexSet<BindingEntry>, syn::Error> {
             Ok(match term {
-                input::BindingTerm::Ident(ident) => let_bindings
-                    .get(ident)
-                    .ok_or_else(|| {
-                        syn::Error::new_spanned(ident, "undefined variable in doop binding term")
-                    })?
-                    .clone(),
+                input::BindingTerm::Ident(ident) =>
+                    get_either(let_bindings, for_bindings, ident)?.clone(),
                 input::BindingTerm::BraceList(list) => list
                     .entries
                     .iter()
@@ -134,13 +140,15 @@ impl TryFrom<input::DoopBlock> for Doop {
 
         fn evaluate_first_and_rest(
             mut let_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
+            for_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
             first: &input::BindingTerm,
             rest: &[input::RestTerm],
         ) -> Result<IndexSet<BindingEntry>, syn::Error> {
-            let mut terms = evaluate_binding_term(&mut let_bindings, &first)?;
+            let mut terms = evaluate_binding_term(&mut let_bindings, &mut for_bindings, &first)?;
 
             for rest in rest {
-                let rest_term = evaluate_binding_term(&mut let_bindings, &rest.term)?;
+                let rest_term =
+                    evaluate_binding_term(&mut let_bindings, &mut for_bindings, &rest.term)?;
                 match rest.operation {
                     input::AddOrSub::Add(_) => terms.extend(rest_term),
                     input::AddOrSub::Sub(_) =>
@@ -154,8 +162,10 @@ impl TryFrom<input::DoopBlock> for Doop {
         for item in input.items {
             match item {
                 input::DoopBlockItem::Let(binding) => {
+                    for_bindings.clear();
                     let terms = evaluate_first_and_rest(
                         &mut let_bindings,
+                        &mut for_bindings,
                         &binding.first_term,
                         &binding.rest_terms,
                     )?;
@@ -164,25 +174,26 @@ impl TryFrom<input::DoopBlock> for Doop {
                 input::DoopBlockItem::Static(item) => {
                     items.push(DoopItem {
                         for_bindings: vec![ForBinding {
-                            target: ForBindingTarget::Ident(None),
-                            entries: vec![vec![item.body.clone().into_token_stream()]
-                                .into_iter()
-                                .collect()],
+                            target: None,
+                            entries: vec![empty().collect()],
                         }],
                         body: item.body.stream(),
                     });
                 }
                 input::DoopBlockItem::For(item) => {
                     let body = item.body.stream();
-                    let mut for_bindings: Vec<ForBinding> = Default::default();
                     let input_bindings = item.bindings.bindings;
 
                     for binding in input_bindings {
                         let terms = evaluate_first_and_rest(
                             &mut let_bindings,
+                            &mut for_bindings,
                             &binding.first_term,
                             &binding.rest_terms,
                         )?;
+                        // XXX: don't insert tuples as a single item,
+                        // break them up at this stage, which also lets us insert them into the
+                        // for_bindings map.0
                         for_bindings.push(ForBinding {
                             target: match binding.target {
                                 input::ForBindingTarget::Ident(ident) =>

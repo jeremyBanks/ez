@@ -28,8 +28,8 @@ fn main() {
 
         for T1 in Types
         for T2 in Types - [T1] {
-            A;
             impl MyAdd<T2> for T1 {}
+            impl MyAdd<T1> for T2 {}
         }
 
         static {
@@ -46,12 +46,11 @@ fn main() {
             let b = 6;
             let as_op = a OP b;
             let as_method = Trait::method(a, b);
-            let as_string = stringify!(a OP b, Trait::method(a, b));
             assert_eq!(as_op, as_method);
         }
 
-        for X of [[1], (2), {3}] {
-            println!("{}", stringify!(X));
+        for X in [[1], (2), {3}] + {[1], (2), {3}}  {
+            println!("-> {}", stringify!(X));
         }
     }
 

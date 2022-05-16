@@ -160,7 +160,7 @@ pub enum BindingTerm {
     Ident(Ident),
     #[peek(token::Bracket, name = "bracket list")]
     BracketList(BracketList),
-    #[peek(token::Bracket, name = "brace list")]
+    #[peek(token::Brace, name = "brace list")]
     BraceList(BraceList),
 }
 
