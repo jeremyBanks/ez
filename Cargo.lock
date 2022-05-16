@@ -668,6 +668,7 @@ name = "doop"
 version = "0.0.7-dev"
 dependencies = [
  "derive-syn-parse",
+ "derive_more",
  "indexmap",
  "proc-macro2",
  "quote",

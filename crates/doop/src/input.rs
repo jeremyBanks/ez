@@ -1,5 +1,6 @@
 use {
     crate::*,
+    derive_more::*,
     derive_syn_parse::Parse,
     proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree},
     syn::{
@@ -32,7 +33,7 @@ pub struct DoopForBindings {
     pub bindings: Vec<DoopForBinding>,
 }
 
-#[derive(Parse, Debug, Clone)]
+#[derive(Parse, Debug, Clone, TryInto, From)]
 pub enum DoopBlockItem {
     #[peek(Token![let], name = "let")]
     Let(DoopLetItem),
@@ -45,13 +46,13 @@ pub enum DoopBlockItem {
 #[derive(Parse, Debug, Clone)]
 pub struct DoopForItem {
     pub bindings: DoopForBindings,
-    pub body: proc_macro2::TokenTree,
+    pub body: proc_macro2::Group,
 }
 
 #[derive(Parse, Debug, Clone)]
 pub struct DoopStaticItem {
     #[prefix(Token![static])]
-    pub body: proc_macro2::TokenTree,
+    pub body: proc_macro2::Group,
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -84,12 +85,29 @@ impl DoopForBinding {
     }
 }
 
-#[derive(Parse, Debug, Clone)]
-pub enum ForBindingTarget {
-    #[peek(syn::Ident::peek_any, name = "ident")]
+#[derive(Parse, Debug, Clone, TryInto, From)]
+pub enum IdentOrUnderscore {
+    #[peek(Token![_], name = "Unidentified")]
+    Unidentified,
+    #[peek(syn::Ident::peek_any, name = "Ident")]
     Ident(Ident),
+}
+
+impl IdentOrUnderscore {
+    pub fn ident(&self) -> Option<Ident> {
+        match self {
+            IdentOrUnderscore::Ident(ident) => Some(ident.clone()),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Parse, Debug, Clone, TryInto, From)]
+pub enum ForBindingTarget {
     #[peek(token::Paren, name = "tuple")]
     Tuple(TupleBinding),
+    #[peek(syn::Ident::peek_any, name = "ident")]
+    Ident(IdentOrUnderscore),
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -98,7 +116,7 @@ pub struct TupleBinding {
     pub paren: token::Paren,
     #[inside(paren)]
     #[call(Punctuated::parse_separated_nonempty)]
-    pub items: Punctuated<Ident, Token![,]>,
+    pub items: Punctuated<IdentOrUnderscore, Token![,]>,
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -128,7 +146,7 @@ impl RestTerm {
     }
 }
 
-#[derive(Parse, Debug, Clone)]
+#[derive(Parse, Debug, Clone, TryInto, From)]
 pub enum AddOrSub {
     #[peek(Token![+], name = "add")]
     Add(Token![+]),
@@ -136,7 +154,7 @@ pub enum AddOrSub {
     Sub(Token![-]),
 }
 
-#[derive(Parse, Debug, Clone)]
+#[derive(Parse, Debug, Clone, TryInto, From)]
 pub enum BindingTerm {
     #[peek(syn::Ident, name = "ident")]
     Ident(Ident),

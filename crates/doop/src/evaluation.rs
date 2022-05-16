@@ -1,7 +1,7 @@
 use {
     crate::{input::DoopForBindings, *},
     indexmap::{IndexMap, IndexSet},
-    proc_macro2::{TokenStream, TokenTree},
+    proc_macro2::{Group, TokenStream, TokenTree},
     quote::ToTokens,
     std::hash::{Hash, Hasher},
 };
@@ -88,15 +88,16 @@ pub struct ForBinding {
 }
 
 pub enum ForBindingTarget {
-    Ident(syn::Ident),
-    Tuple(Vec<syn::Ident>),
+    Ident(Option<syn::Ident>),
+    Tuple(Vec<Option<syn::Ident>>),
 }
 
 impl From<input::ForBindingTarget> for ForBindingTarget {
     fn from(target: input::ForBindingTarget) -> Self {
         match target {
-            input::ForBindingTarget::Ident(ident) => Self::Ident(ident),
-            input::ForBindingTarget::Tuple(tuple) => Self::Tuple(tuple.items.into_iter().collect()),
+            input::ForBindingTarget::Ident(ident) => Self::Ident(ident.ident()),
+            input::ForBindingTarget::Tuple(tuple) =>
+                Self::Tuple(tuple.items.into_iter().map(|ident| ident.ident()).collect()),
         }
     }
 }
@@ -170,17 +171,16 @@ impl TryFrom<input::DoopBlock> for Doop {
                 input::DoopBlockItem::Static(item) => {
                     items.push(DoopItem {
                         for_bindings: vec![ForBinding {
-                            target: ForBindingTarget::Ident(syn::Ident::new(
-                                "_",
-                                proc_macro2::Span::call_site(),
-                            )),
-                            entries: vec![vec![item.body.clone()].into_iter().collect()],
+                            target: ForBindingTarget::Ident(None),
+                            entries: vec![vec![item.body.clone().into_token_stream()]
+                                .into_iter()
+                                .collect()],
                         }],
-                        body: vec![item.body].into_iter().collect(),
+                        body: item.body.stream(),
                     });
                 }
                 input::DoopBlockItem::For(item) => {
-                    let body = item.body.into_token_stream();
+                    let body = item.body.stream();
                     let mut for_bindings: Vec<ForBinding> = Default::default();
                     let input_bindings = item.bindings.bindings;
 
@@ -193,9 +193,10 @@ impl TryFrom<input::DoopBlock> for Doop {
                         for_bindings.push(ForBinding {
                             target: match binding.target {
                                 input::ForBindingTarget::Ident(ident) =>
-                                    ForBindingTarget::Ident(ident),
-                                input::ForBindingTarget::Tuple(tuple) =>
-                                    ForBindingTarget::Tuple(tuple.items.into_iter().collect()),
+                                    ForBindingTarget::Ident(ident.ident()),
+                                input::ForBindingTarget::Tuple(tuple) => ForBindingTarget::Tuple(
+                                    tuple.items.into_iter().map(|ident| ident.ident()).collect(),
+                                ),
                             },
                             entries: terms
                                 .into_iter()

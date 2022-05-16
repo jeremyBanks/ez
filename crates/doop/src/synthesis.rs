@@ -22,11 +22,15 @@ impl TryFrom<evaluation::Doop> for Doop {
                 match binding.target {
                     evaluation::ForBindingTarget::Ident(ident) =>
                         for entry in binding.entries {
-                            binding_body.extend(replace_ident_in_token_stream(
-                                body.clone(),
-                                &ident,
-                                entry,
-                            ))
+                            if let Some(ident) = &ident {
+                                binding_body.extend(replace_ident_in_token_stream(
+                                    body.clone(),
+                                    ident,
+                                    entry,
+                                ));
+                            } else {
+                                binding_body.extend(body.clone());
+                            }
                         },
                     evaluation::ForBindingTarget::Tuple(idents) =>
                         for entry in binding.entries {
@@ -67,11 +71,13 @@ impl TryFrom<evaluation::Doop> for Doop {
                                 for (ident, replacement) in
                                     idents.clone().into_iter().zip(tuple_streams)
                                 {
-                                    tuple_binding_body = replace_ident_in_token_stream(
-                                        tuple_binding_body,
-                                        &ident,
-                                        replacement.into_iter().collect(),
-                                    )?;
+                                    if let Some(ident) = ident {
+                                        tuple_binding_body = replace_ident_in_token_stream(
+                                            tuple_binding_body,
+                                            &ident,
+                                            replacement.into_iter().collect(),
+                                        )?;
+                                    }
                                 }
                             } else {
                                 panic!("bad tuple binding")
