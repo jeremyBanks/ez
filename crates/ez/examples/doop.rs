@@ -27,8 +27,8 @@ fn main() {
         }
 
         for T1 in Types
-        for T2 in Types - [T1]
-        for _ in [lol] {
+        for T2 in Types - [T1] {
+            A;
             impl MyAdd<T2> for T1 {}
         }
 

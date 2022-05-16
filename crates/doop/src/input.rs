@@ -33,7 +33,7 @@ pub struct DoopForBindings {
     pub bindings: Vec<DoopForBinding>,
 }
 
-#[derive(Parse, Debug, Clone, TryInto, From)]
+#[derive(Parse, Debug, Clone)]
 pub enum DoopBlockItem {
     #[peek(Token![let], name = "let")]
     Let(DoopLetItem),
@@ -85,10 +85,10 @@ impl DoopForBinding {
     }
 }
 
-#[derive(Parse, Debug, Clone, TryInto, From)]
+#[derive(Parse, Debug, Clone)]
 pub enum IdentOrUnderscore {
     #[peek(Token![_], name = "Unidentified")]
-    Unidentified,
+    Unidentified(Token![_]),
     #[peek(syn::Ident::peek_any, name = "Ident")]
     Ident(Ident),
 }
@@ -102,7 +102,7 @@ impl IdentOrUnderscore {
     }
 }
 
-#[derive(Parse, Debug, Clone, TryInto, From)]
+#[derive(Parse, Debug, Clone)]
 pub enum ForBindingTarget {
     #[peek(token::Paren, name = "tuple")]
     Tuple(TupleBinding),
@@ -146,7 +146,7 @@ impl RestTerm {
     }
 }
 
-#[derive(Parse, Debug, Clone, TryInto, From)]
+#[derive(Parse, Debug, Clone)]
 pub enum AddOrSub {
     #[peek(Token![+], name = "add")]
     Add(Token![+]),
@@ -154,7 +154,7 @@ pub enum AddOrSub {
     Sub(Token![-]),
 }
 
-#[derive(Parse, Debug, Clone, TryInto, From)]
+#[derive(Parse, Debug, Clone)]
 pub enum BindingTerm {
     #[peek(syn::Ident, name = "ident")]
     Ident(Ident),
