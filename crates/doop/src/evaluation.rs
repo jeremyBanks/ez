@@ -108,13 +108,6 @@ impl TryFrom<input::DoopBlock> for Doop {
         let mut let_bindings = IndexMap::<syn::Ident, IndexSet<BindingEntry>>::new();
         let mut items = vec![];
 
-        // TODO: we need to also allow `for` bindings for outer loops.
-        // I guess they're a special case, where they count as a list of
-        // the single item they're currently bound to.
-
-        // maybe actually mutating the state each time
-        // will work fine.
-
         fn evaluate_binding_term(
             let_bindings: &mut IndexMap<syn::Ident, IndexSet<BindingEntry>>,
             term: &input::BindingTerm,

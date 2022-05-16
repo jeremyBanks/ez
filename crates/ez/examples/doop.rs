@@ -30,6 +30,17 @@ fn main() {
         for T2 in Types - [T1] {
             impl MyAdd<T2> for T1 {}
         }
+
+        for (Trait, method, OP) in [
+            (std::ops::Add, add, +),
+            (::core::ops::Sub, sub, -),
+            (Mul, mul, *),
+            (Div, div, /)
+        ] {
+            let a = 4;
+            let b = 6;
+            assert_eq!(a OP b, Trait::method(a, b));
+        }
     }
 
     println!("done");
