@@ -31,7 +31,6 @@ fn main() {
             impl MyAdd<T2> for T1 {}
         }
     }
-    trait MyAdd<Other> {}
 
     println!("done");
 
