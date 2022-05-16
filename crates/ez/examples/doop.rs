@@ -19,19 +19,19 @@ fn main() {
         let Types = [
             u32,
             u16,
-            u64,
+            u64
         ];
 
-        for _ in [_] {
-            trait MyAdd<Other> {};
+        static {
+            trait MyAdd<Other> {}
         }
 
         for T1 in Types
-        for T2 in Types - T1 {
-            impl MyAdd<T2> for T1 {};
-            impl MyAdd<T1> for T2 {};
+        for T2 in Types - [T1] {
+            impl MyAdd<T2> for T1 {}
         }
     }
+    trait MyAdd<Other> {}
 
     println!("done");
 

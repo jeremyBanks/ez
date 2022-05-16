@@ -1,5 +1,5 @@
 use {
-    crate::*,
+    crate::{input::DoopForBindings, *},
     indexmap::{IndexMap, IndexSet},
     proc_macro2::{TokenStream, TokenTree},
     quote::ToTokens,
@@ -166,6 +166,18 @@ impl TryFrom<input::DoopBlock> for Doop {
                         &binding.rest_terms,
                     )?;
                     let_bindings.insert(binding.ident.clone(), terms);
+                }
+                input::DoopBlockItem::Static(item) => {
+                    items.push(DoopItem {
+                        for_bindings: vec![ForBinding {
+                            target: ForBindingTarget::Ident(syn::Ident::new(
+                                "_",
+                                proc_macro2::Span::call_site(),
+                            )),
+                            entries: vec![vec![item.body.clone()].into_iter().collect()],
+                        }],
+                        body: vec![item.body].into_iter().collect(),
+                    });
                 }
                 input::DoopBlockItem::For(item) => {
                     let body = item.body.into_token_stream();

@@ -38,11 +38,19 @@ pub enum DoopBlockItem {
     Let(DoopLetItem),
     #[peek(Token![for], name = "for")]
     For(DoopForItem),
+    #[peek(Token![static], name = "static")]
+    Static(DoopStaticItem),
 }
 
 #[derive(Parse, Debug, Clone)]
 pub struct DoopForItem {
     pub bindings: DoopForBindings,
+    pub body: proc_macro2::TokenTree,
+}
+
+#[derive(Parse, Debug, Clone)]
+pub struct DoopStaticItem {
+    #[prefix(Token![static])]
     pub body: proc_macro2::TokenTree,
 }
 
