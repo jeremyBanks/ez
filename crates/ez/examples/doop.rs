@@ -31,6 +31,10 @@ fn main() {
             impl MyAdd<T2> for T1 {}
         }
 
+        static {
+            use std::ops::{Mul, Div};
+        }
+
         for (Trait, method, OP) in [
             (std::ops::Add, add, +),
             (::core::ops::Sub, sub, -),
@@ -39,7 +43,11 @@ fn main() {
         ] {
             let a = 4;
             let b = 6;
-            assert_eq!(a OP b, Trait::method(a, b));
+            let as_op = a OP b;
+            let as_method = Trait::method(a, b);
+            let as_string = stringify!(a OP b, Trait::method(a, b));
+            eprintln!("{as_string} {as_op}");
+            assert_eq!(as_op, as_method);
         }
     }
 
