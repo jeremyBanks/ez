@@ -22,9 +22,9 @@ fn main() {
             u64,
         ];
 
-        // yield {
-        //     trait MyAdd<Other> {};
-        // }
+        for _ in [_] {
+            trait MyAdd<Other> {};
+        }
 
         for T1 in Types
         for T2 in Types - T1 {
@@ -32,8 +32,6 @@ fn main() {
             impl MyAdd<T1> for T2 {};
         }
     }
-
-    trait MyAdd<Other> {};
 
     println!("done");
 
