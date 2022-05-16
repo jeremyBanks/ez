@@ -47,8 +47,11 @@ fn main() {
             let as_op = a OP b;
             let as_method = Trait::method(a, b);
             let as_string = stringify!(a OP b, Trait::method(a, b));
-            eprintln!("{as_string} {as_op}");
             assert_eq!(as_op, as_method);
+        }
+
+        for X of [[1], (2), {3}] {
+            println!("{}", stringify!(X));
         }
     }
 
