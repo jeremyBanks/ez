@@ -47,7 +47,7 @@ pub mod batteries {
             rayon::{self, prelude::*},
             rdbc, regex, reqwest, scopeguard, serde,
             serde_json::{self, Value as Json},
-            sha1, sha2, sha3, socket2, strum,
+            sha1, sha2, sha3, socket2, static_assertions, strum,
             tap::{self, Tap},
             tokio,
             toml::{self, Value as Toml},

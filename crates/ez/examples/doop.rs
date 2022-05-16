@@ -16,11 +16,24 @@ fn main() {
             ("foe", "fum")
         ];
 
-        for LITERAL in Literals - Literals + Literals
-        for (LEFT, RIGHT) in Pairs + [("ONE", "MORE")] {
-            println!("{:?} cross {:?} and {:?}", LITERAL, LEFT, RIGHT);
+        let Types = [
+            u32,
+            u16,
+            u64,
+        ];
+
+        // yield {
+        //     trait MyAdd<Other> {};
+        // }
+
+        for T1 in Types
+        for T2 in Types - T1 {
+            impl MyAdd<T2> for T1 {};
+            impl MyAdd<T1> for T2 {};
         }
     }
+
+    trait MyAdd<Other> {};
 
     println!("done");
 
