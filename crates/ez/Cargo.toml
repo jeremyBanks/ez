@@ -1,5 +1,6 @@
+cargo-features = ["workspace-inheritance"]
+
 [package]
-autoexamples = false
 description = "A collection of easy-to-use, beginner-friendly utilities for Rust."
 edition = "2021"
 license = "MIT OR Apache-2.0"

@@ -1,3 +1,5 @@
+cargo-features = ["workspace-inheritance"]
+
 [package]
 autobins = false
 description = "internal"
@@ -12,7 +14,7 @@ version = "0.0.7-dev"
 doc = false
 
 [dependencies]
-eyre = "0.6.6"
+eyre.workspace = true
 ez-macros = { path = "../ez-macros", version = "=0.0.7-dev"}
 
 [package.metadata.release]

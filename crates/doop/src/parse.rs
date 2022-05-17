@@ -1,8 +1,7 @@
 use {
-    crate::*,
     derive_more::*,
     derive_syn_parse::Parse,
-    proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree},
+    proc_macro2::{Delimiter, Ident, TokenStream, TokenTree},
     syn::{
         ext::IdentExt,
         parse::{Parse, ParseStream},
@@ -28,12 +27,6 @@ impl Parse for DoopBlock {
 }
 
 #[derive(Parse, Debug, Clone)]
-pub struct DoopForBindings {
-    #[call(DoopForBinding::parse_vec)]
-    pub bindings: Vec<DoopForBinding>,
-}
-
-#[derive(Parse, Debug, Clone)]
 pub enum DoopBlockItem {
     #[peek(Token![let], name = "let")]
     Let(DoopLetItem),
@@ -45,14 +38,21 @@ pub enum DoopBlockItem {
 
 #[derive(Parse, Debug, Clone)]
 pub struct DoopForItem {
-    pub bindings: DoopForBindings,
-    pub body: proc_macro2::Group,
+    #[call(DoopForBinding::parse_vec)]
+    pub bindings: Vec<DoopForBinding>,
+    #[brace]
+    pub _brace: token::Brace,
+    #[inside(_brace)]
+    pub body: TokenStream,
 }
 
 #[derive(Parse, Debug, Clone)]
 pub struct DoopStaticItem {
     #[prefix(Token![static])]
-    pub body: proc_macro2::Group,
+    #[brace]
+    pub _brace: token::Brace,
+    #[inside(_brace)]
+    pub body: TokenStream,
 }
 
 #[derive(Parse, Debug, Clone)]

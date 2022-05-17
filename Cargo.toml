@@ -1,6 +1,19 @@
+cargo-features = ["workspace-inheritance"]
+
 [workspace]
 members = ["crates/*"]
-default-members = ["crates/ez-examples"]
+default-members = ["crates/ez", "crates/examples"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+license-file = "LICENSE"
+repository = "https://github.com/jeremyBanks/ez"
+rust-version = "1.59.0"
+version = "0.7.0-dev.0"
+
+[workspace.dependencies]
+eyre = "0.6.6"
 
 [workspace.metadata.release]
 consolidate-commits = true

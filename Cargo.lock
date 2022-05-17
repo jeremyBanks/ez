@@ -670,6 +670,7 @@ dependencies = [
  "derive-syn-parse",
  "derive_more",
  "indexmap",
+ "inherent",
  "proc-macro2",
  "quote",
  "syn",
@@ -715,6 +716,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "erro"
+version = "0.0.7-dev"
+
+[[package]]
 name = "euclid"
 version = "0.22.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -750,15 +755,6 @@ version = "0.0.7-dev"
 dependencies = [
  "eyre",
  "ez-macros",
-]
-
-[[package]]
-name = "ez-examples"
-version = "0.0.0"
-dependencies = [
- "eyre",
- "ez",
- "tokio",
 ]
 
 [[package]]
@@ -1128,6 +1124,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "inherent"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "daa5135cb6aa90ee17b4f0a0fb2908059b0830f90fda333f12816f275b21820c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "instant"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1484,10 +1491,6 @@ dependencies = [
  "pkg-config",
  "vcpkg",
 ]
-
-[[package]]
-name = "orerr"
-version = "0.0.7-dev"
 
 [[package]]
 name = "os_str_bytes"
@@ -1857,6 +1860,15 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "winreg",
+]
+
+[[package]]
+name = "run-example"
+version = "0.0.0"
+dependencies = [
+ "eyre",
+ "ez",
+ "tokio",
 ]
 
 [[package]]

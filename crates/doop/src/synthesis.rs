@@ -8,9 +8,9 @@ pub struct Doop {
     pub output: TokenStream,
 }
 
-impl TryFrom<evaluation::Doop> for Doop {
+impl TryFrom<evaluate::Doop> for Doop {
     type Error = syn::Error;
-    fn try_from(evaluation: evaluation::Doop) -> Result<Self, Self::Error> {
+    fn try_from(evaluation: evaluate::Doop) -> Result<Self, Self::Error> {
         let mut output = TokenStream::new();
 
         for item in evaluation.items {
@@ -20,7 +20,7 @@ impl TryFrom<evaluation::Doop> for Doop {
                 let mut binding_body = TokenStream::new();
 
                 match binding.target {
-                    evaluation::ForBindingTarget::Ident(ident) =>
+                    evaluate::ForBindingTarget::Ident(ident) =>
                         for entry in binding.entries {
                             if let Some(ident) = &ident {
                                 binding_body.extend(replace_ident_in_token_stream(
@@ -32,7 +32,7 @@ impl TryFrom<evaluation::Doop> for Doop {
                                 binding_body.extend(body.clone());
                             }
                         },
-                    evaluation::ForBindingTarget::Tuple(idents) =>
+                    evaluate::ForBindingTarget::Tuple(idents) =>
                         for entry in binding.entries {
                             let mut tuple_binding_body = body.clone();
 

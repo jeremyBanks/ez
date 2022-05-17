@@ -15,6 +15,8 @@ fn main() {
             ("fee", 4.0),
             ("foe", "fum")
         ];
+        // XXX: Should trailing commas be ignored, by default?
+        // If you really want an empty trailing element, it needs to be explicit, like `[, []]`
 
         let Types = [
             u32,

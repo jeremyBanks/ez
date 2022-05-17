@@ -1,33 +1,31 @@
-use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
+#![warn(unused_crate_dependencies)]
 
-pub(crate) mod evaluation;
-pub(crate) mod input;
-pub(crate) mod synthesis;
+use {
+    proc_macro::{Delimiter, Group, TokenStream, TokenTree},
+    quote::ToTokens,
+};
+
+pub(crate) mod evaluate;
+pub(crate) mod parse;
+pub(crate) mod tokens;
+
+pub(crate) use {evaluate::evaluate, tokens::Tokens};
 
 #[proc_macro]
-pub fn doop(tokens: TokenStream) -> TokenStream {
-    let tokens: proc_macro2::TokenStream = tokens.into();
+pub fn doop(input: TokenStream) -> TokenStream {
+    let input = proc_macro2::TokenStream::from(input);
 
-    let input: input::DoopBlock = match syn::parse2(tokens) {
+    let input: parse::DoopBlock = match syn::parse2(input) {
         Ok(input) => input,
         Err(report) => return report.to_compile_error().into(),
     };
 
-    let evaluation: evaluation::Doop = match input.try_into() {
-        Ok(evaluation) => evaluation,
+    let output: proc_macro2::TokenStream = match evaluate(input) {
+        Ok(output) => output,
         Err(report) => return report.to_compile_error().into(),
     };
 
-    let synthesis: synthesis::Doop = match evaluation.try_into() {
-        Ok(synthesis) => synthesis,
-        Err(report) => return report.to_compile_error().into(),
-    };
-
-    let tokens = synthesis.into_iter();
-    let tokens: proc_macro2::TokenStream = tokens.collect();
-    let tokens: TokenStream = tokens.into();
-
-    tokens
+    proc_macro::TokenStream::from(output)
 }
 
 #[proc_macro_attribute]
