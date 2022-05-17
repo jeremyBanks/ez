@@ -1,4 +1,4 @@
-macro_rules! todoop {
+macro_rules! to_doop {
     ($($t:tt)*) => {};
 }
 
@@ -58,7 +58,7 @@ fn main() {
 
     println!("done");
 
-    todoop! {
+    to_doop! {
         // You can use either of ({[/]}) to bracket the items.
         // The only difference is that one layer of the outer bracket character
         // will be removed if an item is wrapped in them. This is neccessary for

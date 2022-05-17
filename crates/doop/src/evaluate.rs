@@ -1,9 +1,5 @@
 use {
-    crate::{
-        parse::{DoopBlock, DoopForBindings},
-        tokens::Tokens,
-        *,
-    },
+    crate::{parse::DoopBlock, tokens::Tokens, *},
     indexmap::{IndexMap, IndexSet},
     proc_macro2::{Group, Ident, TokenStream, TokenTree},
     quote::ToTokens,
@@ -43,9 +39,13 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
                 output.extend(item.body);
             }
             Let(item) => {
-                let ident = item.ident;
-                let first = item.first_term;
-                let rest = item.rest_terms;
+                let token_lists = evaluate_binding_terms(
+                    &item.first_term,
+                    &item.rest_terms,
+                    &let_bindings,
+                    None,
+                )?;
+                let_bindings.insert(item.ident, token_lists);
             }
             For(item) => {
                 let input_body = item.body;
@@ -54,122 +54,86 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
         }
     }
 
+    /// evaluates a binding term, which may be an identifier (from a previous)
+    /// `let` statement, or a braced or bracketed, comma-delimited, list of
+    /// replacements. returns a token stream.
     fn evaluate_binding_term(
-        let_bindings: &mut IndexMap<syn::Ident, IndexSet<Tokens>>,
-        for_bindings: &mut IndexMap<syn::Ident, IndexSet<Tokens>>,
         term: &parse::BindingTerm,
+        let_bindings: &IndexMap<syn::Ident, IndexSet<Tokens>>,
+        for_bindings: Option<&IndexMap<syn::Ident, Tokens>>,
     ) -> Result<IndexSet<Tokens>, syn::Error> {
         Ok(match term {
-            parse::BindingTerm::Ident(ident) =>
-                get_either(let_bindings, for_bindings, ident)?.clone(),
-            parse::BindingTerm::BraceList(list) => list
-                .entries
-                .iter()
-                .map(|term| Tokens::from_iter(term.clone().into_iter()))
-                .collect(),
-            parse::BindingTerm::BracketList(list) => list
-                .entries
-                .iter()
-                .map(|term| Tokens::from_iter(term.clone().into_iter()))
-                .collect(),
+            parse::BindingTerm::Ident(ident) => match let_bindings.get(ident) {
+                Some(bindings) => bindings.clone(),
+                None =>
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("undefined doop variable {ident:?}"),
+                    )),
+            },
+
+            parse::BindingTerm::BraceList(term) =>
+                IndexSet::from_iter(term.entries.iter().map(|term| {
+                    let mut tokens = Tokens::from_iter(term.clone());
+                    if let Some(for_bindings) = for_bindings {
+                        tokens = tokens.replace(for_bindings);
+                    }
+                    tokens
+                })),
+            parse::BindingTerm::BracketList(term) =>
+                IndexSet::from_iter(term.entries.iter().map(|term| {
+                    let mut tokens = Tokens::from_iter(term.clone());
+                    if let Some(for_bindings) = for_bindings {
+                        tokens = tokens.replace(for_bindings);
+                    }
+                    tokens
+                })),
         })
     }
 
-    fn evaluate_first_and_rest(
-        mut let_bindings: &mut IndexMap<syn::Ident, IndexSet<Tokens>>,
-        for_bindings: &mut IndexMap<syn::Ident, IndexSet<Tokens>>,
+    fn evaluate_binding_terms(
         first: &parse::BindingTerm,
         rest: &[parse::RestTerm],
+        let_bindings: &IndexMap<syn::Ident, IndexSet<Tokens>>,
+        for_bindings: Option<&IndexMap<syn::Ident, Tokens>>,
     ) -> Result<IndexSet<Tokens>, syn::Error> {
-        let mut terms = evaluate_binding_term(&mut let_bindings, &mut for_bindings, &first)?;
+        let mut token_lists = evaluate_binding_term(first, let_bindings, for_bindings)?;
 
-        for rest in rest {
-            let rest_term =
-                evaluate_binding_term(&mut let_bindings, &mut for_bindings, &rest.term)?;
-            match rest.operation {
-                parse::AddOrSub::Add(_) => terms.extend(rest_term),
-                parse::AddOrSub::Sub(_) => terms = terms.difference(&rest_term).cloned().collect(),
+        for term in rest {
+            let term_token_lists = evaluate_binding_term(&term.term, let_bindings, for_bindings)?;
+            match term.operation {
+                parse::AddOrSub::Add(_) => token_lists.extend(term_token_lists),
+                parse::AddOrSub::Sub(_) =>
+                    token_lists = token_lists.difference(&term_token_lists).cloned().collect(),
             }
         }
 
-        Ok(terms)
-    }
-
-    for item in input.items {
-        match item {
-            parse::DoopBlockItem::Let(binding) => {
-                for_bindings.clear();
-                let terms = evaluate_first_and_rest(
-                    &mut let_bindings,
-                    &mut for_bindings,
-                    &binding.first_term,
-                    &binding.rest_terms,
-                )?;
-                let_bindings.insert(binding.ident.clone(), terms);
-            }
-            parse::DoopBlockItem::Static(item) => {
-                items.push(DoopItem {
-                    for_bindings: vec![ForBinding {
-                        target: None,
-                        entries: vec![empty().collect()],
-                    }],
-                    body: item.body.stream(),
-                });
-            }
-            parse::DoopBlockItem::For(item) => {
-                let body = item.body.stream();
-                let input_bindings = item.bindings.bindings;
-
-                for binding in input_bindings {
-                    let terms = evaluate_first_and_rest(
-                        &mut let_bindings,
-                        &mut for_bindings,
-                        &binding.first_term,
-                        &binding.rest_terms,
-                    )?;
-                    // XXX: don't insert tuples as a single item,
-                    // break them up at this stage, which also lets us insert them into the
-                    // for_bindings map.0
-                    for_bindings.push(ForBinding {
-                        target: match binding.target {
-                            parse::ForBindingTarget::Ident(ident) =>
-                                ForBindingTarget::Ident(ident.ident()),
-                            parse::ForBindingTarget::Tuple(tuple) => ForBindingTarget::Tuple(
-                                tuple.items.into_iter().map(|ident| ident.ident()).collect(),
-                            ),
-                        },
-                        entries: terms.into_iter().map(|term| term.into_iter().collect()).collect(),
-                    });
-                }
-                items.push(DoopItem { for_bindings, body });
-            }
-        }
+        Ok(token_lists)
     }
 
     Ok(output)
 }
 
-fn replace_in_token_stream(
-    input: TokenStream,
-    replacements: &IndexMap<Ident, TokenStream>,
-) -> Result<TokenStream, syn::Error> {
-    let mut output = TokenStream::new();
-    for token in input {
-        match token {
-            TokenTree::Ident(ref candidate) =>
-                if let Some(replacement) = replacements.get(candidate) {
-                    output.extend(replacement.clone().into_token_stream());
-                } else {
-                    output.extend(Some(token));
-                },
+impl Tokens {
+    pub fn replace(&self, replacements: &IndexMap<Ident, Tokens>) -> Tokens {
+        let mut output = Vec::new();
+        for token in self.clone() {
+            match token {
+                TokenTree::Ident(ref candidate) =>
+                    if let Some(replacement) = replacements.get(candidate) {
+                        output.extend(replacement.clone().into_token_stream());
+                    } else {
+                        output.push(token);
+                    },
 
-            TokenTree::Group(group) => output.extend([TokenTree::Group(Group::new(
-                group.delimiter(),
-                replace_in_token_stream(group.stream(), replacements)?,
-            ))]),
+                TokenTree::Group(group) => output.extend([TokenTree::Group(Group::new(
+                    group.delimiter(),
+                    Tokens::from_iter(group.stream()).replace(replacements).into_token_stream(),
+                ))]),
 
-            _ => output.extend(Some(token)),
+                _ => output.push(token),
+            }
         }
+        Tokens::from_iter(output)
     }
-    Ok(output)
 }

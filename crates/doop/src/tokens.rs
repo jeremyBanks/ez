@@ -38,9 +38,9 @@ impl Parse for Tokens {
         let mut tokens: Vec<TokenTree> = Vec::new();
         let mut as_strings: Vec<String> = Vec::new();
         while !input.is_empty() {
-            let token = input.parse()?;
-            tokens.push(token);
+            let token: TokenTree = input.parse()?;
             as_strings.push(token.to_string());
+            tokens.push(token);
         }
         Ok(Tokens { tokens, as_strings })
     }
