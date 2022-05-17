@@ -1,12 +1,12 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
-description = "batteries included"
-edition = "2021"
-license = "MIT OR Apache-2.0"
 name = "batteries"
-rust-version = "1.59.0"
-version = "0.0.7-dev"
+description = "batteries included"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 [features]
 std = ["alloc", "core"]
@@ -25,7 +25,7 @@ crossbeam = "0.8.1"
 crossterm = "0.23.2"
 csv = "1.1.6"
 digest = { version = "0.10.3", features = ["std"] }
-doop = { path = "../doop", version = "=0.0.7-dev" }
+doop = { path = "../doop", version = "=0.7.0-dev.0" }
 dpc-pariter = "0.5.1"
 elor = "1.0.0"
 euclid = "0.22.7"
@@ -40,7 +40,7 @@ match_cfg = "0.1.0"
 mio = "0.8.2"
 munge = "0.2.0"
 nix = "0.23.1"
-num-traits = "0.2.14"
+num-traits.workspace = true
 once_cell = "1.10.0"
 parking_lot = "0.12.0"
 petgraph = "0.6.0"
@@ -48,10 +48,10 @@ proc-macro2 = "1.0.37"
 rand = "0.8.5"
 rayon = "1.5.1"
 rdbc = "0.1.6"
-regex = "1.5.5"
+regex.workspace = true
 reqwest = { version = "0.11.10", features = ["blocking", "cookies", "gzip", "brotli", "deflate", "json", "multipart"] }
 scopeguard = "1.1.0"
-serde = { version = "1.0.136", features = ["derive"] }
+serde.workspace = true
 serde_json = "1.0.79"
 sha-1 = "0.10.0"
 sha2 = "0.10.2"
@@ -59,10 +59,10 @@ sha3 = "0.10.1"
 socket2 = "0.4.4"
 static_assertions = "1.1.0"
 strum = "0.24.0"
-tap = "1.0.1"
-tokio = { version = "1.17.0", features = ["full"] }
-toml = "0.5.8"
-tracing = "0.1.32"
+tap.workspace = true
+tokio = { workspace = true, features = ["full"] }
+toml.workspace = true
+tracing.workspace = true
 typed-arena = "2.0.1"
 unicode-segmentation = "1.9.0"
 url = { version = "2.2.2", features = ["serde"] }

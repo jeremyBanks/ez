@@ -1,6 +1,7 @@
 use {
     crate::{parse::DoopBlock, tokens::Tokens, *},
     indexmap::{IndexMap, IndexSet},
+    itertools::Itertools,
     proc_macro2::{Group, Ident, TokenStream, TokenTree},
     quote::ToTokens,
     std::{
@@ -8,6 +9,7 @@ use {
         iter::empty,
         ops::Deref,
     },
+    std::rc::Rc,
 };
 
 pub struct DoopItem {
@@ -49,7 +51,83 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
             }
             For(item) => {
                 let input_body = item.body;
-                for binding in item.bindings {}
+
+                let mut all_binding_combinations: Vec<IndexMap<Ident, Tokens>> = vec![IndexMap::new()];
+
+                for binding in item.bindings {
+                    let mut new_binding_combinations = vec![];
+
+                    for binding_combination in &mut all_binding_combinations {
+                        let token_lists = evaluate_binding_terms(
+                            &binding.first_term,
+                            &binding.rest_terms,
+                            &let_bindings,
+                            Some(binding_combination),
+                        )?;
+
+                        for token_list in token_lists {
+                            let token_list = token_list.replace(&*binding_combination);
+                            let mut new_binding_combination = binding_combination.clone();
+                            match &binding.target {
+                                parse::ForBindingTarget::Ident(ident) => {
+                                    if let Some(ident) = ident.ident() {
+                                        new_binding_combination.insert(ident.clone(), token_list);
+                                    }
+                                }
+                                parse::ForBindingTarget::Tuple(idents) => {
+                                    // XXXXXXXXXXXXXXXXX
+                                    for item in idents.items.zip(token_list.into_iter()) {
+                                        if let Some(ident) = item.ident() {
+                                            new_binding_combination.insert(ident.clone(), token_list);
+                                        }
+                                    }
+                                }
+
+                            }
+                            new_binding_combinations.push(new_binding_combination);
+                        }
+                    }
+
+                    all_binding_combinations = new_binding_combinations;
+                }
+
+                // XXX: Where do we put the quadratic behaviour?
+                // Itertools::product?
+                // No, just use recursion.
+                // Well, decide on your order of evaluation first, eh?
+                // Inside -> out? Yes, even though the term lists
+                // themselves are outside -> in.
+                // wait no that's dumb
+
+                for binding in item.bindings {
+                    let token_lists = evaluate_binding_terms(
+                        &binding.first_term,
+                        &binding.rest_terms,
+                        &let_bindings,
+                        Some(&for_bindings),
+                    )?;
+
+                    let mut for_bindings = for_bindings.clone();
+
+                    match binding.target {
+                        parse::ForBindingTarget::Ident(ident) => {
+                            if let Some(ident) = ident.ident() {
+                                for_bindings.insert(ident, token_lists);
+                            }
+                        }
+                        parse::ForBindingTarget::Tuple(idents) => {
+                            let token_lists = evaluate_binding_terms(
+                                &binding.first_term,
+                                &binding.rest_terms,
+                                &let_bindings,
+                                None,
+                            )?;
+                            for ident in idents {
+                                for_bindings.insert(ident, token_lists.clone());
+                            }
+                        }
+                    }
+                }
             }
         }
     }

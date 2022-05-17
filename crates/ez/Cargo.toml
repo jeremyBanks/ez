@@ -2,12 +2,12 @@ cargo-features = ["workspace-inheritance"]
 
 [package]
 description = "A collection of easy-to-use, beginner-friendly utilities for Rust."
-edition = "2021"
-license = "MIT OR Apache-2.0"
+edition.workspace = true
+license.workspace = true
 name = "ez"
-repository = "https://github.com/jeremyBanks/ez"
-rust-version = "1.59.0"
-version = "0.0.7-dev"
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 [features]
 default = ["int", "batteries", "main"]
@@ -15,10 +15,10 @@ int = ["implicint"]
 main = ["ez-main"]
 
 [dependencies]
-batteries = { path = "../batteries", version = "=0.0.7-dev", optional = true }
-ez-core = { path = "../ez-core", package = "ez-core", version = "=0.0.7-dev" }
-implicint = { path = "../implicint", version = "=0.0.7-dev", optional = true }
-ez-main = { path = "../ez-main", version = "=0.0.7-dev", optional = true }
+batteries = { path = "../batteries", version = "=0.7.0-dev.0", optional = true }
+ez-core = { path = "../ez-core", package = "ez-core", version = "=0.7.0-dev.0" }
+implicint = { path = "../implicint", version = "=0.7.0-dev.0", optional = true }
+ez-main = { path = "../ez-main", version = "=0.7.0-dev.0", optional = true }
 paste = "1.0.6"
 
 [package.metadata.release]

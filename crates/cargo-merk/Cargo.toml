@@ -1,7 +1,7 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
-edition = "2021"
+edition.workspace = true
 name = "cargo-merk"
 publish = false
 version = "0.0.0"

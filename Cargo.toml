@@ -7,13 +7,27 @@ default-members = ["crates/ez", "crates/examples"]
 [workspace.package]
 edition = "2021"
 license = "MIT OR Apache-2.0"
-license-file = "LICENSE"
 repository = "https://github.com/jeremyBanks/ez"
 rust-version = "1.59.0"
 version = "0.7.0-dev.0"
 
 [workspace.dependencies]
-eyre = "0.6.6"
+derive-syn-parse = "0.1.5"
+derive_more = "0.99.17"
+eyre = "0.6.8"
+indexmap = "1.8.0"
+itertools = "0.10.3"
+num-traits = "0.2.14"
+proc-macro2 = "1.0.36"
+quote = "1.0.15"
+regex = "1.5.5"
+syn = "1.0.86"
+tokio = "1.17.0"
+tracing = "0.1.32"
+serde = { version = "1.0.136", features = ["derive"] }
+tap = "1.0.1"
+toml = "0.5.8"
+
 
 [workspace.metadata.release]
 consolidate-commits = true

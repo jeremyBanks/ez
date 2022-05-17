@@ -4,26 +4,26 @@ cargo-features = ["workspace-inheritance"]
 autobins = false
 description = "internal"
 documentation = "https://docs.rs/ez"
-edition = "2021"
+edition.workspace = true
 homepage =  "https://crates.io/crates/ez"
-license = "MIT OR Apache-2.0"
+license.workspace = true
 name = "ez-proc-macro"
-repository = "https://github.com/jeremyBanks/ez"
-rust-version = "1.59.0"
-version = "0.0.7-dev"
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 [lib]
 doc = false
 proc-macro = true
 
 [dependencies]
-derive-syn-parse = "0.1.5"
-eyre = "0.6.6"
-indexmap = "1.8.0"
-itertools = "0.10.3"
-proc-macro2 = { version = "1.0.36", features = ["span-locations"] }
-quote = "1.0.15"
-syn = { version = "1.0.86", features = ["full", "visit", "visit-mut", "fold", "derive", "parsing", "printing", "clone-impls", "extra-traits", "proc-macro"] }
+derive-syn-parse.workspace = true
+eyre.workspace = true
+indexmap.workspace = true
+itertools.workspace = true
+proc-macro2 = { workspace = true, features = ["span-locations"] }
+quote.workspace = true
+syn = { workspace = true, features = ["full", "visit", "visit-mut", "fold", "derive", "parsing", "printing", "clone-impls", "extra-traits", "proc-macro"] }
 
 [package.metadata.release]
 consolidate-commits = true

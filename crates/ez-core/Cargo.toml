@@ -3,19 +3,19 @@ cargo-features = ["workspace-inheritance"]
 [package]
 autobins = false
 description = "internal"
-edition = "2021"
-license = "MIT OR Apache-2.0"
+edition.workspace = true
+license.workspace = true
 name = "ez-core"
-repository = "https://github.com/jeremyBanks/ez"
-rust-version = "1.59.0"
-version = "0.0.7-dev"
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 [lib]
 doc = false
 
 [dependencies]
 eyre.workspace = true
-ez-macros = { path = "../ez-macros", version = "=0.0.7-dev"}
+ez-macros = { path = "../ez-macros", version = "=0.7.0-dev.0"}
 
 [package.metadata.release]
 consolidate-commits = true
