@@ -53,6 +53,11 @@ fn main() {
         for X in [[1], (2), {3}] + {[1], (2), {3}}  {
             println!("{:10} {:10?}", stringify!(X), X);
         }
+
+
+        for X in [[1], (2), {3}] - {[1], (2), {3}}  {
+            println!("{:10} {:10?}", stringify!(X), X);
+        }
     }
 
     println!("done");
