@@ -1,13 +1,13 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
+name = "ez-proc-macro"
 autobins = false
 description = "internal"
 documentation = "https://docs.rs/ez"
-edition.workspace = true
 homepage =  "https://crates.io/crates/ez"
+edition.workspace = true
 license.workspace = true
-name = "ez-proc-macro"
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true

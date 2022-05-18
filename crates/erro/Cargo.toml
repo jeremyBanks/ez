@@ -1,10 +1,10 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
+name = "erro"
 description = "internal"
 edition.workspace = true
 license.workspace = true
-name = "erro"
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true

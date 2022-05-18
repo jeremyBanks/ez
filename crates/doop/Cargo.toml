@@ -1,10 +1,10 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
+name = "doop"
 description = "a loop-style macro for local code duplication"
 edition.workspace = true
 license.workspace = true
-name = "doop"
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -13,13 +13,13 @@ version.workspace = true
 proc-macro = true
 
 [dependencies]
-derive-syn-parse = "0.1.5"
-proc-macro2 = { version = "1.0.36", features = ["span-locations"] }
-quote = "1.0.15"
-syn = { version = "1.0.86", features = ["full", "visit", "visit-mut", "fold", "derive", "parsing", "printing", "clone-impls", "extra-traits", "proc-macro"] }
-indexmap = "1.8.0"
+derive-syn-parse.workspace = true
+proc-macro2 = { workspace = true, features = ["span-locations"] }
+quote.workspace = true
+syn = { workspace = true, features = ["full", "visit", "visit-mut", "fold", "derive", "parsing", "printing", "clone-impls", "extra-traits", "proc-macro"] }
+indexmap.workspace = true
 derive_more.workspace = true
-inherent = "*"
+inherent.workspace = true
 itertools.workspace = true
 
 [package.metadata.release]

@@ -11,29 +11,29 @@ repository = "https://github.com/jeremyBanks/save"
 version = "0.7.0-dev.0"
 
 [dependencies]
-clap = { features = ["derive", "env", "cargo", "unicode", "wrap_help"], version = "3.0.7" }
-color-eyre = "0.6.0"
-digest = "0.10.1"
-eyre = "0.6.5"
-git2 = "*"
-hex = "0.4.3"
-home = "0.5.3"
-itertools = "0.10.3"
-lazy_static = "1.4.0"
-petgraph = "0.6.0"
-rand = "0.8.4"
-rand_pcg = "0.3.1"
-rayon = "1.5.1"
-sha-1 = "0.10.0"
-sha2 = "0.10.1"
-tempfile = "3.3.0"
-termcolor = "1.1.2"
-thiserror = "1.0.30"
-thousands = "0.2.0"
-tracing = { features = ["log"], version = "0.1.29" }
-tracing-error = { features = ["traced-error"], version = "0.2.0" }
-tracing-subscriber = { features = ["env-filter"], version = "0.3.6" }
-typenum = "1.15.0"
+clap = { features = ["derive", "env", "cargo", "unicode", "wrap_help"], workspace = true }
+color-eyre.workspace = true
+digest.workspace = true
+eyre.workspace = true
+git2.workspace = true
+hex.workspace = true
+home.workspace = true
+itertools.workspace = true
+lazy_static.workspace = true
+petgraph.workspace = true
+rand.workspace = true
+rand_pcg.workspace = true
+rayon.workspace = true
+sha-1.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+termcolor.workspace = true
+thiserror.workspace = true
+thousands.workspace = true
+tracing = { features = ["log"], workspace = true }
+tracing-error = { features = ["traced-error"], workspace = true }
+tracing-subscriber = { features = ["env-filter"], workspace = true }
+typenum.workspace = true
 
 [[bench]]
 name = "criterion"
@@ -44,9 +44,9 @@ name = "iai"
 harness = false
 
 [dev-dependencies]
-criterion = { features = ["html_reports"], version = "0.3.5" }
-crossterm = "0.22.1"
-iai = "0.1.1"
+criterion = { features = ["html_reports"], workspace = true }
+crossterm.workspace = true
+iai.workspace = true
 
 [features]
 

@@ -20,7 +20,6 @@ ez = { path = "../ez-core", package = "ez-core", version = "=0.7.0-dev.0" }
 ez-macros = { path = "../ez-macros", version = "=0.7.0-dev.0"}
 tokio = { version = "1.16.0", features = ["full"] }
 tracing = { version = "0.1.30", features = ["log"] }
-tracing-error = { version = "0.2.0", features = ["traced-error"] }
 tracing-subscriber = { version = "0.3.7", features = ["env-filter"] }
 tracing-tree = "0.2.0"
 

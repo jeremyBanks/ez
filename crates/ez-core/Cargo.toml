@@ -1,11 +1,10 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
-autobins = false
+name = "ez-core"
 description = "internal"
 edition.workspace = true
 license.workspace = true
-name = "ez-core"
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -15,7 +14,7 @@ doc = false
 
 [dependencies]
 eyre.workspace = true
-ez-macros = { path = "../ez-macros", version = "=0.7.0-dev.0"}
+ez-macros.workspace = true
 
 [package.metadata.release]
 consolidate-commits = true

@@ -1,11 +1,11 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
-autobins = false
+name = "ez-macros"
 description = "internal"
+autobins = false
 edition.workspace = true
 license.workspace = true
-name = "ez-macros"
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -14,7 +14,7 @@ version.workspace = true
 doc = false
 
 [dependencies]
-ez-proc-macro = { path = "../ez-proc-macro", version = "=0.7.0-dev.0"}
+ez-proc-macro.workspace = true
 
 [package.metadata.release]
 consolidate-commits = true
