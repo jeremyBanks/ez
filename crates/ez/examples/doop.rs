@@ -31,7 +31,6 @@ fn main() {
         for T1 in Types
         for T2 in Types - [T1] {
             impl MyAdd<T2> for T1 {}
-            impl MyAdd<T1> for T2 {}
         }
 
         static {
@@ -52,7 +51,7 @@ fn main() {
         }
 
         for X in [[1], (2), {3}] + {[1], (2), {3}}  {
-            println!("-> {}", stringify!(X));
+            println!("{:10} {:10?}", stringify!(X), X);
         }
     }
 
