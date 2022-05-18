@@ -1,11 +1,11 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
-autobins = false
+name = "ez-main"
 description = "internal"
+autobins = false
 edition.workspace = true
 license.workspace = true
-name = "ez-main"
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -14,14 +14,14 @@ version.workspace = true
 doc = false
 
 [dependencies]
-color-eyre = "0.6.0"
-dotenv = "0.15.0"
-ez = { path = "../ez-core", package = "ez-core", version = "=0.7.0-dev.0" }
-ez-macros = { path = "../ez-macros", version = "=0.7.0-dev.0"}
-tokio = { version = "1.16.0", features = ["full"] }
-tracing = { version = "0.1.30", features = ["log"] }
-tracing-subscriber = { version = "0.3.7", features = ["env-filter"] }
-tracing-tree = "0.2.0"
+color-eyre.workspace = true
+dotenv.workspace = true
+ez.workspace = true
+ez-macros.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true, features = ["log"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing-tree.workspace = true
 
 [package.metadata.release]
 consolidate-commits = true
