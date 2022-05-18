@@ -1,7 +1,3 @@
-macro_rules! to_doop {
-    ($($t:tt)*) => {};
-}
-
 #[ez::ly]
 fn main() {
     doop! {
@@ -54,23 +50,9 @@ fn main() {
             println!("{:10} {:10?}", stringify!(X), X);
         }
 
-
-        for X in [[1], (2), {3}] - {[1], (2), {3}}  {
-            println!("{:10} {:10?}", stringify!(X), X);
+        static {
+            println!("dedupe!");
         }
-    }
-
-    println!("done");
-
-    to_doop! {
-        // You can use either of ({[/]}) to bracket the items.
-        // The only difference is that one layer of the outer bracket character
-        // will be removed if an item is wrapped in them. This is neccessary for
-        // cases where your items contain a comma that is not in a group, so it
-        // can't be distinguished from the comma delimiting items.
-        let Literals = [
-            "a", 'b', {'c', 'c'}, [['d', 'd']]
-        ];
 
         let Identifiers = [a, b, see, _3, Trait, Type];
         let Keywords = [fn, loop, let];
@@ -81,14 +63,15 @@ fn main() {
         let Combined = Literals + Identifiers + Paths + [?];
         let Excluded = Literals - ["a"];
 
-        for X in Combined {
+        for X in Blocks {
             println!("{}", stringify!(X));
         }
 
         // Destructuring is supported, but only for tuple-style items
         // (wrapped in parentheses, delimited by commas). All items must have the same number
         // of items/commas.
-        for (name, value) in [(a, 2), (b, 3), (c, 4)] {
+        for (NAME, value) in [(a, 2), (b, 3), (c, 4)] {
+            let name = stringify!(NAME);
             println!("{} = {}", name, value);
         }
 
