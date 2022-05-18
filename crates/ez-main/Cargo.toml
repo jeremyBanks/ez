@@ -16,7 +16,7 @@ doc = false
 [dependencies]
 color-eyre.workspace = true
 dotenv.workspace = true
-ez.workspace = true
+ez-core.workspace = true
 ez-macros.workspace = true
 tokio = { workspace = true, features = ["full"] }
 tracing = { workspace = true, features = ["log"] }

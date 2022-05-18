@@ -1,4 +1,5 @@
 use {
+    ez_core as ez,
     std::borrow::Cow,
     tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt},
 };
