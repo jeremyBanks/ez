@@ -175,10 +175,19 @@ trait GroupList {
     const DELIMITER: Delimiter;
 
     fn parse_entries(input: ParseStream) -> syn::Result<Vec<TokenStream>> {
-        let mut entries = Vec::new();
+        let mut entries: Vec<Vec<TokenTree>> = Vec::new();
 
         while !input.is_empty() {
             if input.peek(Token![,]) {
+                if let Some(last) = entries.last() {
+                    if last.is_empty() {
+                        return Err(input.error(match Self::DELIMITER {
+                            Delimiter::Bracket => "Missing entry in replacement list.\nIf you want an empty replacement, please use empty delimiters `[]` instead.",
+                            Delimiter::Brace => "Missing entry in replacement list.\n\nIf you want an empty replacement, please use empty delimiters `{}` instead.",
+                            _ => unreachable!(),
+                        }));
+                    }
+                }
                 entries.push(Vec::new());
                 input.parse::<Token![,]>()?;
             } else {
@@ -187,6 +196,13 @@ trait GroupList {
                     entries.push(Vec::new());
                 }
                 entries.last_mut().unwrap().push(token);
+            }
+        }
+
+        // Handle a single trailing comma
+        if let Some(last) = entries.last() {
+            if last.is_empty() {
+                entries.pop();
             }
         }
 

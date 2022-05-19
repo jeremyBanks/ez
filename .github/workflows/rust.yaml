@@ -12,7 +12,7 @@ jobs:
         - name: maximum versions
           rust_toolchain: beta
         - name: minimum versions
-          rust_toolchain: 1.59.0
+          rust_toolchain: 1.61.0
           bootstrap: RUSTC_BOOTSTRAP=1
           cargo_flags: -Z unstable-options -Z minimal-versions
       fail-fast: false

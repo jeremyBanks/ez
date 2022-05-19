@@ -1,0 +1,7 @@
+error: Missing entry in replacement list.
+
+       If you want an empty replacement, please use empty delimiters `{}` instead.
+  --> tests/compile_fail/empty_braced.rs:10:27
+   |
+10 |         let Nothings = {, , , ,}
+   |                           ^

@@ -20,6 +20,8 @@ pub fn doop(input: TokenStream) -> TokenStream {
         Err(report) => return report.to_compile_error().into(),
     };
 
+    eprintln!("{}", output.to_string());
+
     proc_macro::TokenStream::from(output)
 }
 

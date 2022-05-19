@@ -13,8 +13,8 @@ RUN mkdir -p /deno \
 
 USER codespace
 
-RUN    rustup toolchain add             1.59.0  stable  beta   nightly \
-    && rustup component add --toolchain 1.59.0  rustfmt clippy         \
+RUN    rustup toolchain add             1.61.0  stable  beta   nightly \
+    && rustup component add --toolchain 1.61.0  rustfmt clippy         \
     && rustup component add --toolchain stable  rustfmt clippy         \
     && rustup component add --toolchain beta    rustfmt clippy         \
     && rustup component add --toolchain nightly rustfmt clippy         \

@@ -4,11 +4,10 @@ fn main() {
             let n = 0;
         }
 
-        // this is an empty set
         let None = [];
 
-        // this is the set containing only the empty list
-        let Nothing = [[], [], []];
+        let Nothing = {{}, {}, {},};
+        let Nothings = {, , , ,}
         let NoneAndNothing = None + Nothing;
 
         for N in None {
@@ -17,9 +16,11 @@ fn main() {
         for N in Nothing {
             let n = n + 100;
         }
+        for N in Nothings {
+            let n = n + 10;
+        }
         for N in NoneAndNothing {
             let n = n + 1;
         }
     }
-    assert_eq!(n, 101);
 }
