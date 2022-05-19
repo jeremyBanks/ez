@@ -31,7 +31,8 @@ trait T6 {
 #[dooped(for (Struct, Trait) in [(S1, T4), (S2, T5), (S3, T6)])]
 impl Trait for Struct {}
 
-fn main() {
+#[test]
+fn test() {
     doop! {
         for Struct in [S1, S2, S3]
         for method in [t1, t2, t3] {

@@ -1,6 +1,7 @@
 use doop::doop;
 
-fn main() {
+#[test]
+fn test() {
     doop! {
         static {
             const SUM: i32 = 0

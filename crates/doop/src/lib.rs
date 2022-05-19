@@ -1,5 +1,3 @@
-#![warn(unused_crate_dependencies)]
-
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 
 pub(crate) mod evaluate;

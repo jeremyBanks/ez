@@ -1,4 +1,6 @@
-fn main() {
+
+        #[test]
+        fn test() {
     doop::doop!{
         let Numbers = [
             1,

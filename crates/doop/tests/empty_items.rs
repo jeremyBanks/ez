@@ -1,4 +1,6 @@
-fn main() {
+
+        #[test]
+        fn test() {
     doop::doop!{
         static {
             let n = 0;
