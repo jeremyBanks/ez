@@ -1,10 +1,10 @@
 error[E0599]: no function or associated item named `t2` found for struct `S1` in the current scope
-  --> tests/compile_fail/traitor.rs:25:28
+  --> tests/compile_fail/traitor.rs:23:28
    |
 3  | struct S1;
    | ---------- function or associated item `t2` not found for this
 ...
-25 |         for method in [t1, t2, t3] {
+23 |         for method in [t1, t2, t3] {
    |                            ^^ function or associated item not found in `S1`
    |
    = help: items from traits can only be used if the trait is implemented and in scope
@@ -15,12 +15,12 @@ note: `T2` defines an item `t2`, perhaps you need to implement it
    | ^^^^^^^^
 
 error[E0599]: no function or associated item named `t3` found for struct `S1` in the current scope
-  --> tests/compile_fail/traitor.rs:25:32
+  --> tests/compile_fail/traitor.rs:23:32
    |
 3  | struct S1;
    | ---------- function or associated item `t3` not found for this
 ...
-25 |         for method in [t1, t2, t3] {
+23 |         for method in [t1, t2, t3] {
    |                                ^^ function or associated item not found in `S1`
    |
    = help: items from traits can only be used if the trait is implemented and in scope
@@ -31,12 +31,12 @@ note: `T3` defines an item `t3`, perhaps you need to implement it
    | ^^^^^^^^
 
 error[E0599]: no function or associated item named `t1` found for struct `S2` in the current scope
-  --> tests/compile_fail/traitor.rs:25:24
+  --> tests/compile_fail/traitor.rs:23:24
    |
 4  | struct S2;
    | ---------- function or associated item `t1` not found for this
 ...
-25 |         for method in [t1, t2, t3] {
+23 |         for method in [t1, t2, t3] {
    |                        ^^ function or associated item not found in `S2`
    |
    = help: items from traits can only be used if the trait is implemented and in scope
@@ -47,12 +47,12 @@ note: `T1` defines an item `t1`, perhaps you need to implement it
    | ^^^^^^^^
 
 error[E0599]: no function or associated item named `t3` found for struct `S2` in the current scope
-  --> tests/compile_fail/traitor.rs:25:32
+  --> tests/compile_fail/traitor.rs:23:32
    |
 4  | struct S2;
    | ---------- function or associated item `t3` not found for this
 ...
-25 |         for method in [t1, t2, t3] {
+23 |         for method in [t1, t2, t3] {
    |                                ^^ function or associated item not found in `S2`
    |
    = help: items from traits can only be used if the trait is implemented and in scope
@@ -63,12 +63,12 @@ note: `T3` defines an item `t3`, perhaps you need to implement it
    | ^^^^^^^^
 
 error[E0599]: no function or associated item named `t1` found for struct `S3` in the current scope
-  --> tests/compile_fail/traitor.rs:25:24
+  --> tests/compile_fail/traitor.rs:23:24
    |
 5  | struct S3;
    | ---------- function or associated item `t1` not found for this
 ...
-25 |         for method in [t1, t2, t3] {
+23 |         for method in [t1, t2, t3] {
    |                        ^^ function or associated item not found in `S3`
    |
    = help: items from traits can only be used if the trait is implemented and in scope
@@ -79,12 +79,12 @@ note: `T1` defines an item `t1`, perhaps you need to implement it
    | ^^^^^^^^
 
 error[E0599]: no function or associated item named `t2` found for struct `S3` in the current scope
-  --> tests/compile_fail/traitor.rs:25:28
+  --> tests/compile_fail/traitor.rs:23:28
    |
 5  | struct S3;
    | ---------- function or associated item `t2` not found for this
 ...
-25 |         for method in [t1, t2, t3] {
+23 |         for method in [t1, t2, t3] {
    |                            ^^ function or associated item not found in `S3`
    |
    = help: items from traits can only be used if the trait is implemented and in scope

@@ -1,0 +1,11 @@
+error: expected expression, found `;`
+  --> tests/compile_fail/trailing_commas.rs:15:26
+   |
+15 |             let n = n + N;
+   |                          ^ expected expression
+
+error[E0425]: cannot find value `n` in this scope
+  --> tests/compile_fail/trailing_commas.rs:18:16
+   |
+18 |     assert_eq!(n, 21);
+   |                ^ not found in this scope
