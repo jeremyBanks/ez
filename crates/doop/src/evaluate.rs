@@ -78,6 +78,8 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
                                         })
                                         .map(|slice| slice.iter().cloned().collect())
                                         .collect();
+
+                                    // .zip() will not assert this for us
                                     assert!(tuple_tokens.len() == idents.items.len());
 
                                     for (target, binding) in idents.items.iter().zip(tuple_tokens) {
