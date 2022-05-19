@@ -1,5 +1,5 @@
 use doop::*;
-
+use std::error::Error;
 use std::fmt::{Debug, Display};
 
 doop!{
@@ -89,6 +89,28 @@ doop!{
                 let right: InnerInt = Int::from(rhs).0;
                 let result: InnerInt = Op::method(left, right);
                 Some(Int(result))
+            }
+        }
+
+        impl<E: 'static + Error + Display + Send + Sync> Op<Result<Int, E>> for Int {
+            type Output = Result<Int, eyre::Report>;
+
+            fn method(self, rhs: Result<Int, E>) -> Self::Output {
+                let left: InnerInt = self.0;
+                let right: InnerInt = Int::from(rhs?).0;
+                let result: InnerInt = Op::method(left, right);
+                Ok(Int(result))
+            }
+        }
+
+        impl<E: 'static + Error + Display + Send + Sync> Op<Int> for Result<Int, E> {
+            type Output = Result<Int, eyre::Report>;
+
+            fn method(self, rhs: Result<Int, E>) -> Self::Output {
+                let left: InnerInt = self.0;
+                let right: InnerInt = Int::from(rhs?).0;
+                let result: InnerInt = Op::method(left, right);
+                Ok(Int(result))
             }
         }
     }

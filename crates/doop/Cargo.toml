@@ -20,6 +20,7 @@ syn.workspace = true
 indexmap.workspace = true
 
 [dev-dependencies]
+eyre.workspace = true
 trybuild.workspace = true
 
 [package.metadata.release]
