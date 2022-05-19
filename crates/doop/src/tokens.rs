@@ -1,5 +1,4 @@
 use {
-    inherent::inherent,
     proc_macro2::TokenTree,
     quote::ToTokens,
     std::{
@@ -27,10 +26,6 @@ impl Tokens {
     pub fn into_inner(self) -> Vec<TokenTree> {
         self.tokens
     }
-
-    pub fn iter(&self) -> impl Iterator<Item = &TokenTree> {
-        self.tokens.iter()
-    }
 }
 
 impl Parse for Tokens {
@@ -54,14 +49,12 @@ impl ToTokens for Tokens {
     }
 }
 
-#[inherent]
 impl FromIterator<TokenTree> for Tokens {
     fn from_iter<I: IntoIterator<Item = TokenTree>>(iter: I) -> Self {
         Self::new(iter.into_iter().collect())
     }
 }
 
-#[inherent]
 impl IntoIterator for Tokens {
     type Item = TokenTree;
     type IntoIter = std::vec::IntoIter<TokenTree>;

@@ -79,7 +79,7 @@ sha3 = "0.10.1"
 socket2 = "0.4.4"
 static_assertions = "1.1.0"
 strum = "0.24.0"
-syn = "1.0.86"
+syn = { version = "1.0.86", features = ["extra-traits", "full", "visit", "visit-mut", "fold"] }
 tap = "1.0.1"
 tempfile = "3.3.0"
 termcolor = "1.1.2"

@@ -1,26 +1,9 @@
 use {
     crate::{parse::DoopBlock, tokens::Tokens, *},
     indexmap::{IndexMap, IndexSet},
-    itertools::Itertools,
     proc_macro2::{Group, Ident, TokenStream, TokenTree},
     quote::ToTokens,
-    std::{
-        hash::{Hash, Hasher},
-        iter::empty,
-        ops::Deref,
-        rc::Rc,
-    },
 };
-
-pub struct DoopItem {
-    pub for_bindings: Vec<ForBinding>,
-    pub body: TokenStream,
-}
-
-pub struct ForBinding {
-    pub target: Option<syn::Ident>,
-    pub entries: Vec<TokenStream>,
-}
 
 pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
     let mut output = TokenStream::new();
@@ -29,10 +12,6 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
     // replacements. These are the bindings created by use of the top-level
     // `let` statement.
     let mut let_bindings = IndexMap::<syn::Ident, IndexSet<Tokens>>::new();
-
-    // Mappings from identifiers to tokens representing a single replacement.
-    // These are the bindings created for each iteration of a `for` loop body.
-    let mut for_bindings = IndexMap::<syn::Ident, Tokens>::new();
 
     for item in input.items {
         use parse::DoopBlockItem::*;

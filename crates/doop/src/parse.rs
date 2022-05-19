@@ -1,5 +1,4 @@
 use {
-    derive_more::*,
     derive_syn_parse::Parse,
     proc_macro2::{Delimiter, Ident, TokenStream, TokenTree},
     syn::{
@@ -63,16 +62,6 @@ pub struct DoopForBinding {
     pub first_term: BindingTerm,
     #[call(RestTerm::parse_vec)]
     pub rest_terms: Vec<RestTerm>,
-}
-
-impl DoopLetItem {
-    pub fn parse_vec(input: ParseStream) -> syn::Result<Vec<Self>> {
-        let mut for_binding = Vec::new();
-        while input.peek(Token![let]) {
-            for_binding.push(input.parse()?);
-        }
-        Ok(for_binding)
-    }
 }
 
 impl DoopForBinding {
