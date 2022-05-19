@@ -13,6 +13,8 @@ fn main() {
         ];
         // XXX: Should trailing commas be ignored, by default?
         // If you really want an empty trailing element, it needs to be explicit, like `[, []]`
+        // Or maybe we should assume empty items are errors in all cases, unless they're explicit.
+        // Our error message can suggest appropriate replacements.
 
         let Types = [
             u32,
@@ -69,7 +71,7 @@ fn main() {
 
         // Destructuring is supported, but only for tuple-style items
         // (wrapped in parentheses, delimited by commas). All items must have the same number
-        // of items/commas.
+        // of items/commas, but you can use `_` to ignore an item.
         for (NAME, value) in [(a, 2), (b, 3), (c, 4)] {
             let name = stringify!(NAME);
             println!("{} = {}", name, value);
@@ -99,4 +101,8 @@ fn main() {
             assert_eq!(a OP b, Trait::method(a, b));
         }
     }
+
+    trait T2{}
+    #[dooped(for T1 in [u8, i16, u32])]
+    impl T2 for T1 {}
 }

@@ -2,7 +2,8 @@ cargo-features = ["workspace-inheritance"]
 
 [package]
 name = "ez"
-description = "A collection of easy-to-use, beginner-friendly utilities for Rust."
+description = "easily"
+autoexamples = false
 edition.workspace = true
 license.workspace = true
 repository.workspace = true

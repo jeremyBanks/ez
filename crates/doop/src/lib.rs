@@ -1,15 +1,10 @@
 #![warn(unused_crate_dependencies)]
 
-use {
-    proc_macro::{Delimiter, Group, TokenStream, TokenTree},
-    quote::ToTokens,
-};
+use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 
 pub(crate) mod evaluate;
 pub(crate) mod parse;
 pub(crate) mod tokens;
-
-pub(crate) use {evaluate::evaluate, tokens::Tokens};
 
 #[proc_macro]
 pub fn doop(input: TokenStream) -> TokenStream {
@@ -20,7 +15,7 @@ pub fn doop(input: TokenStream) -> TokenStream {
         Err(report) => return report.to_compile_error().into(),
     };
 
-    let output: proc_macro2::TokenStream = match evaluate(input) {
+    let output: proc_macro2::TokenStream = match evaluate::evaluate(input) {
         Ok(output) => output,
         Err(report) => return report.to_compile_error().into(),
     };
