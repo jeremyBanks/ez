@@ -152,9 +152,5 @@ fn test() {
 
     let y = x + x * x - x / x * 3 + 1 - 2 + 3;
 
-    let z = y + None;
-
-    println!("{z:?}");
-
     assert_eq!(x, y);
 }
