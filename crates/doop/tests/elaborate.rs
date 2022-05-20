@@ -1,13 +1,17 @@
-use doop::*;
-use std::error::Error;
-use std::fmt::{Debug, Display};
+use {
+    doop::*,
+    std::{
+        error::Error,
+        fmt::{Debug, Display},
+    },
+};
 
 type IntInner = i128;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Int(IntInner);
 
-doop!{
+doop! {
     let IntFrom = [ bool, u8, u16, u32, u64, i8, i16, i32, i64, i128, ];
     let IntTryFrom = [ u128, usize, isize, ];
     let IntTryFromApproximate = [ f32, f64, ];
@@ -142,15 +146,15 @@ doop!{
     }
 }
 
-// #[test]
-// fn test() {
-//     let x = Int::from(2);
+#[test]
+fn test() {
+    let x = Int::from(2);
 
-//     let y = x + x * x - x / x * 3 + 1 - 2 + 3;
+    let y = x + x * x - x / x * 3 + 1 - 2 + 3;
 
-//     let z = y + None;
+    let z = y + None;
 
-//     println!("{z:?}");
+    println!("{z:?}");
 
-//     assert_eq!(x, y);
-// }
+    assert_eq!(x, y);
+}

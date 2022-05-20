@@ -1,7 +1,7 @@
 
-        #[test]
-        fn test() {
-    doop::doop!{
+#[test]
+fn test() {
+    doop::doop! {
         let Numbers = [
             1,
             2,

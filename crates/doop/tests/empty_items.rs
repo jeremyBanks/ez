@@ -1,7 +1,7 @@
 
-        #[test]
-        fn test() {
-    doop::doop!{
+#[test]
+fn test() {
+    doop::doop! {
         static {
             let n = 0;
         }

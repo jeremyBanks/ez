@@ -102,7 +102,7 @@ fn main() {
         }
     }
 
-    trait T2{}
+    trait T2 {}
     #[dooped(for T1 in [u8, i16, u32])]
     impl T2 for T1 {}
 }

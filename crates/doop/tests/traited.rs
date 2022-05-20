@@ -1,22 +1,21 @@
-use doop::{dooped, doop};
+use doop::{doop, dooped};
 
 struct S1;
 struct S2;
 struct S3;
 
-trait T1{
+trait T1 {
     fn t1() {}
 }
-trait T2{
+trait T2 {
     fn t2() {}
 }
-trait T3{
+trait T3 {
     fn t3() {}
 }
 
 #[dooped(for Struct in [S1, S2, S3] for Trait in [T1, T2, T3])]
 impl Trait for Struct {}
-
 
 trait T4 {
     fn t4() {}
