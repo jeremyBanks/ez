@@ -8,10 +8,9 @@ use {
 pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
     let mut output = TokenStream::new();
 
-    // Mappings from identifiers to ordered sets of tokens representing possible
-    // replacements. These are the bindings created by use of the top-level
-    // `let` statement.
-    let mut let_bindings = IndexMap::<syn::Ident, IndexSet<Tokens>>::new();
+    let mut declared_lists = IndexMap::<syn::Ident, IndexSet<Tokens>>::new();
+
+    let mut declared_replacements = IndexMap::<syn::Ident, Tokens>::new();
 
     for item in input.items {
         use parse::DoopBlockItem::*;
@@ -23,10 +22,13 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
                 let token_lists = evaluate_binding_terms(
                     &item.first_term,
                     &item.rest_terms,
-                    &let_bindings,
-                    None,
+                    &declared_lists,
+                    Some(&declared_replacements),
                 )?;
-                let_bindings.insert(item.ident, token_lists);
+                declared_lists.insert(item.ident, token_lists);
+            }
+            Type(item) => {
+                declared_replacements.insert(item.ident, Tokens::new(item.tokens));
             }
             For(item) => {
                 let input_body = Tokens::from_iter(item.body);
@@ -38,12 +40,8 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
                     let mut new_binding_combinations = vec![];
 
                     for binding_combination in &mut all_binding_combinations {
-                        let token_lists = evaluate_binding_terms(
-                            &binding.first_term,
-                            &binding.rest_terms,
-                            &let_bindings,
-                            Some(binding_combination),
-                        )?;
+                        let mut for_bindings = declared_lists.clone();
+                        for_bindings.extend(binding_combination);`
 
                         for token_list in token_lists {
                             let token_list = token_list.replace(&*binding_combination);
@@ -108,11 +106,11 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
     /// replacements. returns a token stream.
     fn evaluate_binding_term(
         term: &parse::BindingTerm,
-        let_bindings: &IndexMap<syn::Ident, IndexSet<Tokens>>,
+        declared_lists: &IndexMap<syn::Ident, IndexSet<Tokens>>,
         for_bindings: Option<&IndexMap<syn::Ident, Tokens>>,
     ) -> Result<IndexSet<Tokens>, syn::Error> {
         Ok(match term {
-            parse::BindingTerm::Ident(ident) => match let_bindings.get(ident) {
+            parse::BindingTerm::Ident(ident) => match declared_lists.get(ident) {
                 Some(bindings) => bindings.clone(),
                 None =>
                     return Err(syn::Error::new(
@@ -143,13 +141,13 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
     fn evaluate_binding_terms(
         first: &parse::BindingTerm,
         rest: &[parse::RestTerm],
-        let_bindings: &IndexMap<syn::Ident, IndexSet<Tokens>>,
+        declared_lists: &IndexMap<syn::Ident, IndexSet<Tokens>>,
         for_bindings: Option<&IndexMap<syn::Ident, Tokens>>,
     ) -> Result<IndexSet<Tokens>, syn::Error> {
-        let mut token_lists = evaluate_binding_term(first, let_bindings, for_bindings)?;
+        let mut token_lists = evaluate_binding_term(first, declared_lists, for_bindings)?;
 
         for term in rest {
-            let term_token_lists = evaluate_binding_term(&term.term, let_bindings, for_bindings)?;
+            let term_token_lists = evaluate_binding_term(&term.term, declared_lists, for_bindings)?;
             match term.operation {
                 parse::AddOrSub::Add(_) => token_lists.extend(term_token_lists),
                 parse::AddOrSub::Sub(_) =>

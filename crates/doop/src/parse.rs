@@ -27,8 +27,10 @@ impl Parse for DoopBlock {
 
 #[derive(Parse, Debug, Clone)]
 pub enum DoopBlockItem {
-    #[peek(Token![let], name = "let")]
+    #[peek(Token![let], name = "let SOME_NAME = [1, 2, 3...] + [4] - [1];")]
     Let(DoopLetItem),
+    #[peek(Token![type], name = "type")]
+    Type(DoopTypeItem),
     #[peek(Token![for], name = "for")]
     For(DoopForItem),
     #[peek(Token![static], name = "static")]
@@ -117,6 +119,24 @@ pub struct DoopLetItem {
     #[call(RestTerm::parse_vec)]
     pub rest_terms: Vec<RestTerm>,
     pub semi: Token![;],
+}
+
+#[derive(Parse, Debug, Clone)]
+pub struct DoopTypeItem {
+    #[prefix(Token![type])]
+    pub ident: Ident,
+    #[prefix(Token![=])]
+    #[call(tokens_to_semicolon)]
+    pub tokens: Vec<TokenTree>,
+    pub semi: Token![;],
+}
+
+pub fn tokens_to_semicolon(input: ParseStream) -> syn::Result<Vec<TokenTree>> {
+    let mut tokens = Vec::new();
+    while !input.peek(Token![;]) {
+        tokens.push(input.parse()?);
+    }
+    Ok(tokens)
 }
 
 #[derive(Parse, Debug, Clone)]
