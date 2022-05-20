@@ -16,7 +16,11 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
         use parse::DoopBlockItem::*;
         match item {
             Static(item) => {
-                output.extend(Tokens::from_iter(item.body).replace(&declared_replacements).into_token_stream());
+                output.extend(
+                    Tokens::from_iter(item.body)
+                        .replace(&declared_replacements)
+                        .into_token_stream(),
+                );
             }
             Let(item) => {
                 let token_lists = evaluate_binding_terms(
@@ -129,14 +133,16 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
                     )),
             },
 
-            parse::BindingTerm::BraceList(term) =>
-                IndexSet::from_iter(term.entries.iter().map(|term| {
-                    Tokens::from_iter(term.clone()).replace(replacements)
-                })),
-            parse::BindingTerm::BracketList(term) =>
-                IndexSet::from_iter(term.entries.iter().map(|term| {
-                    Tokens::from_iter(term.clone()).replace(replacements)
-                })),
+            parse::BindingTerm::BraceList(term) => IndexSet::from_iter(
+                term.entries
+                    .iter()
+                    .map(|term| Tokens::from_iter(term.clone()).replace(replacements)),
+            ),
+            parse::BindingTerm::BracketList(term) => IndexSet::from_iter(
+                term.entries
+                    .iter()
+                    .map(|term| Tokens::from_iter(term.clone()).replace(replacements)),
+            ),
         })
     }
 

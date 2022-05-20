@@ -202,8 +202,12 @@ trait GroupList {
                 if let Some(last) = entries.last() {
                     if last.is_empty() {
                         return Err(input.error(match Self::DELIMITER {
-                            Delimiter::Bracket => "Missing entry in replacement list.\nIf you want an empty replacement, please use empty delimiters `[]` instead.",
-                            Delimiter::Brace => "Missing entry in replacement list.\n\nIf you want an empty replacement, please use empty delimiters `{}` instead.",
+                            Delimiter::Bracket =>
+                                "Missing entry in replacement list.\nIf you want an empty \
+                                 replacement, please use empty delimiters `[]` instead.",
+                            Delimiter::Brace =>
+                                "Missing entry in replacement list.\n\nIf you want an empty \
+                                 replacement, please use empty delimiters `{}` instead.",
                             _ => unreachable!(),
                         }));
                     }

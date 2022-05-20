@@ -1,4 +1,3 @@
-
 #[test]
 fn test() {
     doop::doop! {
