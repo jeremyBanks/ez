@@ -1,24 +1,3 @@
-use {
-    doop::{doop, dooped},
-    std::{
-        fmt::{Debug, Display},
-        marker::PhantomData,
-        ops::Add,
-    },
-    thiserror::Error,
-};
-
-#[test]
-fn main() -> Result<(), eyre::Report> {
-    let x = int(2);
-
-    dbg!(Int::MAX + Int::MAX);
-    dbg!(Int::MIN + Int::MAX);
-    dbg!(Int::MIN + Int::MIN);
-
-    Ok(())
-}
-
 pub fn int(value: i128) -> Int<Infer> {
     value.into()
 }
@@ -40,13 +19,14 @@ type DefaultErrorMode = Panicking;
 #[derive(Clone, Copy, PartialEq, Eq, Default)]
 pub struct Int<ErrorMode: self::ErrorMode = Infer> {
     value: i128,
-    error_mode: PhantomData<ErrorMode>,
+    meta: PhantomData<ErrorMode>,
 }
 
-impl<ErrorMode: self::ErrorMode> Int<ErrorMode> {
+impl<A: ErrorMode, B: PrimInt> Int<A, B> {
     const fn new(value: i128) -> Self {
-        Self { value, error_mode: PhantomData }
+        Self { value, meta: PhantomData }
     }
+
     pub const MAX: Self = Self::new(i128::MAX);
     pub const MIN: Self = Self::new(i128::MIN);
 
@@ -67,19 +47,19 @@ impl<ErrorMode: self::ErrorMode> Int<ErrorMode> {
     }
 }
 
-impl<ErrorMode: self::ErrorMode> Debug for Int<ErrorMode> {
+impl<AnyErrorMode: ErrorMode> Debug for Int<AnyErrorMode>{
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         Debug::fmt(&self.value, f)
     }
 }
 
-impl<ErrorMode: self::ErrorMode> Display for Int<ErrorMode> {
+impl<AnyErrorMode: ErrorMode> Display for Int<AnyErrorMode> {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         Display::fmt(&self.value, f)
     }
 }
 
-impl<ErrorMode: self::ErrorMode> From<i128> for Int<ErrorMode> {
+impl<AnyErrorMode: ErrorMode> From<i128> Int<AnyErrorMode> {
     fn from(value: i128) -> Self {
         Self { value, error_mode: PhantomData }
     }
@@ -92,9 +72,6 @@ pub enum IntError {
 
     #[error("division by zero (no result exists)")]
     DivisionByZero(eyre::Report),
-
-    #[error(transparent)]
-    Other(eyre::Report),
 }
 
 impl IntError {
@@ -123,7 +100,6 @@ doop! {
         (i128, CheckedInt, CheckedIntResult, CheckedInt::from(self), rhs, Ok(CheckedInt::from(value))),
         (CheckedIntResult, CheckedInt, CheckedIntResult, self?, rhs, Ok(CheckedInt::from(value))),
         (CheckedInt, CheckedIntResult, CheckedIntResult, self, rhs?, Ok(CheckedInt::from(value))),
-        // (CheckedIntResult, CheckedIntResult, CheckedIntResult, self?, rhs?, Ok(CheckedInt::from(value))),
     ] {
         impl Add<OtherType> for SelfType {
             type Output = ResultType;

@@ -1,181 +1,116 @@
-// #![warn(unused_crate_dependencies)]
+use ::{
+    core::{
+        clone::Clone,
+        cmp::{Eq, Ord, PartialEq, PartialOrd},
+        default::Default,
+        fmt::{Debug, Display},
+        hash::Hash,
+        marker::{Copy, PhantomData},
+        ops::{Add, Div, Mul, Sub},
+    },
+    doop::doop,
+    num_traits::PrimInt,
+    thiserror::Error,
+    paste::paste,
+};
 
-// use {
-//     doop::doop,
-//     ez::{throws, try_throws},
-// };
-
-#[derive(
-    ::core::clone::Clone,
-    ::core::cmp::Eq,
-    ::core::cmp::Ord,
-    ::core::cmp::PartialEq,
-    ::core::cmp::PartialOrd,
-    ::core::default::Default,
-    ::core::hash::Hash,
-    ::core::marker::Copy,
-    ::derive_more::AsMut,
-    ::derive_more::AsRef,
-    ::derive_more::DebugCustom,
-    ::derive_more::Deref,
-    ::derive_more::DerefMut,
-    ::derive_more::Display,
-    ::derive_more::FromStr,
-    ::num_derive::FromPrimitive,
-    ::num_derive::Num,
-    ::num_derive::NumCast,
-    ::num_derive::NumOps,
-    ::num_derive::One,
-    ::num_derive::ToPrimitive,
-    ::num_derive::Zero,
-    ::serde::Deserialize,
-    ::serde::Serialize,
-)]
-#[repr(transparent)]
-#[serde(transparent)]
-pub struct Int(i128);
-
-pub fn int(_: impl std::any::Any) -> Int {
-    todo!()
+#[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Default, Hash, Copy)]
+pub struct Int<M: ErrorMode = Infer> {
+    value: i128,
+    meta: PhantomData<*mut (ErrorMode)>,
 }
 
-mod convert;
-use self::convert::*;
+#[derive(Error, Debug)]
+pub enum IntError {
+    #[error("result overflowed when adding: `{0} + {1}`")]
+    AddOverflow(Int, Int),
 
-impl TryToInt for &str {
-    #[throws]
-    fn try_to_int(&self) -> Int {
-        Int(self.parse()?)
+    #[error("result overflowed when subtracting: `{0} - {1}`")]
+    SubOverflow(Int, Int),
+
+    #[error("result overflowed when multiplying: `{0} * {1}`")]
+    MulOverflow(Int, Int),
+
+    #[error("divided by zero: `{0} / 0`")]
+    DivisionByZero(Int),
+}
+
+impl<M: ErrorMode> Int<M> {
+    const fn new(value: i128) -> Self {
+        Self { value, meta: PhantomData }
+    }
+
+    pub const MAX: Self = Self::new(i128::MAX);
+    pub const MIN: Self = Self::new(i128::MIN);
+
+    pub fn checked(self) -> Int<Checked> {
+        self.value.into()
+    }
+
+    pub fn panicking(self) -> Int<Panicking> {
+        self.value.into()
+    }
+
+    pub fn saturating(self) -> Int<Saturating> {
+        self.value.into()
+    }
+
+    pub fn wrapping(self) -> Int<Wrapping> {
+        self.value.into()
     }
 }
 
-// XXX: where possible maybe implement for Result and/or Option?
+pub trait ErrorMode {}
+type DefaultErrorMode = Panicking;
 
 doop! {
-    let TrueFromTypes = [u8, u16, u32, u64, usize, i8, i16, i32, i64, i128,
-isize];     let PseudoFromTypes = [usize, isize];
-    let BinaryOps = [ (Add, add), (Sub, sub), (Mul, mul), (Div, div) ];
-    let FromTypes = TrueFromTypes + PseudoFromTypes + [u128];
-
-    for Type in FromTypes + [u128]
-    for (Trait, Method) in BinaryOps
-    {
-        impl ToInt for Type {
-            fn to_int(&self) -> Int {
-                todo!()
-            }
-        }
-
-        impl std::ops::Add<Int> for Type {
-            type Output = Int;
-
-            fn add(self, rhs: Int) -> Self::Output {
-                self.to_int() + rhs
-            }
-        }
-
-        impl std::ops::Add<Type> for Int {
-            type Output = Int;
-
-            fn add(self, rhs: Type) -> Self::Output {
-                self + rhs.to_int()
-            }
-        }
-    }
-}
-
-doop! {
-    for Type in [u128] {
-        impl ToInt for Type {
-            fn to_int(&self) -> Int {
-                Int((*self).try_into().unwrap())
-            }
-        }
-
-        impl std::ops::Add<Int> for Type {
-            type Output = Int;
-
-            fn add(self, rhs: Int) -> Self::Output {
-                self.try_to_int().unwrap() + rhs
-            }
-        }
-
-        impl std::ops::Add<Type> for Int {
-            type Output = Int;
-
-            fn add(self, rhs: Type) -> Self::Output {
-                self + rhs.try_to_int().unwrap()
-            }
-        }
-    }
-}
-
-#[try_throws]
-pub fn int(i: impl TryToIntApproximate) -> Int {
-    i.try_to_int_approximate()?
-}
-
-   impl From { bool, u8, u16, u32, u64, i8, i16, i32, i64, i128, }
-   impl TryFrom { u128, usize, isize, }
-   impl TryFromApproximate { f32, f64, }
-   impl Into { i128, }
-   impl TryInto { u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, isize, }
-   impl IntoApproximate { f32, f64, }
-
-   impl<T> Index<usize> for { &[T], Vec<T> }
-   // Do we just want to coerce to usize, or do we want more magic (probably
-not), such as:    // When slicing a string, we should round each index
-backwards to the nearest valid character break    // instead of panicking.
-   // When indexing with negative values, they should be measured from
-.len().
-
-   impl BinaryOperator<Self, Output=Self> {
-       [::core::ops::Add]::add,
-       [::core::ops::Sub]::sub,
-       [::core::ops::Mul]::mul,
-       [::core::ops::Div]::div,
-       [::core::ops::Rem]::rem,
-       [::core::ops::BitAnd]::bitand,
-       [::core::ops::BitOr]::bitor,
-       [::core::ops::BitXor]::bitxor,
-   }
-
-   impl BinaryOperator<u32, Output=Self> {
-       [::core::ops::Shl]::shl,
-       [::core::ops::Shr]::shr,
-       [::num_traits::Pow]::pow,
-   }
-
-   // We should have #[inherent]-style shims for as much as it makes sense.
-doop! {
-    let UnsignedTypes = [u8, u16, u32];
-    let SignedTypes = UnsignedTypes + [
-        impl ::num_traits::Num,
-        impl ::num_traits::NumCast,
-        2,
-        (4 + 4),
-        ::core::i128
+    let ERROR_MODE_LIST = [
+        (Infer),
+        (Panicking),
+        (Checked),
+        (Saturating),
+        (Wrapping),
     ];
-    let Something = SignedTypes - UnsignedTypes + [2];
 
-    let SignedTypes = [i8, i16, i32] + [{impl ::num_traits::Num}, {impl
-SomethingElse}];     let BinaryOps = [+, -, /];
-    let Types = *SignedTypes + UnsignedTypes;
+    let OPERATIONS_LIST_A = [
+        (Add, add, checked_add, saturating_add),
+        (Sub, sub, checked_sub, saturating_sub),
+        (Mul, mul, checked_mul, saturating_mul),
+        (Div, div, checked_div, div),
+    ];
 
-    // Each piece of code to be duplicated is indicated with a
-// `for`-loop-style     // block, optionally with multiple `for` statements for
-// nested repetitions.
-    for Type in Types
-    for B in BinaryOps {
-        let n: Type = 1;
-        dbg!(n B n);
+    let OPERATIONS_LIST_B = [
+
+    ];
+
+    for ERROR_MODE in ERROR_MODE_LIST {
+        #[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
+        pub struct ERROR_MODE;
+        impl ErrorMode for ERROR_MODE {}
     }
 
-    // `for` can refer to aliases and/or bracketed token trees, just like
-    // `let`.
-    for Type in *Types + [u128, i128]
-    for U in [!, -] {
-        let n: Type = 2.try_into().unwrap();
-        dbg!(U n);
-    }
+
+}
+
+#[test]
+fn test() -> Result<(), eyre::Report> {
+    let two = int(2).checked();
+
+    // let x = two;
+    // let y = x + two;
+    // let z = y + two;
+
+    // let x = two.panicking();
+    // let y = x + two;
+    // let z = y + two;
+
+    // let x = two.checked();
+    // let y = x + two;
+    // let z = y + two;
+
+    // dbg!(Int::MAX + Int::MAX);
+    // dbg!(Int::MIN + Int::MAX);
+    // dbg!(Int::MIN + Int::MIN);
+
+    Ok(())
 }

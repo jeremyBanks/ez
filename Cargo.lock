@@ -668,6 +668,7 @@ dependencies = [
  "indexmap",
  "proc-macro2",
  "quote",
+ "static_assertions",
  "syn",
  "thiserror",
  "trybuild",
@@ -1107,6 +1108,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
