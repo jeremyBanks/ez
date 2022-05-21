@@ -1,43 +1,81 @@
-use std::{
-    marker::PhantomData,
-    ops::{Add, Div},
+use {
+    doop::{doop, dooped},
+    std::{
+        fmt::{Debug, Display},
+        marker::PhantomData,
+        ops::Add,
+    },
 };
 
 #[test]
-fn main() {
-    let one = CheckedInt::from(1);
-    let zero = CheckedInt::from(0);
+fn main() -> Result<(), eyre::Report> {
+    let x = int(2);
 
-    let two = one + one;
-    let three = two + one + zero;
+    dbg!(Int::MAX + Int::MAX);
+    dbg!(Int::MIN + Int::MAX);
+    dbg!(Int::MIN + Int::MIN);
 
-    eprintln!("zero = {zero:?}");
-    eprintln!("one = {one:?}");
-    eprintln!("two = {two:?}");
-    eprintln!("three = {three:?}");
+    Ok(())
 }
 
-pub mod error_mode {
-    pub trait ErrorMode: std::fmt::Debug {}
-
-    #[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
-    pub struct Default;
-    impl ErrorMode for Default {}
-
-    #[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
-    pub struct Panicky;
-    impl ErrorMode for Panicky {}
-
-    #[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
-    pub struct Checked;
-    impl ErrorMode for Checked {}
+pub fn int(value: i128) -> Int<Infer> {
+    value.into()
 }
-use error_mode::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct Int<ErrorMode: self::ErrorMode = error_mode::Default> {
+pub trait ErrorMode {}
+
+doop! {
+    let ERROR_MODES = [Infer, Panicking, Checked, Saturating, Wrapping];
+
+    for ERROR_MODE in ERROR_MODES {
+        #[derive(Debug, Copy, Clone, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
+        pub struct ERROR_MODE;
+        impl ErrorMode for ERROR_MODE {}
+    }
+}
+
+type DefaultErrorMode = Panicking;
+
+#[derive(Clone, Copy, PartialEq, Eq, Default)]
+pub struct Int<ErrorMode: self::ErrorMode = Infer> {
     value: i128,
     error_mode: PhantomData<ErrorMode>,
+}
+
+impl<ErrorMode: self::ErrorMode> Int<ErrorMode> {
+    const fn new(value: i128) -> Self {
+        Self { value, error_mode: PhantomData }
+    }
+    pub const MAX: Self = Self::new(i128::MAX);
+    pub const MIN: Self = Self::new(i128::MIN);
+
+    pub fn checked(self) -> Int<Checked> {
+        self.value.into()
+    }
+
+    pub fn panicking(self) -> Int<Panicking> {
+        self.value.into()
+    }
+
+    pub fn saturating(self) -> Int<Saturating> {
+        self.value.into()
+    }
+
+    pub fn wrapping(self) -> Int<Wrapping> {
+        self.value.into()
+    }
+}
+
+impl<ErrorMode: self::ErrorMode> Debug for Int<ErrorMode> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        Debug::fmt(&self.value, f)
+    }
+}
+
+impl<ErrorMode: self::ErrorMode> Display for Int<ErrorMode> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        Display::fmt(&self.value, f)
+    }
 }
 
 impl<ErrorMode: self::ErrorMode> From<i128> for Int<ErrorMode> {
@@ -49,9 +87,9 @@ impl<ErrorMode: self::ErrorMode> From<i128> for Int<ErrorMode> {
 #[derive(thiserror::Error)]
 #[error(transparent)]
 pub struct IntError(eyre::Report);
-impl std::fmt::Debug for IntError {
+impl Debug for IntError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        self.0.fmt(f)
+        Debug::fmt(&self.0, f)
     }
 }
 
@@ -69,28 +107,33 @@ impl IntError {
     }
 }
 
-pub type CheckedInt = Int<error_mode::Checked>;
-pub type PanickyInt = Int<error_mode::Panicky>;
-pub type DefaultInt = Int<error_mode::Default>;
+pub type CheckedInt = Int<Checked>;
+pub type PanickingInt = Int<Panicking>;
+pub type InferInt = Int<Infer>;
 
-impl Add<CheckedInt> for CheckedInt {
-    type Output = Result<CheckedInt, IntError>;
+type IntResult<T> = Result<Int<T>, IntError>;
+type CheckedIntResult = IntResult<Checked>;
+type PanickingIntResult = IntResult<Panicking>;
+type InferIntResult = IntResult<Infer>;
 
-    fn add(self, rhs: CheckedInt) -> Self::Output {
-        match self.value.checked_add(rhs.value) {
-            Some(value) => Ok(Self::from(value)),
-            None => Err(IntError::overflow()),
-        }
-    }
-}
+doop! {
+    for (SelfType, OtherType, ResultType, self_value, other_value, result_value) in [
+        (CheckedInt, CheckedInt, CheckedIntResult, self, rhs, Ok(CheckedInt::from(value))),
+        (CheckedInt, i128, CheckedIntResult, self, CheckedInt::from(rhs), Ok(CheckedInt::from(value))),
+        (i128, CheckedInt, CheckedIntResult, CheckedInt::from(self), rhs, Ok(CheckedInt::from(value))),
+        (CheckedIntResult, CheckedInt, CheckedIntResult, self?, rhs, Ok(CheckedInt::from(value))),
+        (CheckedInt, CheckedIntResult, CheckedIntResult, self, rhs?, Ok(CheckedInt::from(value))),
+        // (CheckedIntResult, CheckedIntResult, CheckedIntResult, self?, rhs?, Ok(CheckedInt::from(value))),
+    ] {
+        impl Add<OtherType> for SelfType {
+            type Output = ResultType;
 
-impl Div<CheckedInt> for CheckedInt {
-    type Output = Result<CheckedInt, IntError>;
-
-    fn div(self, rhs: CheckedInt) -> Self::Output {
-        match self.value.checked_div(rhs.value) {
-            Some(value) => Ok(Self::from(value)),
-            None => Err(IntError::divided_by_zero()),
+            fn add(self, rhs: OtherType) -> ResultType {
+                match self_value.value.checked_add(other_value.value) {
+                    Some(value) => result_value,
+                    None => Err(IntError::overflow()),
+                }
+            }
         }
     }
 }
