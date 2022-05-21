@@ -51,12 +51,44 @@ impl<M: ErrorMode> Int<M> {
         self.value.into()
     }
 
-    pub fn saturating(self) -> Int<Saturating> {
-        self.value.into()
+    fn try_add(self, other: impl Into<Self>) -> Result<Self, IntError> {
+        match self.value.checked_add(other.into().value) {
+            Some(value) => Ok(Self::new(value)),
+            None => Err(IntError::AddOverflow(self, other)),
+        }
     }
 
-    pub fn wrapping(self) -> Int<Wrapping> {
-        self.value.into()
+    fn try_sub(self, other: impl Into<Self>) -> Result<Self, IntError> {
+        match self.value.checked_sub(other.into().value) {
+            Some(value) => Ok(Self::new(value)),
+            None => Err(IntError::SubOverflow(self, other)),
+        }
+    }
+
+    fn try_mul(self, other: impl Into<Self>) -> Result<Self, IntError> {
+        match self.value.checked_mul(other.into().value) {
+            Some(value) => Ok(Self::new(value)),
+            None => Err(IntError::AddOverflow(self, other)),
+        }
+    }
+
+    fn try_div(self, other: impl Into<Self>) -> Result<Self, IntError> {
+        match self.value.checked_div(other.into().value) {
+            Some(value) => Ok(Self::new(value)),
+            None => Err(IntError::DivisionByZero(self)),
+        }
+    }
+}
+
+impl Add<Int<Checked>> for Int<Checked> {
+    type Output = Int<Checked>;
+
+    fn add(self, rhs: Int<Checked>) -> Self::Output {
+        let result = self.value.checked_add(rhs.value);
+        match result {
+            Some(value) => Ok(Int::new(value)),
+            None => Err(IntError::AddOverflow(self, rhs)),
+        }
     }
 }
 
@@ -65,22 +97,9 @@ type DefaultErrorMode = Panicking;
 
 doop! {
     let ERROR_MODE_LIST = [
-        (Infer),
-        (Panicking),
-        (Checked),
-        (Saturating),
-        (Wrapping),
-    ];
-
-    let OPERATIONS_LIST_A = [
-        (Add, add, checked_add, saturating_add),
-        (Sub, sub, checked_sub, saturating_sub),
-        (Mul, mul, checked_mul, saturating_mul),
-        (Div, div, checked_div, div),
-    ];
-
-    let OPERATIONS_LIST_B = [
-
+        (Infer, unwrap()),
+        (Panicking, unwrap()),
+        (Checked, unwrap()),
     ];
 
     for ERROR_MODE in ERROR_MODE_LIST {
