@@ -152,5 +152,5 @@ fn test() {
 
     let y = x + x * x - x / x * 3 + 1 - 2 + 3;
 
-    assert_eq!(x, y);
+    assert_eq!(Int::from(5), y);
 }
