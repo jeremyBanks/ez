@@ -9,76 +9,81 @@ use ::{
         ops::{Add, Div, Mul, Sub},
     },
     doop::doop,
-    num_traits::PrimInt,
     thiserror::Error,
     paste::paste,
 };
 
+// one thing at a fucking time, jesus christ.
+// first, basic ops, checked and panicking(!).
+// then add coercion from strictly compatible types.
+// then add .into() and .from() for all integer types, panicking or throwing as appropriate.
+// then add int() converting from approximately maybe compatible types.
+
+
+
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Default, Hash, Copy)]
-pub struct Int<M: ErrorMode = Infer> {
+pub struct Int<M> {
     value: i128,
-    meta: PhantomData<*mut (ErrorMode)>,
 }
 
 #[derive(Error, Debug)]
 pub enum IntError {
-    #[error("result overflowed when adding: `{0} + {1}`")]
-    AddOverflow(Int, Int),
-
-    #[error("result overflowed when subtracting: `{0} - {1}`")]
+    #[error(transparent)]
+    AddOverflow(IntAddOverflowError),
+    #[error(transparent)]
     SubOverflow(Int, Int),
-
-    #[error("result overflowed when multiplying: `{0} * {1}`")]
+    #[error(transparent)]
     MulOverflow(Int, Int),
-
-    #[error("divided by zero: `{0} / 0`")]
+    #[error(transparent)]
     DivisionByZero(Int),
 }
 
-impl<M: ErrorMode> Int<M> {
-    const fn new(value: i128) -> Self {
-        Self { value, meta: PhantomData }
-    }
+#[derive(Error, Debug)]
+#[error("result overflowed when adding: `{.lhs} + {.rhs}`")]
+pub struct IntAddOverflowError {
+    pub lhs: Int,
+    pub rhs: Int,
+}
 
-    pub const MAX: Self = Self::new(i128::MAX);
-    pub const MIN: Self = Self::new(i128::MIN);
+#[derive(Error, Debug)]
+#[error("result overflowed when subtracting: `{.lhs} - {.rhs}`")]
+pub struct IntSubOverflowError {
+    pub lhs: Int,
+    pub rhs: Int,
+}
 
-    pub fn checked(self) -> Int<Checked> {
-        self.value.into()
-    }
+#[derive(Error, Debug)]
+#[error("result overflowed when multiplying: `{.lhs} * {.rhs}`")]
+pub struct IntMulOverflowError {
+    pub lhs: Int,
+    pub rhs: Int,
+}
 
-    pub fn panicking(self) -> Int<Panicking> {
-        self.value.into()
-    }
+#[derive(Error, Debug)]
+#[error("divided by zero: `{.lhs} / 0`")]
+pub struct IntDivisionByZeroError {
+    pub lhs: Int,
+}
 
-    fn try_add(self, other: impl Into<Self>) -> Result<Self, IntError> {
-        match self.value.checked_add(other.into().value) {
-            Some(value) => Ok(Self::new(value)),
-            None => Err(IntError::AddOverflow(self, other)),
-        }
-    }
 
-    fn try_sub(self, other: impl Into<Self>) -> Result<Self, IntError> {
-        match self.value.checked_sub(other.into().value) {
-            Some(value) => Ok(Self::new(value)),
-            None => Err(IntError::SubOverflow(self, other)),
-        }
-    }
+impl Int {
+    pub const MAX: Self = Self { value: i128::MAX };
+    pub const MIN: Self = Self { value: i128::MIN };
+}
 
-    fn try_mul(self, other: impl Into<Self>) -> Result<Self, IntError> {
-        match self.value.checked_mul(other.into().value) {
-            Some(value) => Ok(Self::new(value)),
-            None => Err(IntError::AddOverflow(self, other)),
-        }
-    }
-
-    fn try_div(self, other: impl Into<Self>) -> Result<Self, IntError> {
-        match self.value.checked_div(other.into().value) {
-            Some(value) => Ok(Self::new(value)),
-            None => Err(IntError::DivisionByZero(self)),
+pub(crate) trait IntImpl: Into<Int> {
+    pub fn try_add(self, rhs: Int) -> Result<Int, IntError> {
+        let lhs = self.into();
+        let rhs = rhs.into();
+        let result = lhs.value.checked_add(rhs.value);
+        if let Some(result) = result {
+            Ok(result.into())
+        } else {
+            Err(IntError::AddOverflow(lhs, rhs))
         }
     }
 }
+impl IntImpl for Int {}
 
 impl Add<Int<Checked>> for Int<Checked> {
     type Output = Int<Checked>;
