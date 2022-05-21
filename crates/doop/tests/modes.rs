@@ -5,6 +5,7 @@ use {
         marker::PhantomData,
         ops::Add,
     },
+    thiserror::Error,
 };
 
 #[test]
@@ -84,26 +85,25 @@ impl<ErrorMode: self::ErrorMode> From<i128> for Int<ErrorMode> {
     }
 }
 
-#[derive(thiserror::Error)]
-#[error(transparent)]
-pub struct IntError(eyre::Report);
-impl Debug for IntError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        Debug::fmt(&self.0, f)
-    }
+#[derive(Error, Debug)]
+pub enum IntError {
+    #[error("operation overflowed (the result was out-of-bounds")]
+    Overflow(eyre::Report),
+
+    #[error("division by zero (no result exists)")]
+    DivisionByZero(eyre::Report),
+
+    #[error(transparent)]
+    Other(eyre::Report),
 }
 
 impl IntError {
-    pub(crate) fn msg(msg: &'static str) -> Self {
-        Self(eyre::Report::msg(msg))
+    fn overflow() -> IntError {
+        IntError::Overflow(eyre::Report::msg("operation overflowed (the result was out-of-bounds"))
     }
 
-    pub(crate) fn overflow() -> Self {
-        Self::msg("operation overflowed (the result was too large to fit)")
-    }
-
-    pub(crate) fn divided_by_zero() -> Self {
-        Self::msg("divided by zero")
+    fn division_by_zero() -> IntError {
+        IntError::DivisionByZero(eyre::Report::msg("division by zero (no result exists)"))
     }
 }
 
