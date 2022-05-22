@@ -8,8 +8,11 @@
 static doop: ! = {
     let BOOL: TokenStream = BOOL;
 
-    let int_from: [TokenStream] = [BOOL, u8, u16, u32, u64, i8, i16, i32, i64, i128];
-    let int_try_from: [TokenStream] = [u128, usize, isize];
+    // vec![] is a way to add a macro context with brackets
+    
+
+    let int_from: [TokenStream] = vec![BOOL, u8, u16, u32, u64, i8, i16, i32, i64, i128];
+    let int_try_from: [TokenStream] = vec![u128, usize, isize];
     let int_try_from_approximate: [TokenStream] = [f32, f64] + [] - [];
     let int_maybe_from: [TokenStream] = int_from + int_try_from + int_try_from_approximate;
 
@@ -27,19 +30,16 @@ static doop: ! = {
     let int_into_approximate: [TokenStream] = [f32, f64];
     let int_maybe_into: [TokenStream] = int_into + int_try_into + int_into_approximate;
 
-    // Is this the only punctuation that can't be written on its own?
-    // If so, maybe don't treat this as a more general case.
-    // Just provide like lifetime!(...) which prefixes ' to the contents.
-    type Lifetime = punctuation!("'");
 
     // `let`, `type`, and `const` are equivalent (interpolated),
     // they have different suggested capitalizations and unescaped grammar.
+    // static too, 'cause why not?
     let static_lifetime: TokenStream = ungrammatical!('static);
     type static_lifetime: TokenStream = ungrammatical!(Lifetime static);
     const static_lifetime: TokenStream = ungrammatical!('static);
     type static_lifetime: TokenStream = Any + 'static;
 
-    '_: {
+    'static: {
         let x = 2;
     }
 
