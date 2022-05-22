@@ -26,3 +26,17 @@ pub fn dooped(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
     tokens.extend(TokenStream::from(TokenTree::from(Group::new(Delimiter::Brace, item))));
     doop(tokens)
 }
+
+#[proc_macro_attribute]
+pub fn doopin(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
+    let mut item = Vec::from_iter(item);
+    let block = item.pop().unwrap();
+
+    if let TokenTree::Group(group) = block {
+        tokens.extend(group.stream());
+    } else {
+        panic!("is this a fn?");
+    }
+
+    doop(tokens)
+}

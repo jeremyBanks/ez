@@ -33,7 +33,7 @@ pub enum DoopBlockItem {
     Type(DoopTypeItem),
     #[peek(Token![for], name = "for")]
     For(DoopForItem),
-    #[peek(Token![static], name = "static")]
+    #[peek(Token![return], name = "return")]
     Static(DoopStaticItem),
 }
 
@@ -49,11 +49,12 @@ pub struct DoopForItem {
 
 #[derive(Parse, Debug, Clone)]
 pub struct DoopStaticItem {
-    #[prefix(Token![static])]
+    #[prefix(Token![return])]
     #[brace]
     pub _brace: token::Brace,
     #[inside(_brace)]
     pub body: TokenStream,
+    pub _semi: Token![;],
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -118,7 +119,7 @@ pub struct DoopLetItem {
     pub first_term: BindingTerm,
     #[call(RestTerm::parse_vec)]
     pub rest_terms: Vec<RestTerm>,
-    pub semi: Token![;],
+    pub _semi: Token![;],
 }
 
 #[derive(Parse, Debug, Clone)]
@@ -128,7 +129,7 @@ pub struct DoopTypeItem {
     #[prefix(Token![=])]
     #[call(tokens_to_semicolon)]
     pub tokens: Vec<TokenTree>,
-    pub semi: Token![;],
+    pub _semi: Token![;],
 }
 
 pub fn tokens_to_semicolon(input: ParseStream) -> syn::Result<Vec<TokenTree>> {

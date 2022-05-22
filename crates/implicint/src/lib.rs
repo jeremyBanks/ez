@@ -24,7 +24,7 @@ doop! {
         #[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Default, Hash, Copy)]
         pub struct Int<M> {
             value: i128,
-        }
+        };
 
         #[derive(Error, Debug)]
         pub enum IntError {

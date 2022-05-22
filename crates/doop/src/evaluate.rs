@@ -33,8 +33,6 @@ pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
             }
             Type(item) => {
                 declared_replacements.insert(item.ident, Tokens::new(item.tokens));
-
-                eprintln!("{declared_replacements:#?}");
             }
             For(item) => {
                 let input_body = Tokens::from_iter(item.body);
