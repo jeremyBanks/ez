@@ -29,14 +29,15 @@ static X: ! = {
 
     // this is only accepted at the top level, and has the same effect as wrapping
     // the next item in parenthesis. item I think defined as being until after the
-    // next semicolon or braced group. it's like to emit stuff without adding another
-    // level of indentation.
-    #[X] let x = 2;
+    // next semicolon or braced group. it's like to emit stuff without adding
+    // another level of indentation.
+    #[X]
+    let x = 2;
 
     #[X(for X in [1, 2, 3])]
     let x = X;
 
-    X!{x};
+    X! {x};
 
     {
         #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
