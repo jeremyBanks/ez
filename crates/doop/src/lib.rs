@@ -40,3 +40,8 @@ pub fn doopin(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
 
     doop(tokens)
 }
+
+#[proc_macro_attribute]
+pub fn raw(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
+    TokenStream::new()
+}

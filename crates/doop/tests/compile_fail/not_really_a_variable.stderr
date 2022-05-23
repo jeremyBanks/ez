@@ -1,5 +1,0 @@
-error[E0425]: cannot find value `N` in this scope
- --> tests/compile_fail/not_really_a_variable.rs:8:24
-  |
-8 |             println!("{N}");
-  |                        ^ help: a local variable with a similar name exists: `n`
