@@ -26,36 +26,36 @@ impl TokenStream {
         self.vec.get(index).cloned()
     }
 
-    pub fn replace(&self, replacements: &impl HashMap<Ident, TokenStream2>) -> TokenStream
+    pub fn replace(&self, replacements: &HashMap<Ident, TokenStream2>) -> TokenStream
     {
-        self.as_ref().replace(replacements).into()
+        self.deref().replace(replacements).into()
     }
 }
 
-pub trait TokenStream2Ext: AsRef<TokenStream2> {}
-impl TokenStream2Ext for TokenStream2 {
-    fn replace<Replacements>(&self, replacements: &impl HashMap<Ident, TokenStream2>) -> TokenStream2 {
+pub trait TokenStream2Ext: Borrow<TokenStream2> {
+    fn replace(&self, replacements: &HashMap<Ident, TokenStream2>) -> TokenStream2 {
         let mut output = TokenStream2::new();
-        for tree in self {
+        for tree in self.borrow() {
             match tree {
                 TokenTree::Ident(ident) =>
                     if let Some(replacement) = replacements.get(&ident) {
                         output.extend(replacement);
                     } else {
-                        output.push(tree);
+                        output.extend(Some(tree));
                     },
                 TokenTree::Group(group) => {
-                    output.push(TokenTree::Group(Group::new(
+                    output.extend(Some(TokenTree::Group(Group::new(
                         group.delimiter(),
                         group.stream().replace(replacements),
-                    )));
+                    ))));
                 }
-                _ => output.push(tree),
+                _ => output.extend(Some(tree)),
             }
         }
         output
     }
 }
+impl TokenStream2Ext for TokenStream2 {}
 
 impl Index<usize> for TokenStream {
     type Output = proc_macro2::TokenTree;
@@ -117,8 +117,11 @@ impl From<TokenStream2> for TokenStream {
 }
 
 impl FromIterator<TokenTree> for TokenStream {
-    fn from_iter(iter: impl IntoIterator<Item = TokenTree>) -> Self {
-        Self::from(Vec::from_iter(iter))
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = TokenTree>,
+    {
+        Self::from(Vec::from_iter(iter.into_iter()))
     }
 }
 

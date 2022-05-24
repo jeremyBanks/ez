@@ -5,7 +5,6 @@ use {
         ext::IdentExt,
         parse::{Parse, ParseStream},
         punctuated::Punctuated,
-        token, Token,
     },
 };
 

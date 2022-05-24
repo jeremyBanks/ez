@@ -11,6 +11,7 @@ pub(crate) use {
         hash::{Hash, Hasher},
         ops::*,
         fmt::{Debug, Display},
+        borrow::Borrow,
     },
     tap::Tap,
 };
@@ -18,11 +19,11 @@ pub(crate) use {
 mod token_stream;
 
 #[proc_macro]
-pub fn doop(input: TokenStream) -> TokenStream {
+pub fn doop(input: TokenStream1) -> TokenStream1 {
     Default::default()
 }
 
 #[proc_macro_attribute]
-pub fn from(mut tokens: TokenStream1, item: TokenStream1) -> TokenStream {
+pub fn from(mut tokens: TokenStream1, item: TokenStream1) -> TokenStream1 {
     Default::default()
 }
