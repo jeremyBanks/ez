@@ -1,18 +1,7 @@
-pub use proc_macro2::{Delimiter, Group, Ident, TokenStream as TokenStream2, TokenTree};
-use {
-    crate::{parse::DoopBlock, tokens::Tokens, *},
-    indexmap::{IndexMap, IndexSet},
-    inherent::inherent,
-    quote::ToTokens,
-    std::{
-        cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd},
-        collections::{BTreeMap, HashMap},
-        hash::{Hash, Hasher},
-        ops::*,
-    },
-    tap::Tap,
-};
+use crate::*;
 
+/// An immutable wrapper around a TokenStream, adding string-based
+/// equality and hashing, and some other useful methods.
 #[derive(Debug, Clone, Default)]
 pub struct TokenStream {
     stream: TokenStream2,
@@ -25,11 +14,22 @@ impl TokenStream {
         self.vec.len()
     }
 
-    pub fn replace(&self, replacements: &Replacements) -> TokenStream
+    pub fn first(&self) -> Option<TokenTree> {
+        self.vec.first().cloned()
+    }
+
+    pub fn last(&self) -> Option<TokenTree> {
+        self.vec.last().cloned()
+    }
+
+    pub fn get(&self, index: usize) -> Option<TokenTree> {
+        self.vec.get(index).cloned()
+    }
+
+    pub fn replace<Replacements>(&self, replacements: &Replacements) -> TokenStream
     where
         Replacements: HashMap<Ident, Replacement>,
-        Replacement: IntoIterator<Item = Tree>,
-        Tree: Into<TokenTree>,
+        Replacement: TokenStream2,
     {
         fn replace2<'a>(input: &TokenStream2, replacements: &Replacements) -> TokenStream2 {
             for mut tree in input {
@@ -53,6 +53,14 @@ impl TokenStream {
         }
 
         replace2(self.as_ref(), replacements).into()
+    }
+}
+
+impl Index<usize> for TokenStream {
+    type Output = proc_macro2::TokenTree;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.vec[index]
     }
 }
 
@@ -124,6 +132,12 @@ impl From<Vec<proc_macro2::TokenTree>> for TokenStream {
 impl Into<TokenStream2> for TokenStream {
     fn into(self) -> TokenStream2 {
         self.stream
+    }
+}
+
+impl Into<Vec<TokenTree>> for TokenStream {
+    fn into(self) -> Vec<TokenTree> {
+        self.vec
     }
 }
 

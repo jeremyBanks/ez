@@ -1,4 +1,3 @@
-use crate::token_stream::TokenStream;
 
 #[derive(Debug, Clone, Default)]
 pub struct TokenStreamList {
