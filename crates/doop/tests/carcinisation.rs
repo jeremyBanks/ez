@@ -82,13 +82,9 @@ static DOOP: _ = {
     }
 
     // and zip can just be
-    for (x, y, z) in (A, B, C) {
-
-    }
+    for (x, y, z) in (A, B, C) {}
     // except i can't cram that into the runtime
-    for (x, y, z) in A / B / C {
-
-    }
+    for (x, y, z) in A / B / C {}
 
     // shoving this all into the runtime would be funny
 
