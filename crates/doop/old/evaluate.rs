@@ -1,9 +1,14 @@
 use {
     crate::{parse::DoopBlock, tokens::Tokens, *},
     indexmap::{IndexMap, IndexSet},
-    proc_macro2::{Group, Ident, TokenStream, TokenTree},
+    proc_macro2::{Group, Ident},
     quote::ToTokens,
+    std::collections::BTreeMap,
+    inherent::inherent,
 };
+
+
+use std::ops::Deref;
 
 pub fn evaluate(input: DoopBlock) -> Result<TokenStream, syn::Error> {
     let mut output = TokenStream::new();

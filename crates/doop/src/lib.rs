@@ -1,8 +1,8 @@
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 
-pub(crate) mod evaluate;
 pub(crate) mod parse;
-pub(crate) mod tokens;
+pub(crate) mod token_stream;
+pub(crate) mod token_stream;
 
 #[proc_macro]
 pub fn doop(input: TokenStream) -> TokenStream {
@@ -13,7 +13,7 @@ pub fn doop(input: TokenStream) -> TokenStream {
         Err(report) => return report.to_compile_error().into(),
     };
 
-    let output: proc_macro2::TokenStream = match evaluate::evaluate(input) {
+    let output: proc_macro2::TokenStream = match token_stream::token_stream(input) {
         Ok(output) => output,
         Err(report) => return report.to_compile_error().into(),
     };
@@ -22,26 +22,6 @@ pub fn doop(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn dooped(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
-    tokens.extend(TokenStream::from(TokenTree::from(Group::new(Delimiter::Brace, item))));
-    doop(tokens)
-}
-
-#[proc_macro_attribute]
-pub fn doopin(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
-    let mut item = Vec::from_iter(item);
-    let block = item.pop().unwrap();
-
-    if let TokenTree::Group(group) = block {
-        tokens.extend(group.stream());
-    } else {
-        panic!("is this a fn?");
-    }
-
-    doop(tokens)
-}
-
-#[proc_macro_attribute]
-pub fn raw(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
+pub fn from(mut tokens: TokenStream, item: TokenStream) -> TokenStream {
     TokenStream::new()
 }
