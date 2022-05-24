@@ -26,33 +26,34 @@ impl TokenStream {
         self.vec.get(index).cloned()
     }
 
-    pub fn replace<Replacements>(&self, replacements: &Replacements) -> TokenStream
-    where
-        Replacements: HashMap<Ident, Replacement>,
-        Replacement: TokenStream2,
+    pub fn replace(&self, replacements: &impl HashMap<Ident, TokenStream2>) -> TokenStream
     {
-        fn replace2<'a>(input: &TokenStream2, replacements: &Replacements) -> TokenStream2 {
-            for mut tree in input {
-                match tree {
-                    TokenTree::Ident(ident) =>
-                        if let Some(replacement) = replacements.get(&ident) {
-                            output.extend(replacement);
-                        } else {
-                            output.push(tree);
-                        },
-                    TokenTree::Group(group) => {
-                        output.push(TokenTree::Group(Group::new(
-                            group.delimiter(),
-                            replace2(&group.stream(), replacements),
-                        )));
-                    }
-                    _ => output.push(tree),
-                }
-            }
-            output
-        }
+        self.as_ref().replace(replacements).into()
+    }
+}
 
-        replace2(self.as_ref(), replacements).into()
+pub trait TokenStream2Ext: AsRef<TokenStream2> {}
+impl TokenStream2Ext for TokenStream2 {
+    fn replace<Replacements>(&self, replacements: &impl HashMap<Ident, TokenStream2>) -> TokenStream2 {
+        let mut output = TokenStream2::new();
+        for tree in self {
+            match tree {
+                TokenTree::Ident(ident) =>
+                    if let Some(replacement) = replacements.get(&ident) {
+                        output.extend(replacement);
+                    } else {
+                        output.push(tree);
+                    },
+                TokenTree::Group(group) => {
+                    output.push(TokenTree::Group(Group::new(
+                        group.delimiter(),
+                        group.stream().replace(replacements),
+                    )));
+                }
+                _ => output.push(tree),
+            }
+        }
+        output
     }
 }
 
