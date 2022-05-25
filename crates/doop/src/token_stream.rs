@@ -1,7 +1,11 @@
+//! For doop's macros, we need to support replacement of an identifier
+//! with an arbitrary token stream, recursively, within another TokenStream.
+//!
+//! We also need frozen TokenStreams that are hashable and comparable, based
+//! on their string representation (spans are ignored).
+
 use crate::*;
 
-/// An immutable wrapper around a TokenStream, adding string-based
-/// equality and hashing, and some other useful methods.
 #[derive(Debug, Clone, Default)]
 pub struct TokenStream {
     stream: TokenStream2,
@@ -10,36 +14,102 @@ pub struct TokenStream {
 }
 
 impl TokenStream {
+    pub fn replace(&self, replacements: &HashMap<Ident, TokenStream2>) -> TokenStream {
+        self.stream().replace(replacements).into()
+    }
+
     pub fn len(&self) -> usize {
         self.vec.len()
     }
 
-    pub fn first(&self) -> Option<TokenTree> {
-        self.vec.first().cloned()
+    pub fn first(&self) -> Option<&TokenTree> {
+        self.vec.first()
     }
 
-    pub fn last(&self) -> Option<TokenTree> {
-        self.vec.last().cloned()
+    pub fn last(&self) -> Option<&TokenTree> {
+        self.vec.last()
     }
 
-    pub fn get(&self, index: usize) -> Option<TokenTree> {
-        self.vec.get(index).cloned()
+    pub fn only(&self) -> Option<&TokenTree> {
+        if self.vec.len() == 1 {
+            self.first()
+        } else {
+            None
+        }
     }
 
-    pub fn replace(&self, replacements: &HashMap<Ident, TokenStream2>) -> TokenStream
-    {
-        self.deref().replace(replacements).into()
+    pub fn get(&self, index: usize) -> Option<&TokenTree> {
+        self.vec.get(index)
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<TokenTree> {
+        self.vec.iter()
+    }
+
+    pub fn vec(&self) -> &Vec<TokenTree> {
+        &self.vec
+    }
+
+    pub fn stream(&self) -> &TokenStream2 {
+        &self.stream
+    }
+
+    pub fn ident(&self) -> Option<&Ident> {
+        self.only().and_then(|tt| tt.ident())
+    }
+
+    pub fn literal(&self) -> Option<&Literal> {
+        self.only().and_then(|tt| tt.literal())
+    }
+
+    pub fn punct(&self) -> Option<&Punct> {
+        self.only().and_then(|tt| tt.punct())
+    }
+
+    pub fn bracketed(&self) -> Option<TokenStream> {
+        self.only().and_then(|tt| tt.bracketed())
+    }
+
+    pub fn braced(&self) -> Option<TokenStream> {
+        self.only().and_then(|tt| tt.braced())
+    }
+
+    pub fn parenthesized(&self) -> Option<TokenStream> {
+        self.only().and_then(|tt| tt.parenthesized())
+    }
+
+    pub fn lines(&self) -> Vec<&[TokenTree]> {
+        let mut result = Vec::new();
+        let mut next_line_start_index = 0;
+        for (i, tt) in self.vec.iter().enumerate() {
+            match tt {
+                TokenTree::Punct(punct) =>
+                    if punct.as_char() == ';' {
+                        result.push(&self.vec[next_line_start_index..=i]);
+                        next_line_start_index = i + 1;
+                    },
+                TokenTree::Group(group) =>
+                    if group.delimiter() == Delimiter::Brace {
+                        result.push(&self.vec[next_line_start_index..=i]);
+                        next_line_start_index = i + 1;
+                    },
+                _ => {}
+            }
+        }
+        result.push(&self.vec[next_line_start_index..]);
+        result
     }
 }
 
-pub trait TokenStream2Ext: Borrow<TokenStream2> {
+impl TokenStream2Ext for TokenStream2 {}
+pub trait TokenStream2Ext: Borrow<TokenStream2> + BorrowMut<TokenStream2> {
     fn replace(&self, replacements: &HashMap<Ident, TokenStream2>) -> TokenStream2 {
         let mut output = TokenStream2::new();
-        for tree in self.borrow() {
-            match tree {
+        for tree in self.borrow().clone() {
+            match &tree {
                 TokenTree::Ident(ident) =>
                     if let Some(replacement) = replacements.get(&ident) {
-                        output.extend(replacement);
+                        output.extend(replacement.clone());
                     } else {
                         output.extend(Some(tree));
                     },
@@ -55,7 +125,6 @@ pub trait TokenStream2Ext: Borrow<TokenStream2> {
         output
     }
 }
-impl TokenStream2Ext for TokenStream2 {}
 
 impl Index<usize> for TokenStream {
     type Output = proc_macro2::TokenTree;
@@ -94,17 +163,15 @@ impl Ord for TokenStream {
     }
 }
 
-impl PartialOrd for TokenStream {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+impl Display for TokenStream {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.string)
     }
 }
 
-impl Deref for TokenStream {
-    type Target = TokenStream2;
-
-    fn deref(&self) -> &TokenStream2 {
-        &self.stream
+impl PartialOrd for TokenStream {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -125,11 +192,19 @@ impl FromIterator<TokenTree> for TokenStream {
     }
 }
 
-impl From<Vec<proc_macro2::TokenTree>> for TokenStream {
-    fn from(vec: Vec<proc_macro2::TokenTree>) -> Self {
-        let stream = vec.iter().cloned().collect();
+impl From<Vec<TokenTree>> for TokenStream {
+    fn from(vec: Vec<TokenTree>) -> Self {
+        let stream = TokenStream2::from_iter(vec.iter().cloned());
         let string = stream.to_string();
         Self { stream, vec, string }
+    }
+}
+
+impl Deref for TokenStream {
+    type Target = TokenStream2;
+
+    fn deref(&self) -> &TokenStream2 {
+        &self.stream
     }
 }
 
@@ -145,8 +220,8 @@ impl Into<Vec<TokenTree>> for TokenStream {
     }
 }
 
-impl AsRef<[proc_macro2::TokenTree]> for TokenStream {
-    fn as_ref(&self) -> &[proc_macro2::TokenTree] {
+impl AsRef<Vec<TokenTree>> for TokenStream {
+    fn as_ref(&self) -> &Vec<TokenTree> {
         &self.vec
     }
 }
@@ -154,5 +229,11 @@ impl AsRef<[proc_macro2::TokenTree]> for TokenStream {
 impl AsRef<TokenStream2> for TokenStream {
     fn as_ref(&self) -> &TokenStream2 {
         &self.stream
+    }
+}
+
+impl AsRef<str> for TokenStream {
+    fn as_ref(&self) -> &str {
+        &self.string
     }
 }

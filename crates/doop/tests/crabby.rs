@@ -1,14 +1,5 @@
-mod DOOP {
-    // if runtime representation enabled (lol) then do something like this?
-    pub static my_types: [TokenStream] = TokenStream;
-
-    // it would make the identifier spans through to something, heh.
-
-    // these would export the same types as are used internally
-}
-
-#[doop::oop]
-static DOOP: _ = {
+#[doop::from]
+static DOOP: ! = {
     // defaults to [TokenStream]
     let my_types: [TokenStream] = [T];
     let my_types: _ = my_type;
@@ -105,6 +96,6 @@ static DOOP: _ = {
     };
 
     {
-        output
+        println!("output");
     }
 };

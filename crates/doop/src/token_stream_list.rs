@@ -1,3 +1,17 @@
+//! For doop's macros, we need to allow various set-like operations on
+//! lists of TokenStreams. (They're not sets: order and duplicates are
+//! generally preserved.) The main operations are:
+//!
+//! - `L + R`: extend, creates a list containing all elements of `L` followed by
+//!   all elements of `R`.
+//! - `L | R`: union, creates a list containing all elements of `L` followed by
+//!   all elements of `R` which were not already in `L`.
+//! - `L & R`: intersection, creates a list containing all elements of `L` which
+//!   are also in `R`.
+//! - `L - R`: removal, creates a list containing all elements of `L` which are
+//!   not in `R`.
+
+use crate::*;
 
 #[derive(Debug, Clone, Default)]
 pub struct TokenStreamList {
@@ -8,53 +22,28 @@ impl TokenStreamList {
     pub fn len(&self) -> usize {
         self.vec.len()
     }
-}
 
-impl AddAssign for TokenStreamList {
-    fn add_assign(&mut self, other: &Vec<TokenStreamList>) {
-        self.vec.extend(other.clone());
+    pub fn extend(&mut self, other: &TokenStreamList) {
+        self.vec.extend(other.vec.iter().cloned())
     }
-}
 
-impl BitOrAssign for TokenStreamList {
-    fn bitor_assign(&mut self, other: &Vec<TokenStreamList>) {
-        let self_set = HashSet::from(self.vec.vec.iter());
-        self.vec.extend(other.filter(|stream| !self_set.contains(stream)));
+    pub fn union(&mut self, other: &TokenStreamList) {
+        let set: HashSet<TokenStream> = self.vec.iter().cloned().collect();
+        for item in other.vec.iter() {
+            if !set.contains(item) {
+                self.vec.push(item.clone());
+            }
+        }
     }
-}
 
-impl SubAssign for TokenStreamList {
-    fn sub_assign(&mut self, other: &Vec<TokenStreamList>) {
-        let other_set = HashSet::from_iter(other_set);
-        self.vec.retain(|stream| !other_set.contains(stream));
+    pub fn intersect(&mut self, other: &TokenStreamList) {
+        let set: HashSet<&TokenStream> = other.vec.iter().collect();
+        self.vec.retain(|item| set.contains(item));
     }
-}
 
-impl BitAndAssign for TokenStreamList {
-    fn bitand_assign(&mut self, other_set: &Vec<TokenStreamList>) {
-        let other_set = HashSet::from_iter(other_set);
-        self.vec.retain(|stream| other_set.contains(stream));
-    }
-}
-
-impl Add for TokenStreamList {
-    fn add(&self, other: &Vec<TokenStreamList>) -> Vec<TokenStreamList> {
-        self.vec.clone().tap_mut(|vec| vec.add_assign(other))
-    }
-}
-impl Sub for TokenStreamList {
-    fn sub(&mut self, stream: Vec<TokenStreamList>) -> Vec<TokenStreamList> {
-        self.vec.clone().tap_mut(|vec| vec.sub_assign(other))
-    }
-}
-impl BitAnd for TokenStreamList {
-    fn bitand(&self, other: &Vec<TokenStreamList>) -> Vec<TokenStreamList> {
-        self.vec.clone().tap_mut(|vec| vec.bitand_assign(other))
-    }
-}
-impl BitOr for TokenStream {
-    fn bitor(&mut self, other: &Vec<TokenStream>) -> Vec<TokenStream> {
-        self.vec.clone().tap_mut(|vec| vec.bitor_assign(other))
+    pub fn remove(&mut self, other: &TokenStreamList) {
+        let set: HashSet<&TokenStream> = other.vec.iter().collect();
+        self.vec.retain(|item| !set.contains(item));
     }
 }
 
@@ -64,6 +53,11 @@ impl From<Vec<TokenStream>> for TokenStreamList {
     }
 }
 
+impl Into<Vec<TokenStream>> for TokenStreamList {
+    fn into(self) -> Vec<TokenStream> {
+        self.vec
+    }
+}
 
 impl Deref for TokenStreamList {
     type Target = Vec<TokenStream>;
@@ -79,3 +73,54 @@ impl AsRef<[TokenStream]> for TokenStreamList {
     }
 }
 
+impl AddAssign<&TokenStreamList> for TokenStreamList {
+    fn add_assign(&mut self, other: &TokenStreamList) {
+        self.extend(other)
+    }
+}
+
+impl SubAssign<&TokenStreamList> for TokenStreamList {
+    fn sub_assign(&mut self, other: &TokenStreamList) {
+        self.remove(other)
+    }
+}
+
+impl BitAndAssign<&TokenStreamList> for TokenStreamList {
+    fn bitand_assign(&mut self, other: &TokenStreamList) {
+        self.intersect(other)
+    }
+}
+
+impl BitOrAssign<&TokenStreamList> for TokenStreamList {
+    fn bitor_assign(&mut self, other: &TokenStreamList) {
+        self.union(other)
+    }
+}
+
+impl Add for &TokenStreamList {
+    type Output = TokenStreamList;
+    fn add(self, other: &TokenStreamList) -> TokenStreamList {
+        self.clone().tap_mut(|result| *result += other)
+    }
+}
+
+impl Sub for &TokenStreamList {
+    type Output = TokenStreamList;
+    fn sub(self, other: &TokenStreamList) -> TokenStreamList {
+        self.clone().tap_mut(|result| *result -= other)
+    }
+}
+
+impl BitAnd for &TokenStreamList {
+    type Output = TokenStreamList;
+    fn bitand(self, other: &TokenStreamList) -> TokenStreamList {
+        self.clone().tap_mut(|result| *result &= other)
+    }
+}
+
+impl BitOr for &TokenStreamList {
+    type Output = TokenStreamList;
+    fn bitor(self, other: &TokenStreamList) -> TokenStreamList {
+        self.clone().tap_mut(|result| *result |= other)
+    }
+}
