@@ -96,6 +96,9 @@ static DOOP: ! = {
     };
 
     {
-        println!("output");
+        #[test]
+        pub fn main() {
+            println!("output");
+        }
     }
 };

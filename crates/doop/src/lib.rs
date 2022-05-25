@@ -37,11 +37,12 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
         if line.is_empty() || line.punct().map(|punct| punct.as_char()) == Some(';') {
             println!("skipping empty: {line}");
         } else if let Some(braced) = line.braced() {
+            println!("EMITTING: {braced}");
             output.extend(braced);
         } else if let Some(ident) = line.first().and_then(TokenTree::ident) {
             println!("KEYWORD {ident}")
         } else {
-            println!("EMIT! {line}")
+            println!("UNEXPECTED! {line}")
         }
     }
 
