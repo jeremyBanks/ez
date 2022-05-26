@@ -1,6 +1,6 @@
 #[test]
 pub fn main() {
-    #[doop::from]
+    #[doop::block]
     static DOOP: ! = {
         // defaults to [TokenStream]
         let my_types: [TokenStream] = [T];

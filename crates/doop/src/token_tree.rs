@@ -34,7 +34,7 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
         }
     }
 
-    fn braced(&self) -> Option<TokenStream> {
+    fn braced(&self) -> Option<Tokens> {
         let group = self.group()?;
         if group.delimiter() == Delimiter::Brace {
             Some(group.stream().into())
@@ -43,7 +43,7 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
         }
     }
 
-    fn bracketed(&self) -> Option<TokenStream> {
+    fn bracketed(&self) -> Option<Tokens> {
         let group = self.group()?;
         if group.delimiter() == Delimiter::Brace {
             Some(group.stream().into())
@@ -52,7 +52,7 @@ pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
         }
     }
 
-    fn parenthesized(&self) -> Option<TokenStream> {
+    fn parenthesized(&self) -> Option<Tokens> {
         let group = self.group()?;
         if group.delimiter() == Delimiter::Parenthesis {
             Some(group.stream().into())

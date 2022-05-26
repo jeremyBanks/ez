@@ -1,10 +1,11 @@
 mod token_stream;
-mod token_stream_list;
 mod token_tree;
+mod tokens;
+mod tokens_list;
 
 #[allow(unused)]
 pub(crate) use {
-    crate::{token_stream::*, token_stream_list::*, token_tree::*},
+    crate::{token_stream::*, token_tree::*, tokens::*, tokens_list::*},
     indexmap::{IndexMap, IndexSet},
     inherent::inherent,
     itertools::Itertools,
@@ -24,13 +25,14 @@ pub(crate) use {
     tap::Tap,
 };
 
+/// A macro for local code duplication in Rust.
 #[proc_macro]
 pub fn doop(input: TokenStream1) -> TokenStream1 {
-    let input = TokenStream::from(TokenStream2::from(input));
+    let input = Tokens::from(TokenStream2::from(input));
     let mut output = TokenStream2::new();
 
-    for line in input.lines() {
-        let line = TokenStream::from_iter(line.into_iter().cloned());
+    for line in input.split_lines() {
+        let line = Tokens::from_iter(line.into_iter().cloned());
 
         if line.is_empty() || line.punct().map(|punct| punct.as_char()) == Some(';') {
             println!("skipping empty: {line}");
@@ -47,20 +49,85 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
     output.into()
 }
 
+/// Evaluates the contents of the next braced expression as though it was the
+/// body of a [`doop!`] macro invocation. Any other tokens on the line are
+/// discarded. This is more syntactically limited than using the macro directly
+/// because your item needs to parse as a typical valid Rust item, even if we're
+/// interpreting it directly. However, in return we get rustfmt support, which
+/// is often nonexistent for non-attribute macro invocations.
+///
+/// ```rust
+/// #[doop::block]
+/// static DOOP: ! = {
+///     for Name in [Foo, Bar] {
+///         struct Name;
+///     }
+/// };
+/// ```
+///
+/// If you need to use some tokens that are not valid Rust syntax, you can
+/// "escape" them by using the `Tokens!()` macro. (This is only accepted in
+/// location where a `Tokens` value is expected.) Here's an example case:
+///
+/// ```rust
+/// #[doop::block]
+/// static LIFETIMES: ! = {
+///     const LIFETIME = Tokens!(static);
+///     {
+///        struct LifeBytes(&'LIFETIME Vec<u8>);
+///     }
+/// };
+/// ```
+///
+/// Equivalent to:
+///
+/// ```rust
+/// # use doop::doop;
+/// doop! {
+///    const LIFETIME = static;
+///    {
+///        struct LifeBytes(&'LIFETIME Vec<u8>);
+///    }
+/// }
+/// ```
+///
+/// Equivalent to:
+///
+/// ```rust
+/// #[doop::item(const LIFETIME = static)]
+/// struct LifeBytes(&'LIFETIME Vec<u8>);
+/// ```
 #[proc_macro_attribute]
-pub fn from(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
+pub fn block(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
     assert!(attribute.is_empty(), "no attribute arguments expected");
-    let input = TokenStream::from(TokenStream2::from(item));
+    let input = Tokens::from(TokenStream2::from(item));
 
     let braced = input.iter().flat_map(TokenTree::braced).collect_vec();
     assert_eq!(braced.len(), 1, "expected exactly one braced block in item statement");
 
-    doop(TokenStream2::from(braced[0].clone()).into())
+    let block = braced[0].clone();
+
+    doop(TokenStream2::from(block).into())
 }
 
+/// Duplicates a single item in the manner of the [`doop!`] macro,
+/// using a `for` expression as the attribute argument.
+///
+/// ```rust
+/// #[doop::item(for Name in [Foo, Bar])]
+/// struct Name;
+///
+/// let _: (Foo, Bar);
+/// ```
 #[proc_macro_attribute]
 pub fn item(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
-    assert!(attribute.is_empty(), "no attribute arguments expected");
+    let attribute = TokenStream2::from(attribute);
+    let item = TokenStream2::from(item);
 
-    doop(item)
+    let mut input = TokenStream2::new();
+    input.extend(attribute);
+    let group = Group::new(Delimiter::Brace, item);
+    input.extend(Some(TokenTree::Group(group)));
+
+    doop(TokenStream1::from(input))
 }
