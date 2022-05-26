@@ -25,8 +25,8 @@ pub(crate) use {
     tap::Tap,
 };
 
-/// A macro for local code duplication in Rust.
 #[proc_macro]
+/// A macro for local code duplication in Rust.
 pub fn doop(input: TokenStream1) -> TokenStream1 {
     let input = Tokens::from(TokenStream2::from(input));
     let mut output = TokenStream2::new();
@@ -49,6 +49,7 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
     output.into()
 }
 
+#[proc_macro_attribute]
 /// Evaluates the contents of the next braced expression as though it was the
 /// body of a [`doop!`] macro invocation. Any other tokens on the line are
 /// discarded. This is more syntactically limited than using the macro directly
@@ -97,7 +98,6 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
 /// #[doop::item(const LIFETIME = static)]
 /// struct LifeBytes(&'LIFETIME Vec<u8>);
 /// ```
-#[proc_macro_attribute]
 pub fn block(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
     assert!(attribute.is_empty(), "no attribute arguments expected");
     let input = Tokens::from(TokenStream2::from(item));
@@ -110,6 +110,7 @@ pub fn block(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
     doop(TokenStream2::from(block).into())
 }
 
+#[proc_macro_attribute]
 /// Duplicates a single item in the manner of the [`doop!`] macro,
 /// using a `for` expression as the attribute argument.
 ///
@@ -119,7 +120,6 @@ pub fn block(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
 ///
 /// let _: (Foo, Bar);
 /// ```
-#[proc_macro_attribute]
 pub fn item(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let attribute = TokenStream2::from(attribute);
     let item = TokenStream2::from(item);
