@@ -667,6 +667,8 @@ dependencies = [
  "eyre",
  "indexmap",
  "inherent",
+ "itertools",
+ "paste",
  "proc-macro2",
  "quote",
  "static_assertions",

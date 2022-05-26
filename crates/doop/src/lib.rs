@@ -7,6 +7,7 @@ pub(crate) use {
     crate::{token_stream::*, token_stream_list::*, token_tree::*},
     indexmap::{IndexMap, IndexSet},
     inherent::inherent,
+    itertools::Itertools,
     proc_macro::TokenStream as TokenStream1,
     proc_macro2::{
         Delimiter, Group, Ident, Literal, Punct, TokenStream as TokenStream2, TokenTree,
@@ -28,10 +29,7 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
     let input = TokenStream::from(TokenStream2::from(input));
     let mut output = TokenStream2::new();
 
-    let braced: Vec<_> = input.iter().flat_map(|tree| tree.braced()).collect();
-    assert_eq!(braced.len(), 1, "expected exactly one braced block in item statement");
-
-    for line in braced[0].lines() {
+    for line in input.lines() {
         let line = TokenStream::from_iter(line.into_iter().cloned());
 
         if line.is_empty() || line.punct().map(|punct| punct.as_char()) == Some(';') {
@@ -51,6 +49,17 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
 
 #[proc_macro_attribute]
 pub fn from(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
+    assert!(attribute.is_empty(), "no attribute arguments expected");
+    let input = TokenStream::from(TokenStream2::from(item));
+
+    let braced = input.iter().flat_map(TokenTree::braced).collect_vec();
+    assert_eq!(braced.len(), 1, "expected exactly one braced block in item statement");
+
+    doop(TokenStream2::from(braced[0].clone()).into())
+}
+
+#[proc_macro_attribute]
+pub fn item(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
     assert!(attribute.is_empty(), "no attribute arguments expected");
 
     doop(item)

@@ -208,15 +208,15 @@ impl Deref for TokenStream {
     }
 }
 
-impl Into<TokenStream2> for TokenStream {
-    fn into(self) -> TokenStream2 {
-        self.stream
+impl From<TokenStream> for TokenStream2 {
+    fn from(val: TokenStream) -> Self {
+        val.stream
     }
 }
 
-impl Into<Vec<TokenTree>> for TokenStream {
-    fn into(self) -> Vec<TokenTree> {
-        self.vec
+impl From<TokenStream> for Vec<TokenTree> {
+    fn from(val: TokenStream) -> Self {
+        val.vec
     }
 }
 
