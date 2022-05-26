@@ -1,11 +1,6 @@
-//! For doop's macros, we need to support replacement of an identifier
-//! with an arbitrary token stream, recursively, within another TokenStream.
-//!
-//! We also need frozen TokenStreams that are hashable and comparable, based
-//! on their string representation (spans are ignored).
-
 use crate::*;
 
+/// A frozen, hashable, orderable list of [`TokenTree`]s.
 #[derive(Debug, Clone, Default)]
 pub struct Tokens {
     stream: TokenStream2,

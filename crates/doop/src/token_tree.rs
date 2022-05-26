@@ -1,5 +1,6 @@
 use crate::*;
 
+/// Extension trait to make it more convenient to use [`TokenTree`], particularly in combination with our [`Tokens`] type.
 impl TokenTreeExt for TokenTree {}
 pub trait TokenTreeExt: Borrow<TokenTree> + BorrowMut<TokenTree> {
     fn group(&self) -> Option<&Group> {

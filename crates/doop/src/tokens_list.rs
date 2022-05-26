@@ -1,5 +1,5 @@
 //! For doop's macros, we need to allow various set-like operations on
-//! lists of TokenStreams. (They're not sets: order and duplicates are
+//! lists of Tokens. (They're not sets: order and duplicates are
 //! generally preserved.) The main operations are:
 //!
 //! - `L + R`: extend, creates a list containing all elements of `L` followed by
