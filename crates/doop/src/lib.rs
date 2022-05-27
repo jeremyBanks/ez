@@ -9,8 +9,8 @@ mod tokens_list;
 pub(crate) use {
     crate::{span::*, token_stream::*, token_tree::*, tokens::*, tokens_list::*},
     indexmap::{IndexMap, IndexSet},
-    inherent::inherent,
     itertools::Itertools,
+    once_cell::unsync::OnceCell,
     proc_macro::TokenStream as TokenStream1,
     proc_macro2::{
         Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream as TokenStream2,
@@ -106,7 +106,13 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
 /// struct LifeBytes(&'LIFETIME Vec<u8>);
 /// ```
 pub fn block(attribute: TokenStream1, item: TokenStream1) -> TokenStream1 {
-    assert!(attribute.is_empty(), "no attribute arguments expected");
+    let attribute = TokenStream2::from(attribute);
+    let item = TokenStream2::from(item);
+
+    if let Some(first) = attribute.into_iter().next() {
+        return first.error("no arguments expected for doop::block attribute macro");
+    }
+
     let input = Tokens::from(TokenStream2::from(item));
 
     let braced = input.iter().flat_map(TokenTree::braced).collect_vec();

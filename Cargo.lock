@@ -668,6 +668,7 @@ dependencies = [
  "indexmap",
  "inherent",
  "itertools",
+ "once_cell",
  "paste",
  "proc-macro2",
  "quote",
