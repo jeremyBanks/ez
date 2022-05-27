@@ -8,6 +8,10 @@ pub struct Tokens {
     string: String,
 }
 
+macro_rules! Tokens {
+    ($($tt:tt)*) => ($($tt)*)
+}
+
 impl Tokens {
     pub fn replace(&self, replacements: &HashMap<Ident, TokenStream2>) -> Tokens {
         self.stream().replace(replacements).into()

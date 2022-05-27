@@ -1,5 +1,15 @@
 #[test]
 pub fn main() {
+    // The macro supports syntax that would be illegal in normal Rust syntax:
+    doop::doop! {
+        for A in [0, 1]
+        for B in [2, 4] {
+            println!("{} {}", A, B);
+        }
+
+        type my_values: [TokenStream] = [1, 2, 3];
+    }
+
     #[doop::block]
     static DOOP: ! = {
         // defaults to [TokenStream]
@@ -50,10 +60,6 @@ pub fn main() {
         let static_lifetime: TokenStream = TokenStream!('static);
         type static_lifetime: TokenStream = TokenStream!(Lifetime static);
         type static_lifetime: TokenStream = Any + 'static;
-
-        trait static_lifetime: TokenStream {
-            TokenStream!(Lifetime static);
-        }
 
         let static_lifetime = TokenStream!('static ;);
 

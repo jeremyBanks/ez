@@ -1,17 +1,20 @@
+#![allow(unused)]
+
+mod span;
 mod token_stream;
 mod token_tree;
 mod tokens;
 mod tokens_list;
 
-#[allow(unused)]
 pub(crate) use {
-    crate::{token_stream::*, token_tree::*, tokens::*, tokens_list::*},
+    crate::{span::*, token_stream::*, token_tree::*, tokens::*, tokens_list::*},
     indexmap::{IndexMap, IndexSet},
     inherent::inherent,
     itertools::Itertools,
     proc_macro::TokenStream as TokenStream1,
     proc_macro2::{
-        Delimiter, Group, Ident, Literal, Punct, TokenStream as TokenStream2, TokenTree,
+        Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream as TokenStream2,
+        TokenTree,
     },
     quote::ToTokens,
     std::{
@@ -35,12 +38,19 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
         let line = Tokens::from_iter(line.into_iter().cloned());
 
         if line.is_empty() || line.punct().map(|punct| punct.as_char()) == Some(';') {
-            println!("skipping empty: {line}");
+            // ignore empty lines
         } else if let Some(braced) = line.braced() {
             println!("EMITTING: {braced}");
             output.extend(braced);
         } else if let Some(ident) = line.first().and_then(TokenTree::ident) {
-            println!("KEYWORD {ident}")
+            match ident.to_string().as_str() {
+                "let" => 2,
+                "type" => 2,
+                "const" => 2,
+                "static" => 2,
+                "for" => 4,
+                other => return ident.span().error("unrecognized keyword"),
+            };
         } else {
             println!("UNEXPECTED! {line}")
         }
@@ -67,8 +77,8 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
 /// ```
 ///
 /// If you need to use some tokens that are not valid Rust syntax, you can
-/// "escape" them by using the `Tokens!()` macro. (This is only accepted in
-/// location where a `Tokens` value is expected.) Here's an example case:
+/// "escape" them by using the `Tokens!()` pseudo-macro. (This is only accepted
+/// in location where a `Tokens` value is expected.) Here's an example case:
 ///
 /// ```rust
 /// #[doop::block]
