@@ -40,19 +40,18 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
         if line.is_empty() || line.punct().map(|punct| punct.as_char()) == Some(';') {
             // ignore empty lines
         } else if let Some(braced) = line.braced() {
-            println!("EMITTING: {braced}");
             output.extend(braced);
         } else if let Some(ident) = line.first().and_then(TokenTree::ident) {
             match ident.to_string().as_str() {
-                "let" => 2,
-                "type" => 2,
-                "const" => 2,
-                "static" => 2,
-                "for" => 4,
-                other => return ident.span().error("unrecognized keyword"),
+                "let" => println!("TODO: let {line}"),
+                "type" => println!("TODO: type {line}"),
+                "const" => println!("TODO: const {line}"),
+                "static" => println!("TODO: static {line}"),
+                "for" => println!("TODO: for {line}"),
+                _ => return ident.error("unrecognized keyword"),
             };
         } else {
-            println!("UNEXPECTED! {line}")
+            return line.error("expected keyword or braced block");
         }
     }
 
