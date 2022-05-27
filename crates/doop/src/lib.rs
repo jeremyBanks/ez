@@ -43,11 +43,9 @@ pub fn doop(input: TokenStream1) -> TokenStream1 {
             output.extend(braced);
         } else if let Some(ident) = line.first().and_then(TokenTree::ident) {
             match ident.to_string().as_str() {
-                "let" => println!("TODO: let {line}"),
-                "type" => println!("TODO: type {line}"),
-                "const" => println!("TODO: const {line}"),
-                "static" => println!("TODO: static {line}"),
-                "for" => println!("TODO: for {line}"),
+                "let" | "static" => println!("TODO: [Tokens] slice assignment: {line}"),
+                "type" | "const" => println!("TODO: Tokens assignment: {line}"),
+                "for" => println!("TODO: FOR LOOPS {line}"),
                 _ => return ident.error("unrecognized keyword"),
             };
         } else {

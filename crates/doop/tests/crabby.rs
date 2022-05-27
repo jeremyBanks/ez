@@ -61,9 +61,9 @@ pub fn main() {
         type static_lifetime: TokenStream = TokenStream!(Lifetime static);
         type static_lifetime: TokenStream = Any + 'static;
 
-        2;
+        // 2;
 
-        "test";
+        // "test";
 
         let static_lifetime = TokenStream!('static ;);
 
