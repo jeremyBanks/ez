@@ -3,45 +3,28 @@ use crate::*;
 /// A frozen list of tokens.
 #[derive(Debug, Clone)]
 pub struct Tokens {
+    only: OnceCell<TokenTree>,
     stream: OnceCell<TokenStream2>,
-    only_tree: OnceCell<TokenTree>,
     vec: OnceCell<Vec<TokenTree>>,
     string: OnceCell<String>,
 }
 
 impl Tokens {
     pub fn new() -> Tokens {
-        Tokens::from_members(None, Some(Vec::new()), Some(String::new()))
-    }
-
-    fn from_members(
-        stream: Option<TokenStream2>,
-        vec: Option<Vec<TokenTree>>,
-        string: Option<String>,
-    ) -> Tokens {
         Tokens {
-            stream: stream.map(OnceCell::with_value).unwrap_or_else(OnceCell::new),
-            vec: vec.map(OnceCell::with_value).unwrap_or_else(OnceCell::new),
-            string: string.map(OnceCell::with_value).unwrap_or_else(OnceCell::new),
+            only: OnceCell::new(),
+            stream: OnceCell::new(),
+            vec: OnceCell::with_value(Vec::new()),
+            string: OnceCell::new(),
         }
     }
 
-    fn members(&self) -> (Option<&TokenStream2>, Option<&Vec<TokenTree>>, Option<&String>) {
-        (self.stream.get(), self.vec.get(), self.string.get())
-    }
-
-    fn mut_members(
-        &mut self,
-    ) -> (Option<&mut TokenStream2>, Option<&mut Vec<TokenTree>>, Option<&mut String>) {
-        (self.stream.get_mut(), self.vec.get_mut(), self.string.get_mut())
-    }
-
-    fn into_members(self) -> (Option<TokenStream2>, Option<Vec<TokenTree>>, Option<String>) {
-        (self.stream.into_inner(), self.vec.into_inner(), self.string.into_inner())
+    fn extend(&mut self, rhs: impl Into<Tokens>) {
+        self += rhs;
     }
 }
 
-impl<T: Into<Tokens>> AddAssign<T> for Tokens {
+impl<T: Into<Tokens>> AddAssign<T> for &mut Tokens {
     fn add_assign(&mut self, rhs: T) {
         let rhs = rhs.into();
         self.string = OnceCell::new();
@@ -90,6 +73,16 @@ impl Tokens {
     pub fn into_stream(self) -> TokenStream2 {
         self.stream();
         self.stream.into_inner().unwrap()
+    }
+}
+
+impl Tokens {
+    pub fn only(&self) -> Option<&TokenTree> {
+        if self.len() == 1 {
+            self.first()
+        } else {
+            None
+        }
     }
 }
 
@@ -219,14 +212,6 @@ impl Tokens {
 
     pub fn last(&self) -> Option<&TokenTree> {
         self.vec().last()
-    }
-
-    pub fn only(&self) -> Option<&TokenTree> {
-        if self.len() == 1 {
-            self.first()
-        } else {
-            None
-        }
     }
 
     pub fn get(&self, index: usize) -> Option<&TokenTree> {
@@ -366,7 +351,6 @@ impl FromIterator<TokenTree> for Tokens {
     }
 }
 
-// TODO: impl From for TokenTree and each of its variants
 impl From<TokenTree> for Tokens {
     fn from(token: TokenTree) -> Self {
         Tokens::from_iter(Some(token))
@@ -396,4 +380,3 @@ impl From<Literal> for Tokens {
         Tokens::from_iter(Some(TokenTree::Literal(literal)))
     }
 }
-
