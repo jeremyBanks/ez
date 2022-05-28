@@ -1,45 +1,25 @@
 use crate::*;
 
-/// A frozen list of tokens.
+/// Convenience wrapper for a list of one or more [`TokenTree`]s.
 #[derive(Debug, Clone)]
 pub struct Tokens {
-    only: OnceCell<TokenTree>,
-    stream: OnceCell<TokenStream2>,
+    // At least one of `tree`, `stream`, or `vec` must always be non-empty.
+    // Other fields will be lazily initialized the first time they're needed,
+    // or cleared out if any changes are made.
+    tree: OnceCell<Option<TokenTree>>,
+    stream: OnceCell<TokenStream>,
     vec: OnceCell<Vec<TokenTree>>,
     string: OnceCell<String>,
 }
 
 impl Tokens {
+    /// Creates a new, empty, list.
     pub fn new() -> Tokens {
         Tokens {
-            only: OnceCell::new(),
+            tree: OnceCell::new(),
             stream: OnceCell::new(),
             vec: OnceCell::with_value(Vec::new()),
             string: OnceCell::new(),
-        }
-    }
-
-    fn extend(&mut self, rhs: impl Into<Tokens>) {
-        self += rhs;
-    }
-}
-
-impl<T: Into<Tokens>> AddAssign<T> for &mut Tokens {
-    fn add_assign(&mut self, rhs: T) {
-        let rhs = rhs.into();
-        self.string = OnceCell::new();
-        match self.mut_members() {
-            (None, Some(vec), _) => {
-                vec.extend(rhs.into_iter());
-            }
-            (Some(stream), None, _) => {
-                stream.extend(rhs.into_iter());
-            }
-            (Some(stream), Some(vec), _) => {
-                stream.extend(rhs.clone().into_iter());
-                vec.extend(rhs.into_iter());
-            }
-            _ => unreachable!(),
         }
     }
 }
@@ -51,26 +31,28 @@ impl Default for Tokens {
 }
 
 impl Tokens {
-    pub fn from_stream(stream: impl Into<TokenStream2>) -> Tokens {
+    pub fn from_stream(stream: impl Into<TokenStream>) -> Tokens {
         Tokens {
+            tree: OnceCell::new(),
             stream: OnceCell::with_value(stream.into()),
             vec: OnceCell::new(),
             string: OnceCell::new(),
         }
     }
 
-    pub fn stream(&self) -> &TokenStream2 {
+    pub fn stream(&self) -> &TokenStream {
         self.stream.get_or_init(|| self.vec().iter().cloned().collect())
     }
 
-    pub fn mut_stream(&mut self) -> &mut TokenStream2 {
+    pub fn mut_stream(&mut self) -> &mut TokenStream {
         self.stream();
+        self.tree = OnceCell::new();
         self.vec = OnceCell::new();
         self.string = OnceCell::new();
         self.stream.get_mut().unwrap()
     }
 
-    pub fn into_stream(self) -> TokenStream2 {
+    pub fn into_stream(self) -> TokenStream {
         self.stream();
         self.stream.into_inner().unwrap()
     }
@@ -86,26 +68,26 @@ impl Tokens {
     }
 }
 
-impl From<Tokens> for TokenStream2 {
-    fn from(tokens: Tokens) -> TokenStream2 {
+impl From<Tokens> for TokenStream {
+    fn from(tokens: Tokens) -> TokenStream {
         tokens.into_stream()
     }
 }
 
-impl AsRef<TokenStream2> for Tokens {
-    fn as_ref(&self) -> &TokenStream2 {
+impl AsRef<TokenStream> for Tokens {
+    fn as_ref(&self) -> &TokenStream {
         self.stream()
     }
 }
 
-impl AsMut<TokenStream2> for Tokens {
-    fn as_mut(&mut self) -> &mut TokenStream2 {
+impl AsMut<TokenStream> for Tokens {
+    fn as_mut(&mut self) -> &mut TokenStream {
         self.mut_stream()
     }
 }
 
-impl From<TokenStream2> for Tokens {
-    fn from(stream: TokenStream2) -> Tokens {
+impl From<TokenStream> for Tokens {
+    fn from(stream: TokenStream) -> Tokens {
         Tokens::from_stream(stream)
     }
 }
@@ -158,7 +140,7 @@ impl From<Vec<TokenTree>> for Tokens {
 
 impl Tokens {
     pub fn from_string(string: &str) -> Tokens {
-        Tokens::from_stream(string.parse::<TokenStream2>().unwrap())
+        Tokens::from_stream(string.parse::<TokenStream>().unwrap())
     }
 
     pub fn string(&self) -> &String {
@@ -198,7 +180,7 @@ impl Tokens {
         }
     }
 
-    pub fn replace(&self, replacements: &HashMap<Ident, TokenStream2>) -> Tokens {
+    pub fn replace(&self, replacements: &HashMap<Ident, TokenStream>) -> Tokens {
         self.stream().replace(replacements).into()
     }
 
@@ -378,5 +360,31 @@ impl From<Ident> for Tokens {
 impl From<Literal> for Tokens {
     fn from(literal: Literal) -> Self {
         Tokens::from_iter(Some(TokenTree::Literal(literal)))
+    }
+}
+
+impl<T: Into<Tokens>> AddAssign<T> for &mut Tokens {
+    fn add_assign(&mut self, rhs: T) {
+        let rhs = rhs.into();
+        self.string = OnceCell::new();
+        match self.mut_members() {
+            (None, Some(vec), _) => {
+                vec.extend(rhs.into_iter());
+            }
+            (Some(stream), None, _) => {
+                stream.extend(rhs.into_iter());
+            }
+            (Some(stream), Some(vec), _) => {
+                stream.extend(rhs.clone().into_iter());
+                vec.extend(rhs.into_iter());
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Tokens {
+    fn extend(&mut self, rhs: impl Into<Tokens>) {
+        self += rhs;
     }
 }

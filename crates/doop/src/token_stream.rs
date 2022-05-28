@@ -1,13 +1,13 @@
 use crate::*;
 
-impl TokenStream2Ext for TokenStream2 {}
-pub trait TokenStream2Ext: Borrow<TokenStream2> + BorrowMut<TokenStream2> {
-    fn replace(&self, replacements: &HashMap<Ident, TokenStream2>) -> TokenStream2 {
-        let mut output = TokenStream2::new();
+impl TokenStreamExt for TokenStream {}
+pub trait TokenStreamExt: Borrow<TokenStream> + BorrowMut<TokenStream> {
+    fn replace(&self, replacements: &HashMap<String, TokenStream>) -> TokenStream {
+        let mut output = TokenStream::new();
         for tree in self.borrow().clone() {
             match &tree {
                 TokenTree::Ident(ident) =>
-                    if let Some(replacement) = replacements.get(&ident) {
+                    if let Some(replacement) = replacements.get(&ident.to_string()) {
                         output.extend(replacement.clone());
                     } else {
                         output.extend(Some(tree));

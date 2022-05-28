@@ -100,27 +100,35 @@ impl BitOrAssign<&TokensList> for TokensList {
 impl Add for &TokensList {
     type Output = TokensList;
     fn add(self, other: &TokensList) -> TokensList {
-        self.clone().tap_mut(|result| *result += other)
+        let mut result = self.clone();
+        result += other;
+        result
     }
 }
 
 impl Sub for &TokensList {
     type Output = TokensList;
     fn sub(self, other: &TokensList) -> TokensList {
-        self.clone().tap_mut(|result| *result -= other)
+        let mut result = self.clone();
+        result -= other;
+        result
     }
 }
 
 impl BitAnd for &TokensList {
     type Output = TokensList;
     fn bitand(self, other: &TokensList) -> TokensList {
-        self.clone().tap_mut(|result| *result &= other)
+        let mut result = self.clone();
+        result &= other;
+        result
     }
 }
 
 impl BitOr for &TokensList {
     type Output = TokensList;
     fn bitor(self, other: &TokensList) -> TokensList {
-        self.clone().tap_mut(|result| *result |= other)
+        let mut result = self.clone();
+        result |= other;
+        result
     }
 }
