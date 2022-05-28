@@ -4,12 +4,13 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub struct Tokens {
     stream: OnceCell<TokenStream2>,
+    only_tree: OnceCell<TokenTree>,
     vec: OnceCell<Vec<TokenTree>>,
     string: OnceCell<String>,
 }
 
 impl Tokens {
-    pub fn new() -> Self {
+    pub fn new() -> Tokens {
         Tokens::from_members(None, Some(Vec::new()), Some(String::new()))
     }
 
@@ -17,7 +18,7 @@ impl Tokens {
         stream: Option<TokenStream2>,
         vec: Option<Vec<TokenTree>>,
         string: Option<String>,
-    ) -> Self {
+    ) -> Tokens {
         Tokens {
             stream: stream.map(OnceCell::with_value).unwrap_or_else(OnceCell::new),
             vec: vec.map(OnceCell::with_value).unwrap_or_else(OnceCell::new),
@@ -40,7 +41,25 @@ impl Tokens {
     }
 }
 
-// TODO: append methods
+impl<T: Into<Tokens>> AddAssign<T> for Tokens {
+    fn add_assign(&mut self, rhs: T) {
+        let rhs = rhs.into();
+        self.string = OnceCell::new();
+        match self.mut_members() {
+            (None, Some(vec), _) => {
+                vec.extend(rhs.into_iter());
+            }
+            (Some(stream), None, _) => {
+                stream.extend(rhs.into_iter());
+            }
+            (Some(stream), Some(vec), _) => {
+                stream.extend(rhs.clone().into_iter());
+                vec.extend(rhs.into_iter());
+            }
+            _ => unreachable!(),
+        }
+    }
+}
 
 impl Default for Tokens {
     fn default() -> Tokens {
@@ -93,7 +112,7 @@ impl AsMut<TokenStream2> for Tokens {
 }
 
 impl From<TokenStream2> for Tokens {
-    fn from(stream: TokenStream2) -> Self {
+    fn from(stream: TokenStream2) -> Tokens {
         Tokens::from_stream(stream)
     }
 }
@@ -139,13 +158,13 @@ impl AsMut<Vec<TokenTree>> for Tokens {
 }
 
 impl From<Vec<TokenTree>> for Tokens {
-    fn from(vec: Vec<TokenTree>) -> Self {
+    fn from(vec: Vec<TokenTree>) -> Tokens {
         Tokens::from_vec(vec)
     }
 }
 
 impl Tokens {
-    pub fn from_string(string: String) -> Tokens {
+    pub fn from_string(string: &str) -> Tokens {
         Tokens::from_stream(string.parse::<TokenStream2>().unwrap())
     }
 
@@ -171,8 +190,8 @@ impl AsRef<String> for Tokens {
     }
 }
 
-impl From<String> for Tokens {
-    fn from(string: String) -> Self {
+impl From<&str> for Tokens {
+    fn from(string: &str) -> Tokens {
         Tokens::from_string(string)
     }
 }
@@ -346,3 +365,35 @@ impl FromIterator<TokenTree> for Tokens {
         Tokens::from_vec(iter.into_iter().collect())
     }
 }
+
+// TODO: impl From for TokenTree and each of its variants
+impl From<TokenTree> for Tokens {
+    fn from(token: TokenTree) -> Self {
+        Tokens::from_iter(Some(token))
+    }
+}
+
+impl From<Group> for Tokens {
+    fn from(group: Group) -> Self {
+        Tokens::from_iter(Some(TokenTree::Group(group)))
+    }
+}
+
+impl From<Punct> for Tokens {
+    fn from(punct: Punct) -> Self {
+        Tokens::from_iter(Some(TokenTree::Punct(punct)))
+    }
+}
+
+impl From<Ident> for Tokens {
+    fn from(ident: Ident) -> Self {
+        Tokens::from_iter(Some(TokenTree::Ident(ident)))
+    }
+}
+
+impl From<Literal> for Tokens {
+    fn from(literal: Literal) -> Self {
+        Tokens::from_iter(Some(TokenTree::Literal(literal)))
+    }
+}
+
