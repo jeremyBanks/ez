@@ -3,10 +3,10 @@ use crate::*;
 /// Convenience wrapper for a list of one or more [`TokenTree`]s.
 #[derive(Debug, Clone)]
 pub struct Tokens {
-    // At least one of `tree`, `stream`, or `vec` must always be non-empty.
+    // At least one of `only`, `stream`, or `vec` must always be non-empty.
     // Other fields will be lazily initialized the first time they're needed,
     // or cleared out if any changes are made.
-    tree: OnceCell<Option<TokenTree>>,
+    only: OnceCell<Option<TokenTree>>,
     stream: OnceCell<TokenStream>,
     vec: OnceCell<Vec<TokenTree>>,
     string: OnceCell<String>,
@@ -16,7 +16,7 @@ impl Tokens {
     /// Creates a new, empty, list.
     pub fn new() -> Tokens {
         Tokens {
-            tree: OnceCell::new(),
+            only: OnceCell::new(),
             stream: OnceCell::new(),
             vec: OnceCell::with_value(Vec::new()),
             string: OnceCell::new(),
@@ -33,7 +33,7 @@ impl Default for Tokens {
 impl Tokens {
     pub fn from_stream(stream: impl Into<TokenStream>) -> Tokens {
         Tokens {
-            tree: OnceCell::new(),
+            only: OnceCell::new(),
             stream: OnceCell::with_value(stream.into()),
             vec: OnceCell::new(),
             string: OnceCell::new(),
@@ -46,7 +46,7 @@ impl Tokens {
 
     pub fn mut_stream(&mut self) -> &mut TokenStream {
         self.stream();
-        self.tree = OnceCell::new();
+        self.only = OnceCell::new();
         self.vec = OnceCell::new();
         self.string = OnceCell::new();
         self.stream.get_mut().unwrap()
@@ -60,11 +60,11 @@ impl Tokens {
 
 impl Tokens {
     pub fn only(&self) -> Option<&TokenTree> {
-        if self.len() == 1 {
-            self.first()
-        } else {
-            None
-        }
+        self.only
+            .get_or_init(
+                || if self.len() == 1 { Some(self.first().unwrap().clone()) } else { None },
+            )
+            .as_ref()
     }
 }
 
