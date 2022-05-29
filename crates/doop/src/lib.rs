@@ -31,8 +31,6 @@ pub fn doop(input: TokenStream) -> TokenStream {
     let lines = input.split_lines();
 
     for line in input.split_lines() {
-        let line = Tokens::from_iter(line.into_iter().cloned());
-
         if line.is_empty() || line.punct().map(|punct| punct.as_char()) == Some(';') {
             continue;
         }
@@ -170,13 +168,11 @@ pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let attribute = attribute.into_tokens();
-    let item = item.into_tokens();
-
-    let trait_keyword = item.first().ident();
+    let _item = item.into_tokens();
 
     if !attribute.is_empty() {
         return attribute.into_error("no arguments expected for #[doop::inherent] attribute macro");
     }
 
-    todo!()
+    todo!("#[doop::inherent] is not yet implemented");
 }

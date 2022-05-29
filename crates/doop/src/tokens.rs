@@ -354,43 +354,45 @@ impl Tokens {
         .into()
     }
 
-    pub fn split_lines(&self) -> impl Iterator<Item = Tokens> {
-        let mut slices = Vec::new();
+    pub fn split_lines(&self) -> impl IntoIterator<Item = Tokens> {
+        let vec = self.vec();
+        let mut lines = Vec::new();
         let mut next_line_start_index = 0;
-        for (i, tt) in self.vec().iter().enumerate() {
+        for (i, tt) in vec.iter().enumerate() {
             match tt {
                 TokenTree::Punct(punct) if punct.as_char() == ';' => {
-                    slices.push(&self.vec()[next_line_start_index..=i]);
+                    lines.push(Tokens::from_iter(vec[next_line_start_index..=i].iter().cloned()));
                     next_line_start_index = i + 1;
                 }
                 TokenTree::Group(group) if group.delimiter() == Delimiter::Brace => {
-                    slices.push(&self.vec()[next_line_start_index..=i]);
+                    lines.push(Tokens::from_iter(vec[next_line_start_index..=i].iter().cloned()));
                     next_line_start_index = i + 1;
                 }
                 _ => {}
             }
         }
-        slices.push(&self.vec()[next_line_start_index..]);
+        lines.push(Tokens::from_iter(vec[next_line_start_index..].iter().cloned()));
 
-        let lines = slices.into_iter().map(|slice| Tokens::from_iter(slice.into_iter().cloned()));
-
-        lines
+        lines.into_iter()
     }
 
-    pub fn split_commas(&self) -> Vec<&[TokenTree]> {
+    pub fn split_commas(&self) -> impl IntoIterator<Item = Tokens> {
+        let vec = self.vec();
         let mut slices = Vec::new();
         let mut next_comma_start_index = 0;
-        for (i, tt) in self.vec().iter().enumerate() {
+        for (i, tt) in vec.iter().enumerate() {
             match tt {
                 TokenTree::Punct(punct) if punct.as_char() == ',' => {
-                    slices.push(&self.vec()[next_comma_start_index..=i]);
+                    slices.push(Tokens::from_iter(vec[next_comma_start_index..=i].iter().cloned()));
                     next_comma_start_index = i + 1;
                 }
                 _ => {}
             }
         }
-        slices.push(&self.vec()[next_comma_start_index..]);
-        slices
+
+        slices.push(Tokens::from_iter(vec[next_comma_start_index..].iter().cloned()));
+
+        slices.into_iter()
     }
 }
 
