@@ -5,7 +5,7 @@ mod tokens;
 mod tokens_list;
 
 pub(crate) use {
-    crate::{span::*, token_stream::*, token_tree::*, tokens::*, tokens_list::*},
+    crate::{span::*, token_stream::*, tokens::*, tokens_list::*},
     ::{
         once_cell::unsync::OnceCell,
         proc_macro::{

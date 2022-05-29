@@ -241,31 +241,62 @@ impl Tokens {
         self.vec().iter()
     }
     pub fn group(&self) -> Option<&Group> {
-        self.tree().and_then(TokenTreeExt::group)
+        if let Some(TokenTree::Group(group)) = self.tree() {
+            Some(group)
+        } else {
+            None
+        }
     }
 
     pub fn punct(&self) -> Option<&Punct> {
-        self.tree().and_then(TokenTreeExt::punct)
+        if let Some(TokenTree::Punct(punct)) = self.tree() {
+            Some(punct)
+        } else {
+            None
+        }
     }
 
     pub fn ident(&self) -> Option<&Ident> {
-        self.tree().and_then(TokenTreeExt::ident)
+        if let Some(TokenTree::Ident(ident)) = self.tree() {
+            Some(ident)
+        } else {
+            None
+        }
     }
 
     pub fn literal(&self) -> Option<&Literal> {
-        self.tree().and_then(TokenTreeExt::literal)
+        if let Some(TokenTree::Literal(literal)) = self.tree() {
+            Some(literal)
+        } else {
+            None
+        }
     }
 
     pub fn bracketed(&self) -> Option<Tokens> {
-        self.tree().and_then(TokenTreeExt::bracketed)
+        let group = self.group()?;
+        if group.delimiter() == Delimiter::Brace {
+            Some(group.stream().into())
+        } else {
+            None
+        }
     }
 
     pub fn braced(&self) -> Option<Tokens> {
-        self.tree().and_then(TokenTreeExt::braced)
+        let group = self.group()?;
+        if group.delimiter() == Delimiter::Brace {
+            Some(group.stream().into())
+        } else {
+            None
+        }
     }
 
     pub fn parenthesized(&self) -> Option<Tokens> {
-        self.tree().and_then(TokenTreeExt::parenthesized)
+        let group = self.group()?;
+        if group.delimiter() == Delimiter::Parenthesis {
+            Some(group.stream().into())
+        } else {
+            None
+        }
     }
 
     pub fn split_lines(&self) -> Vec<&[TokenTree]> {
