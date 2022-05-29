@@ -51,9 +51,9 @@ pub fn doop(input: TokenStream) -> TokenStream {
             let keyword = ident.to_string();
 
             if keyword == "for" {
-                todo!("parse for loop");
+                return line.into_error("TODO: implement parsing for loop");
             } else if matches!(keyword.as_ref(), "let" | "static" | "type" | "const") {
-                todo!("parse assignment");
+                return line.into_error("TODO: implement parsing assignment");
             } else {
                 return line.into_error(&format!("unexpected keyword: {keyword}"));
             }
