@@ -1,18 +1,15 @@
-mod span;
-mod token_stream;
-mod token_tree;
 mod tokens;
 mod tokens_list;
 
 pub(crate) use {
-    crate::{span::*, token_stream::*, tokens::*, tokens_list::*},
+    crate::{tokens::*, tokens_list::*},
     ::{
         once_cell::unsync::OnceCell,
         proc_macro::{
             Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree,
         },
         std::{
-            borrow::{Borrow, BorrowMut},
+            borrow::Borrow,
             cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd},
             collections::{HashMap, HashSet},
             fmt::{Debug, Display},
@@ -25,25 +22,45 @@ pub(crate) use {
 #[proc_macro]
 /// A macro for local code duplication in Rust.
 pub fn doop(input: TokenStream) -> TokenStream {
-    let input = Tokens::from(TokenStream::from(input));
-    let mut output = TokenStream::new();
+    let input = input.into_tokens();
+
+    let mut output = Tokens::new();
+    let mut tokens_bindings: HashMap<String, Tokens> = HashMap::new();
+    let mut tokens_list_bindings: HashMap<String, TokensList> = HashMap::new();
+
+    let lines = input.split_lines();
 
     for line in input.split_lines() {
         let line = Tokens::from_iter(line.into_iter().cloned());
 
         if line.is_empty() || line.punct().map(|punct| punct.as_char()) == Some(';') {
-            // ignore empty lines
-        } else if let Some(braced) = line.braced() {
-            output.extend(braced);
-        } else if let Some(ident) = line.first().and_then(TokenTree::ident) {
-            match ident.to_string().as_str() {
-                "let" | "static" => println!("TODO: [Tokens] slice assignment: {line}"),
-                "type" | "const" => println!("TODO: Tokens assignment: {line}"),
-                "for" => println!("TODO: FOR LOOPS {line}"),
-                _ => return ident.error("unrecognized keyword"),
+            continue;
+        }
+
+        let item: Item;
+        enum Item {
+            TokensAssignment { lhs: Ident, rhs: Tokens },
+            TokensListAssignment { lhs: Ident, rhs: Tokens },
+            EmitForLoop { body: Tokens, replacement_list: Vec<HashMap<String, Tokens>> },
+        }
+
+        if let Some(braced) = line.braced() {
+            item = Item::EmitForLoop {
+                body: braced.into_tokens(),
+                replacement_list: vec![HashMap::new()],
             };
+        } else if let Some(TokenTree::Ident(ident)) = line.first() {
+            let keyword = ident.to_string();
+
+            if keyword == "for" {
+                todo!("parse for loop");
+            } else if matches!(keyword.as_ref(), "let" | "static" | "type" | "const") {
+                todo!("parse assignment");
+            } else {
+                return line.into_error(&format!("unexpected keyword: {keyword}"));
+            }
         } else {
-            return line.error("expected keyword or braced block");
+            return line.into_error("expected keyword or braced block");
         }
     }
 
@@ -106,16 +123,17 @@ pub fn doop(input: TokenStream) -> TokenStream {
 /// struct LifeBytes(&'LIFETIME Vec<u8>);
 /// ```
 pub fn block(attribute: TokenStream, item: TokenStream) -> TokenStream {
-    let attribute = TokenStream::from(attribute);
-    let item = TokenStream::from(item);
+    let attribute = attribute.into_tokens();
+    let item = item.into_tokens();
 
-    if let Some(first) = attribute.into_iter().next() {
-        return first.error("no arguments expected for #[doop::block] attribute macro");
+    if !attribute.is_empty() {
+        return attribute.into_error("no arguments expected for #[doop::block] attribute macro");
     }
 
     let input = Tokens::from(TokenStream::from(item));
 
-    let braced = input.iter().flat_map(TokenTree::braced).collect::<Vec<_>>();
+    let braced =
+        input.iter().flat_map(|tt| (Tokens::from(tt.clone()).braced())).collect::<Vec<_>>();
     assert_eq!(braced.len(), 1, "expected exactly one braced block in item statement");
 
     let block = braced[0].clone();
@@ -134,9 +152,12 @@ pub fn block(attribute: TokenStream, item: TokenStream) -> TokenStream {
 /// let _: (Foo, Bar);
 /// ```
 pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
+    let attribute = attribute.into_tokens();
+    let item = item.into_tokens();
+
     let mut input = TokenStream::new();
     input.extend(attribute);
-    let group = Group::new(Delimiter::Brace, item);
+    let group = Group::new(Delimiter::Brace, item.into());
     input.extend(Some(TokenTree::Group(group)));
 
     doop(TokenStream::from(input))
@@ -148,8 +169,14 @@ pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
 /// as it simply duplicates instead of delegating, supporting fewer cases.
 #[proc_macro_attribute]
 pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
-    if let Some(first) = attribute.into_iter().next() {
-        return first.error("no arguments expected for #[doop::inherent] attribute macro");
+    let attribute = attribute.into_tokens();
+    let item = item.into_tokens();
+
+    let trait_keyword = item.first().ident();
+
+    if !attribute.is_empty() {
+        return attribute.into_error("no arguments expected for #[doop::inherent] attribute macro");
     }
+
     todo!()
 }

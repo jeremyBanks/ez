@@ -1,6 +1,5 @@
 use crate::*;
 
-/// Convenience wrapper for a list of one or more [`TokenTree`]s.
 #[derive(Debug, Clone)]
 pub struct Tokens {
     // At least one of `tree`, `stream`, or `vec` must always be non-empty.
@@ -217,8 +216,42 @@ impl Tokens {
         }
     }
 
-    pub fn replace(&self, replacements: &HashMap<String, TokenStream>) -> Tokens {
-        self.stream().replace(replacements).into()
+    pub fn replace_deep(&self, replacements: &HashMap<String, Tokens>) -> Tokens {
+        let mut output = Tokens::new();
+        for tree in self.iter() {
+            match &tree {
+                TokenTree::Ident(ident) =>
+                    if let Some(replacement) = replacements.get(&ident.to_string()) {
+                        output.extend(replacement);
+                    } else {
+                        output.extend(tree);
+                    },
+                TokenTree::Group(group) => {
+                    output.extend(&Group::new(
+                        group.delimiter(),
+                        Tokens::from(group.stream()).replace_deep(replacements).into(),
+                    ));
+                }
+                _ => output.extend(tree),
+            }
+        }
+        output
+    }
+
+    pub fn replace_shallow(&self, replacements: &HashMap<String, Tokens>) -> Tokens {
+        let mut output = Tokens::new();
+        for tree in self.iter() {
+            match &tree {
+                TokenTree::Ident(ident) =>
+                    if let Some(replacement) = replacements.get(&ident.to_string()) {
+                        output.extend(replacement);
+                    } else {
+                        output.extend(tree);
+                    },
+                _ => output.extend(tree),
+            }
+        }
+        output
     }
 
     pub fn len(&self) -> usize {
@@ -299,7 +332,29 @@ impl Tokens {
         }
     }
 
-    pub fn split_lines(&self) -> Vec<&[TokenTree]> {
+    pub fn error<T: From<Tokens>>(&self, message: &str) -> T {
+        let span = self.first().map(|tt| tt.span()).unwrap_or(Span::call_site());
+
+        let ident = Ident::new("compile_error", span.clone());
+
+        let mut punct = Punct::new('!', Spacing::Alone);
+        punct.set_span(span.clone());
+
+        let mut group = Group::new(
+            Delimiter::Parenthesis,
+            TokenStream::from(TokenTree::Literal(Literal::string(message))),
+        );
+        group.set_span(span.clone());
+
+        Tokens::from(vec![
+            TokenTree::Ident(ident),
+            TokenTree::Punct(punct),
+            TokenTree::Group(group),
+        ])
+        .into()
+    }
+
+    pub fn split_lines(&self) -> impl Iterator<Item = Tokens> {
         let mut slices = Vec::new();
         let mut next_line_start_index = 0;
         for (i, tt) in self.vec().iter().enumerate() {
@@ -316,7 +371,10 @@ impl Tokens {
             }
         }
         slices.push(&self.vec()[next_line_start_index..]);
-        slices
+
+        let lines = slices.into_iter().map(|slice| Tokens::from_iter(slice.into_iter().cloned()));
+
+        lines
     }
 
     pub fn split_commas(&self) -> Vec<&[TokenTree]> {
@@ -432,9 +490,9 @@ impl From<Literal> for Tokens {
     }
 }
 
-impl<T: Into<Tokens>> AddAssign<T> for Tokens {
-    fn add_assign(&mut self, rhs: T) {
-        let rhs = rhs.into();
+impl<T: Into<Tokens> + Clone> AddAssign<&T> for Tokens {
+    fn add_assign(&mut self, rhs: &T) {
+        let rhs = rhs.clone().into();
 
         if !self.stream.get().is_some() && !self.vec.get().is_some() {
             self.vec();
@@ -460,7 +518,21 @@ impl<T: Into<Tokens>> AddAssign<T> for Tokens {
 }
 
 impl Tokens {
-    pub fn extend(&mut self, rhs: impl Into<Tokens>) {
-        *self += rhs;
+    pub fn extend<T: Into<Tokens> + Clone>(&mut self, rhs: &T) {
+        self.add_assign(rhs);
+    }
+}
+
+pub trait IntoTokens: Sized {
+    fn into_tokens(self) -> Tokens;
+
+    fn into_error<T: From<Tokens>>(self, message: &str) -> T {
+        self.into_tokens().error(message)
+    }
+}
+
+impl<T: Into<Tokens>> IntoTokens for T {
+    fn into_tokens(self) -> Tokens {
+        self.into()
     }
 }
