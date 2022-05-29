@@ -332,7 +332,7 @@ impl Tokens {
         }
     }
 
-    pub fn error<T: From<Tokens>>(&self, message: &str) -> T {
+    pub fn error<T: From<Tokens>, M: AsRef<str>>(&self, message: M) -> T {
         let span = self.first().map(|tt| tt.span()).unwrap_or(Span::call_site());
 
         let ident = Ident::new("compile_error", span.clone());
@@ -342,7 +342,7 @@ impl Tokens {
 
         let mut group = Group::new(
             Delimiter::Parenthesis,
-            TokenStream::from(TokenTree::Literal(Literal::string(message))),
+            TokenStream::from(TokenTree::Literal(Literal::string(message.as_ref()))),
         );
         group.set_span(span.clone());
 
@@ -528,8 +528,8 @@ impl Tokens {
 pub trait IntoTokens: Sized {
     fn into_tokens(self) -> Tokens;
 
-    fn into_error<T: From<Tokens>>(self, message: &str) -> T {
-        self.into_tokens().error(message)
+    fn error<T: From<Tokens>, M: AsRef<str>>(self, message: M) -> T {
+        Tokens::error(&self.into_tokens(), message)
     }
 }
 

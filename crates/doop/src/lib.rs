@@ -51,14 +51,14 @@ pub fn doop(input: TokenStream) -> TokenStream {
             let keyword = ident.to_string();
 
             if keyword == "for" {
-                return line.into_error("TODO: implement parsing for loop");
+                return line.error("TODO: implement parsing for loop");
             } else if matches!(keyword.as_ref(), "let" | "static" | "type" | "const") {
-                return line.into_error("TODO: implement parsing assignment");
+                return line.error("TODO: implement parsing assignment");
             } else {
-                return line.into_error(&format!("unexpected keyword: {keyword}"));
+                return line.error(format!("unexpected keyword: {keyword}"));
             }
         } else {
-            return line.into_error("expected keyword or braced block");
+            return line.error("expected keyword or braced block");
         }
     }
 
@@ -125,7 +125,7 @@ pub fn block(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let item = item.into_tokens();
 
     if !attribute.is_empty() {
-        return attribute.into_error("no arguments expected for #[doop::block] attribute macro");
+        return attribute.error("no arguments expected for #[doop::block] attribute macro");
     }
 
     let input = Tokens::from(TokenStream::from(item));
@@ -171,7 +171,7 @@ pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let _item = item.into_tokens();
 
     if !attribute.is_empty() {
-        return attribute.into_error("no arguments expected for #[doop::inherent] attribute macro");
+        return attribute.error("no arguments expected for #[doop::inherent] attribute macro");
     }
 
     todo!("#[doop::inherent] is not yet implemented");
