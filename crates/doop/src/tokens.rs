@@ -3,20 +3,20 @@ use crate::*;
 /// Convenience wrapper for a list of one or more [`TokenTree`]s.
 #[derive(Debug, Clone)]
 pub struct Tokens {
-    // At least one of `only`, `stream`, or `vec` must always be non-empty.
+    // At least one of `tree`, `stream`, or `vec` must always be non-empty.
     // Other fields will be lazily initialized the first time they're needed,
     // or cleared out if any changes are made.
-    only: OnceCell<Option<TokenTree>>,
+    tree: OnceCell<Option<TokenTree>>,
     stream: OnceCell<TokenStream>,
     vec: OnceCell<Vec<TokenTree>>,
     string: OnceCell<String>,
 }
 
-impl Tokens {
+impl Tokens /* for Empty */ {
     /// Creates a new, empty, list.
     pub fn new() -> Tokens {
         Tokens {
-            only: OnceCell::new(),
+            tree: OnceCell::new(),
             stream: OnceCell::new(),
             vec: OnceCell::with_value(Vec::new()),
             string: OnceCell::new(),
@@ -30,10 +30,10 @@ impl Default for Tokens {
     }
 }
 
-impl Tokens {
+impl Tokens /* for TokenStream */ {
     pub fn from_stream(stream: impl Into<TokenStream>) -> Tokens {
         Tokens {
-            only: OnceCell::new(),
+            tree: OnceCell::new(),
             stream: OnceCell::with_value(stream.into()),
             vec: OnceCell::new(),
             string: OnceCell::new(),
@@ -46,7 +46,7 @@ impl Tokens {
 
     pub fn mut_stream(&mut self) -> &mut TokenStream {
         self.stream();
-        self.only = OnceCell::new();
+        self.tree = OnceCell::new();
         self.vec = OnceCell::new();
         self.string = OnceCell::new();
         self.stream.get_mut().unwrap()
@@ -55,16 +55,6 @@ impl Tokens {
     pub fn into_stream(self) -> TokenStream {
         self.stream();
         self.stream.into_inner().unwrap()
-    }
-}
-
-impl Tokens {
-    pub fn only(&self) -> Option<&TokenTree> {
-        self.only
-            .get_or_init(
-                || if self.len() == 1 { Some(self.first().unwrap().clone()) } else { None },
-            )
-            .as_ref()
     }
 }
 
@@ -92,9 +82,14 @@ impl From<TokenStream> for Tokens {
     }
 }
 
-impl Tokens {
+impl Tokens /* for Vec<TokenTree> */ {
     pub fn from_vec(vec: Vec<TokenTree>) -> Tokens {
-        Tokens { vec: OnceCell::with_value(vec), stream: OnceCell::new(), string: OnceCell::new() }
+        Tokens {
+            tree: OnceCell::new(),
+            vec: OnceCell::with_value(vec),
+            stream: OnceCell::new(),
+            string: OnceCell::new(),
+        }
     }
 
     pub fn vec(&self) -> &Vec<TokenTree> {
@@ -138,7 +133,64 @@ impl From<Vec<TokenTree>> for Tokens {
     }
 }
 
-impl Tokens {
+impl Tokens /* for Option<TokenTree> */ {
+    pub fn from_tree(tree: TokenTree) -> Tokens {
+        Tokens {
+            tree: OnceCell::with_value(Some(tree)),
+            vec: OnceCell::new(),
+            stream: OnceCell::new(),
+            string: OnceCell::new(),
+        }
+    }
+
+    pub fn tree(&self) -> Option<&TokenTree> {
+        self.tree
+            .get_or_init(
+                || if self.len() == 1 { Some(self.first().unwrap().clone()) } else { None },
+            )
+            .as_ref()
+    }
+
+    pub fn mut_tree(&mut self) -> Option<&mut TokenTree> {
+        self.tree();
+        self.vec = OnceCell::new();
+        self.stream = OnceCell::new();
+        self.string = OnceCell::new();
+        self.tree.get_mut().and_then(|tree| tree.as_mut())
+    }
+
+    pub fn into_tree(self) -> Option<TokenTree> {
+        self.tree();
+        self.tree.into_inner().unwrap()
+    }
+}
+
+impl From<TokenTree> for Tokens {
+    fn from(tree: TokenTree) -> Tokens {
+        Self::from_tree(tree)
+    }
+}
+
+impl AsRef<Option<TokenTree>> for Tokens {
+    fn as_ref(&self) -> &Option<TokenTree> {
+        self.tree()
+    }
+}
+
+impl AsMut<Option<TokenTree>> for Tokens {
+    fn as_mut(&mut self) -> &mut Option<TokenTree> {
+        self.mut_tree()
+    }
+}
+
+impl TryFrom<Tokens> for Option<TokenTree> {
+    type Error = ();
+    fn try_from(tokens: Tokens) -> Option<TokenTree> {
+        tokens.into_tree()
+    }
+}
+
+impl Tokens /* for String */ {
     pub fn from_string(string: &str) -> Tokens {
         Tokens::from_stream(string.parse::<TokenStream>().unwrap())
     }
@@ -173,14 +225,18 @@ impl From<&str> for Tokens {
 
 impl Tokens {
     pub fn is_empty(&self) -> bool {
-        match self.members() {
-            (_, Some(vec), _) => vec.is_empty(),
-            (Some(stream), _, _) => stream.is_empty(),
-            _ => unreachable!(),
+        if let Some(vec) = self.vec.get() {
+            vec.is_empty()
+        } else if let Some(stream) = self.stream.get() {
+            stream.is_empty()
+        } else if let Some(Some(_)) = self.tree.get() {
+            true
+        } else {
+            unreachable!()
         }
     }
 
-    pub fn replace(&self, replacements: &HashMap<Ident, TokenStream>) -> Tokens {
+    pub fn replace(&self, replacements: &HashMap<String, TokenStream>) -> Tokens {
         self.stream().replace(replacements).into()
     }
 
@@ -205,27 +261,27 @@ impl Tokens {
     }
 
     pub fn ident(&self) -> Option<&Ident> {
-        self.only().and_then(|tt| tt.ident())
+        self.tree().and_then(|tt| tt.ident())
     }
 
     pub fn literal(&self) -> Option<&Literal> {
-        self.only().and_then(|tt| tt.literal())
+        self.tree().and_then(|tt| tt.literal())
     }
 
     pub fn punct(&self) -> Option<&Punct> {
-        self.only().and_then(|tt| tt.punct())
+        self.tree().and_then(|tt| tt.punct())
     }
 
     pub fn bracketed(&self) -> Option<Tokens> {
-        self.only().and_then(|tt| tt.bracketed())
+        self.tree().and_then(|tt| tt.bracketed())
     }
 
     pub fn braced(&self) -> Option<Tokens> {
-        self.only().and_then(|tt| tt.braced())
+        self.tree().and_then(|tt| tt.braced())
     }
 
     pub fn parenthesized(&self) -> Option<Tokens> {
-        self.only().and_then(|tt| tt.parenthesized())
+        self.tree().and_then(|tt| tt.parenthesized())
     }
 
     pub fn split_lines(&self) -> Vec<&[TokenTree]> {
@@ -333,48 +389,49 @@ impl FromIterator<TokenTree> for Tokens {
     }
 }
 
-impl From<TokenTree> for Tokens {
-    fn from(token: TokenTree) -> Self {
-        Tokens::from_iter(Some(token))
-    }
-}
-
 impl From<Group> for Tokens {
     fn from(group: Group) -> Self {
-        Tokens::from_iter(Some(TokenTree::Group(group)))
+        Tokens::from_tree(TokenTree::Group(group))
     }
 }
 
 impl From<Punct> for Tokens {
     fn from(punct: Punct) -> Self {
-        Tokens::from_iter(Some(TokenTree::Punct(punct)))
+        Tokens::from_tree(TokenTree::Punct(punct))
     }
 }
 
 impl From<Ident> for Tokens {
     fn from(ident: Ident) -> Self {
-        Tokens::from_iter(Some(TokenTree::Ident(ident)))
+        Tokens::from_tree(TokenTree::Ident(ident))
     }
 }
 
 impl From<Literal> for Tokens {
     fn from(literal: Literal) -> Self {
-        Tokens::from_iter(Some(TokenTree::Literal(literal)))
+        Tokens::from_tree(TokenTree::Literal(literal))
     }
 }
 
 impl<T: Into<Tokens>> AddAssign<T> for &mut Tokens {
     fn add_assign(&mut self, rhs: T) {
         let rhs = rhs.into();
+
+        if !self.stream.get().is_some() && !self.vec.get().is_some() {
+            self.vec();
+        }
+
         self.string = OnceCell::new();
-        match self.mut_members() {
-            (None, Some(vec), _) => {
+        self.tree = OnceCell::new();
+
+        match (self.stream.get_mut(), self.vec.get_mut()) {
+            (None, Some(vec)) => {
                 vec.extend(rhs.into_iter());
             }
-            (Some(stream), None, _) => {
+            (Some(stream), None) => {
                 stream.extend(rhs.into_iter());
             }
-            (Some(stream), Some(vec), _) => {
+            (Some(stream), Some(vec)) => {
                 stream.extend(rhs.clone().into_iter());
                 vec.extend(rhs.into_iter());
             }
