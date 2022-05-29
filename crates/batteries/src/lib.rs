@@ -23,7 +23,7 @@ pub mod batteries {
             cfg_if, clap, crossbeam,
             crossterm::{self, tty::IsTty},
             csv, digest,
-            doop::{doop, dooped},
+            doop::doop,
             dpc_pariter,
             elor::Either,
             euclid, git2,

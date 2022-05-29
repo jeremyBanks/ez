@@ -171,25 +171,6 @@ impl From<TokenTree> for Tokens {
     }
 }
 
-impl AsRef<Option<TokenTree>> for Tokens {
-    fn as_ref(&self) -> &Option<TokenTree> {
-        self.tree()
-    }
-}
-
-impl AsMut<Option<TokenTree>> for Tokens {
-    fn as_mut(&mut self) -> &mut Option<TokenTree> {
-        self.mut_tree()
-    }
-}
-
-impl TryFrom<Tokens> for Option<TokenTree> {
-    type Error = ();
-    fn try_from(tokens: Tokens) -> Option<TokenTree> {
-        tokens.into_tree()
-    }
-}
-
 impl Tokens /* for String */ {
     pub fn from_string(string: &str) -> Tokens {
         Tokens::from_stream(string.parse::<TokenStream>().unwrap())
@@ -334,10 +315,14 @@ impl IntoIterator for Tokens {
     type IntoIter = Box<dyn Iterator<Item = TokenTree>>;
 
     fn into_iter(self) -> Self::IntoIter {
-        match self.into_members() {
-            (_, Some(vec), _) => Box::new(vec.into_iter()),
-            (Some(stream), _, _) => Box::new(stream.into_iter()),
-            _ => unreachable!(),
+        if let Some(Some(_)) = self.tree.get() {
+            Box::new(self.into_tree().into_iter())
+        } else if let Some(_) = self.vec.get() {
+            Box::new(self.into_vec().into_iter())
+        } else if let Some(_) = self.stream.get() {
+            Box::new(self.into_stream().into_iter())
+        } else {
+            unreachable!()
         }
     }
 }
@@ -413,7 +398,7 @@ impl From<Literal> for Tokens {
     }
 }
 
-impl<T: Into<Tokens>> AddAssign<T> for &mut Tokens {
+impl<T: Into<Tokens>> AddAssign<T> for Tokens {
     fn add_assign(&mut self, rhs: T) {
         let rhs = rhs.into();
 
@@ -441,7 +426,7 @@ impl<T: Into<Tokens>> AddAssign<T> for &mut Tokens {
 }
 
 impl Tokens {
-    fn extend(&mut self, rhs: impl Into<Tokens>) {
-        self += rhs;
+    pub fn extend(&mut self, rhs: impl Into<Tokens>) {
+        *self += rhs;
     }
 }
