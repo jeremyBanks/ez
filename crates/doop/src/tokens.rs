@@ -240,29 +240,32 @@ impl Tokens {
     pub fn iter(&self) -> impl Iterator<Item = &TokenTree> {
         self.vec().iter()
     }
-
-    pub fn ident(&self) -> Option<&Ident> {
-        self.tree().and_then(|tt| tt.ident())
-    }
-
-    pub fn literal(&self) -> Option<&Literal> {
-        self.tree().and_then(|tt| tt.literal())
+    pub fn group(&self) -> Option<&Group> {
+        self.tree().and_then(TokenTreeExt::group)
     }
 
     pub fn punct(&self) -> Option<&Punct> {
-        self.tree().and_then(|tt| tt.punct())
+        self.tree().and_then(TokenTreeExt::punct)
+    }
+
+    pub fn ident(&self) -> Option<&Ident> {
+        self.tree().and_then(TokenTreeExt::ident)
+    }
+
+    pub fn literal(&self) -> Option<&Literal> {
+        self.tree().and_then(TokenTreeExt::literal)
     }
 
     pub fn bracketed(&self) -> Option<Tokens> {
-        self.tree().and_then(|tt| tt.bracketed())
+        self.tree().and_then(TokenTreeExt::bracketed)
     }
 
     pub fn braced(&self) -> Option<Tokens> {
-        self.tree().and_then(|tt| tt.braced())
+        self.tree().and_then(TokenTreeExt::braced)
     }
 
     pub fn parenthesized(&self) -> Option<Tokens> {
-        self.tree().and_then(|tt| tt.parenthesized())
+        self.tree().and_then(TokenTreeExt::parenthesized)
     }
 
     pub fn split_lines(&self) -> Vec<&[TokenTree]> {
