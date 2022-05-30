@@ -40,7 +40,8 @@ pub fn doop(input: TokenStream) -> TokenStream {
     input
         .pipe(Tokens::from)
         .pipe_ref(parse)
-        .pipe(generate)
+        .map(generate)
+        .into_tokens()
         .into_stream()
 }
 

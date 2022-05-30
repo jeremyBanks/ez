@@ -494,6 +494,15 @@ impl From<Literal> for Tokens {
     }
 }
 
+impl From<Result<Tokens, Tokens>> for Tokens {
+    fn from(literal: Result<Tokens, Tokens>) -> Self {
+        match literal {
+            Ok(tokens) => tokens,
+            Err(tokens) => tokens,
+        }
+    }
+}
+
 impl Tokens {
     pub fn extend(&mut self, rhs: impl Into<Tokens>) {
         let rhs = rhs.into_tokens();
