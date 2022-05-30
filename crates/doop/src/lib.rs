@@ -37,12 +37,7 @@ pub(crate) use {
 #[proc_macro]
 /// A macro for local code duplication in Rust.
 pub fn doop(input: TokenStream) -> TokenStream {
-    input
-        .pipe(Tokens::from)
-        .pipe_ref(parse)
-        .map(generate)
-        .into_tokens()
-        .into_stream()
+    input.pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
 }
 
 #[proc_macro_attribute]
@@ -105,7 +100,10 @@ pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let item = item.into_tokens();
 
     if !attribute.is_empty() {
-        return attribute.error("no arguments expected for #[doop::block] attribute macro").into();
+        return attribute
+            .error("no arguments expected for #[doop::block] attribute macro")
+            .into_tokens()
+            .into_stream();
     }
 
     let input = Tokens::from(TokenStream::from(item));
@@ -113,12 +111,13 @@ pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let braced =
         input.iter().filter_map(|tt| (Tokens::from(tt.clone()).braced())).collect::<Vec<_>>();
     if braced.len() != 1 {
-        return input.error("expected exactly one braced block in item statement").into();
+        return input
+            .error("expected exactly one braced block in item statement")
+            .into_tokens()
+            .into_stream();
     }
 
-    let body = braced[0].clone();
-
-    generate(match parse(&body) { Ok(x) => x, Err(e) => { return e.into_stream() ;} }).into_stream()
+    braced[0].clone().pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
 }
 
 #[proc_macro_attribute]
@@ -140,7 +139,7 @@ pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let group = Group::new(Delimiter::Brace, item.into());
     input.extend(Some(TokenTree::Group(group)));
 
-    generate(parse(&input.into_tokens())).into_stream()
+    input.pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
 }
 
 /// Duplicates a trait impl block as an inherent impl block.
@@ -155,8 +154,9 @@ pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
     if !attribute.is_empty() {
         return attribute
             .error("no arguments expected for #[doop::inherent] attribute macro")
-            .into();
+            .into_tokens()
+            .into_stream();
     }
 
-    item.error("#[doop::inherent] is not yet implemented").into()
+    item.error("#[doop::inherent] is not yet implemented").into_tokens().into_stream()
 }

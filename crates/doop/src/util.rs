@@ -1,5 +1,8 @@
 pub trait ExtTapPipe {
-    fn pipe<R>(self, f: impl FnOnce(Self) -> R) -> R where Self: Sized {
+    fn pipe<R>(self, f: impl FnOnce(Self) -> R) -> R
+    where
+        Self: Sized,
+    {
         f(self)
     }
 
@@ -11,7 +14,10 @@ pub trait ExtTapPipe {
         f(self)
     }
 
-    fn tap(self, f: impl FnOnce(Self) -> ()) where Self: Sized {
+    fn tap(self, f: impl FnOnce(Self) -> ())
+    where
+        Self: Sized,
+    {
         f(self)
     }
 
