@@ -37,6 +37,8 @@ pub(crate) use {
 #[proc_macro]
 /// A macro for local code duplication in Rust.
 pub fn doop(input: TokenStream) -> TokenStream {
+    return input.into_tokens().error("oh noes").into_tokens().into_stream();
+
     input.pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
 }
 
@@ -99,6 +101,8 @@ pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let attribute = attribute.into_tokens();
     let item = item.into_tokens();
 
+    return item.error("oh noes").into_tokens().into_stream();
+
     if !attribute.is_empty() {
         return attribute
             .error("no arguments expected for #[doop::block] attribute macro")
@@ -131,6 +135,8 @@ pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
 /// let _: (Foo, Bar);
 /// ```
 pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
+    return item.into_tokens().error("oh noes").into_tokens().into_stream();
+
     let attribute = attribute.into_tokens();
     let item = item.into_tokens();
 
@@ -148,6 +154,8 @@ pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
 /// as it simply duplicates instead of delegating, supporting fewer cases.
 #[proc_macro_attribute]
 pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
+    return item.into_tokens().error("oh noes").into_tokens().into_stream();
+
     let attribute = attribute.into_tokens();
     let item = item.into_tokens();
 
