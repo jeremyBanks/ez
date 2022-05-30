@@ -14,19 +14,20 @@ pub trait ExtTapPipe {
         f(self)
     }
 
-    fn tap(self, f: impl FnOnce(Self) -> ())
+    fn tap(self, f: impl FnOnce(&Self) -> ()) -> Self
     where
         Self: Sized,
     {
-        f(self)
+        f(&self);
+        self
     }
 
-    fn tap_ref(&self, f: impl FnOnce(&Self) -> ()) {
-        f(self)
-    }
-
-    fn tap_mut(&mut self, f: impl FnOnce(&mut Self) -> ()) {
-        f(self)
+    fn tap_mut(mut self, f: impl FnOnce(&mut Self) -> ()) -> Self
+    where
+        Self: Sized,
+    {
+        f(&mut self);
+        self
     }
 }
 
