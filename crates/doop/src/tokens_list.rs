@@ -28,8 +28,9 @@ impl TokensList {
     }
 
     pub fn union(&mut self, other: &TokensList) {
+        #[allow(clippy::mutable_key_type)]
         let set: HashSet<Tokens> = self.vec.iter().cloned().collect();
-        for item in other.vec.iter() {
+        for item in &other.vec {
             if !set.contains(item) {
                 self.vec.push(item.clone());
             }
@@ -53,9 +54,9 @@ impl From<Vec<Tokens>> for TokensList {
     }
 }
 
-impl Into<Vec<Tokens>> for TokensList {
-    fn into(self) -> Vec<Tokens> {
-        self.vec
+impl From<TokensList> for Vec<Tokens> {
+    fn from(val: TokensList) -> Self {
+        val.vec
     }
 }
 

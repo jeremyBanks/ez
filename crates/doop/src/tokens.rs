@@ -1,3 +1,5 @@
+//! The `Tokens` type provides a collection of convenience methods, wrapping a
+//! [`TokenStream`] and/or equivalent .
 use crate::*;
 
 #[derive(Debug, Clone)]
@@ -155,7 +157,7 @@ impl Tokens /* for Option<TokenTree> */ {
         self.vec = OnceCell::new();
         self.stream = OnceCell::new();
         self.string = OnceCell::new();
-        self.tree.get_mut().and_then(|tree| tree.as_mut())
+        self.tree.get_mut().and_then(Option::as_mut)
     }
 
     pub fn into_tree(self) -> Option<TokenTree> {
@@ -222,17 +224,17 @@ impl Tokens {
             match &tree {
                 TokenTree::Ident(ident) =>
                     if let Some(replacement) = replacements.get(&ident.to_string()) {
-                        output.extend(replacement);
+                        output.extend(replacement.clone());
                     } else {
-                        output.extend(tree);
+                        output.extend(tree.clone());
                     },
                 TokenTree::Group(group) => {
-                    output.extend(&Group::new(
+                    output.extend(Group::new(
                         group.delimiter(),
                         Tokens::from(group.stream()).replace_deep(replacements).into(),
                     ));
                 }
-                _ => output.extend(tree),
+                _ => output.extend(tree.clone()),
             }
         }
         output
@@ -244,11 +246,11 @@ impl Tokens {
             match &tree {
                 TokenTree::Ident(ident) =>
                     if let Some(replacement) = replacements.get(&ident.to_string()) {
-                        output.extend(replacement);
+                        output.extend(replacement.clone().into_tokens());
                     } else {
-                        output.extend(tree);
+                        output.extend(tree.clone().into_tokens());
                     },
-                _ => output.extend(tree),
+                _ => output.extend(tree.clone().into_tokens()),
             }
         }
         output
@@ -333,18 +335,18 @@ impl Tokens {
     }
 
     pub fn error<T: From<Tokens>, M: AsRef<str>>(&self, message: M) -> T {
-        let span = self.first().map(|tt| tt.span()).unwrap_or(Span::call_site());
+        let span = self.first().map_or(Span::call_site(), TokenTree::span);
 
-        let ident = Ident::new("compile_error", span.clone());
+        let ident = Ident::new("compile_error", span);
 
         let mut punct = Punct::new('!', Spacing::Alone);
-        punct.set_span(span.clone());
+        punct.set_span(span);
 
         let mut group = Group::new(
             Delimiter::Parenthesis,
             TokenStream::from(TokenTree::Literal(Literal::string(message.as_ref()))),
         );
-        group.set_span(span.clone());
+        group.set_span(span);
 
         Tokens::from(vec![
             TokenTree::Ident(ident),
@@ -411,9 +413,9 @@ impl IntoIterator for Tokens {
     fn into_iter(self) -> Self::IntoIter {
         if let Some(Some(_)) = self.tree.get() {
             Box::new(self.into_tree().into_iter())
-        } else if let Some(_) = self.vec.get() {
+        } else if self.vec.get().is_some() {
             Box::new(self.into_vec().into_iter())
-        } else if let Some(_) = self.stream.get() {
+        } else if self.stream.get().is_some() {
             Box::new(self.into_stream().into_iter())
         } else {
             unreachable!()
@@ -443,7 +445,7 @@ impl Eq for Tokens {}
 
 impl Ord for Tokens {
     fn cmp(&self, other: &Tokens) -> Ordering {
-        self.string().cmp(&other.string())
+        self.string().cmp(other.string())
     }
 }
 
@@ -492,11 +494,11 @@ impl From<Literal> for Tokens {
     }
 }
 
-impl<T: Into<Tokens> + Clone> AddAssign<&T> for Tokens {
-    fn add_assign(&mut self, rhs: &T) {
-        let rhs = rhs.clone().into();
+impl Tokens {
+    pub fn extend(&mut self, rhs: impl Into<Tokens>) {
+        let rhs = rhs.into_tokens();
 
-        if !self.stream.get().is_some() && !self.vec.get().is_some() {
+        if self.stream.get().is_none() && self.vec.get().is_none() {
             self.vec();
         }
 
@@ -519,17 +521,11 @@ impl<T: Into<Tokens> + Clone> AddAssign<&T> for Tokens {
     }
 }
 
-impl Tokens {
-    pub fn extend<T: Into<Tokens> + Clone>(&mut self, rhs: &T) {
-        self.add_assign(rhs);
-    }
-}
-
 pub trait IntoTokens: Sized {
     fn into_tokens(self) -> Tokens;
 
-    fn error<T: From<Tokens>, M: AsRef<str>>(self, message: M) -> T {
-        Tokens::error(&self.into_tokens(), message)
+    fn error<M: AsRef<str>, R>(self, message: M) -> Result<R, Tokens> {
+        Err(Tokens::error(&self.into_tokens(), message))
     }
 }
 

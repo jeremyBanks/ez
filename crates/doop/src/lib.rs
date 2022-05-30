@@ -1,68 +1,47 @@
+#![warn(missing_docs, clippy::pedantic)]
+#![allow(
+    unused,
+    clippy::items_after_statements,
+    clippy::wildcard_imports,
+    clippy::redundant_else,
+    clippy::from_iter_instead_of_collect,
+    clippy::semicolon_if_nothing_returned,
+    clippy::module_name_repetitions,
+    clippy::mutable_key_type,
+    clippy::let_unit_value
+)]
+
+//! `doop!`—spelled like "loop" and pronounced like "dupe"—is a macro for local
+//! code duplication in Rust, using a loop-style syntax.
+
+mod generate;
+mod parse;
 mod tokens;
 mod tokens_list;
+mod util;
 
 pub(crate) use {
-    crate::{tokens::*, tokens_list::*},
-    ::{
-        once_cell::unsync::OnceCell,
-        proc_macro::{
-            Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree,
-        },
-        std::{
-            borrow::Borrow,
-            cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd},
-            collections::{HashMap, HashSet},
-            fmt::{Debug, Display},
-            hash::{Hash, Hasher},
-            ops::*,
-        },
+    crate::{generate::*, parse::*, tokens::*, tokens_list::*, util::*},
+    ::once_cell::unsync::OnceCell,
+    proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree},
+    std::{
+        borrow::Borrow,
+        cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd},
+        collections::{HashMap, HashSet},
+        fmt::{Debug, Display},
+        hash::{Hash, Hasher},
+        ops::*,
     },
 };
 
 #[proc_macro]
 /// A macro for local code duplication in Rust.
 pub fn doop(input: TokenStream) -> TokenStream {
-    let input = input.into_tokens();
-
-    let mut output = Tokens::new();
-    let mut tokens_bindings: HashMap<String, Tokens> = HashMap::new();
-    let mut tokens_list_bindings: HashMap<String, TokensList> = HashMap::new();
-
-    let lines = input.split_lines();
-
-    for line in input.split_lines() {
-        if line.is_empty() || line.punct().map(|punct| punct.as_char()) == Some(';') {
-            continue;
-        }
-
-        let item: Item;
-        enum Item {
-            TokensAssignment { lhs: Ident, rhs: Tokens },
-            TokensListAssignment { lhs: Ident, rhs: Tokens },
-            EmitForLoop { body: Tokens, replacement_list: Vec<HashMap<String, Tokens>> },
-        }
-
-        if let Some(braced) = line.braced() {
-            item = Item::EmitForLoop {
-                body: braced.into_tokens(),
-                replacement_list: vec![HashMap::new()],
-            };
-        } else if let Some(TokenTree::Ident(ident)) = line.first() {
-            let keyword = ident.to_string();
-
-            if keyword == "for" {
-                return line.error("TODO: implement parsing for loop");
-            } else if matches!(keyword.as_ref(), "let" | "static" | "type" | "const") {
-                return line.error("TODO: implement parsing assignment");
-            } else {
-                return line.error(format!("unexpected keyword: {keyword}"));
-            }
-        } else {
-            return line.error("expected keyword or braced block");
-        }
-    }
-
-    output.into()
+    input
+        .pipe(Tokens::from)
+        .pipe_ref(parse)
+        .pipe(generate)
+        .into_stream()
 }
 
 #[proc_macro_attribute]
@@ -120,23 +99,25 @@ pub fn doop(input: TokenStream) -> TokenStream {
 /// #[doop::item(const LIFETIME = static)]
 /// struct LifeBytes(&'LIFETIME Vec<u8>);
 /// ```
-pub fn block(attribute: TokenStream, item: TokenStream) -> TokenStream {
+pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let attribute = attribute.into_tokens();
     let item = item.into_tokens();
 
     if !attribute.is_empty() {
-        return attribute.error("no arguments expected for #[doop::block] attribute macro");
+        return attribute.error("no arguments expected for #[doop::block] attribute macro").into();
     }
 
     let input = Tokens::from(TokenStream::from(item));
 
     let braced =
-        input.iter().flat_map(|tt| (Tokens::from(tt.clone()).braced())).collect::<Vec<_>>();
-    assert_eq!(braced.len(), 1, "expected exactly one braced block in item statement");
+        input.iter().filter_map(|tt| (Tokens::from(tt.clone()).braced())).collect::<Vec<_>>();
+    if braced.len() != 1 {
+        return input.error("expected exactly one braced block in item statement").into();
+    }
 
-    let block = braced[0].clone();
+    let body = braced[0].clone();
 
-    doop(TokenStream::from(block).into())
+    generate(match parse(&body) { Ok(x) => x, Err(e) => { return e.into_stream() ;} }).into_stream()
 }
 
 #[proc_macro_attribute]
@@ -158,7 +139,7 @@ pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let group = Group::new(Delimiter::Brace, item.into());
     input.extend(Some(TokenTree::Group(group)));
 
-    doop(TokenStream::from(input))
+    generate(parse(&input.into_tokens())).into_stream()
 }
 
 /// Duplicates a trait impl block as an inherent impl block.
@@ -168,11 +149,13 @@ pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let attribute = attribute.into_tokens();
-    let _item = item.into_tokens();
+    let item = item.into_tokens();
 
     if !attribute.is_empty() {
-        return attribute.error("no arguments expected for #[doop::inherent] attribute macro");
+        return attribute
+            .error("no arguments expected for #[doop::inherent] attribute macro")
+            .into();
     }
 
-    todo!("#[doop::inherent] is not yet implemented");
+    item.error("#[doop::inherent] is not yet implemented").into()
 }

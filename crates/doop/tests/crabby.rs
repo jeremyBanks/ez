@@ -10,7 +10,8 @@ pub fn main() {
         type my_values: [TokenStream] = [1, 2, 3];
     }
 
-    #[doop::block]
+    // But a large subset can fit in as normal rustfmtable rust syntax.
+    #[doop::unwrap]
     static DOOP: ! = {
         // defaults to [TokenStream]
         let my_types: [TokenStream] = [T];
