@@ -31,6 +31,7 @@ pub(crate) use {
         fmt::{Debug, Display},
         hash::{Hash, Hasher},
         ops::*,
+        rc::Rc,
     },
 };
 

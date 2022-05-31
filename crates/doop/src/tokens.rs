@@ -4,37 +4,81 @@ use crate::*;
 
 #[derive(Debug, Clone)]
 pub struct Tokens {
-    // At least one of `tree`, `stream`, or `vec` must always be non-empty.
-    // Other fields will be lazily initialized the first time they're needed,
-    // or cleared out if any changes are made.
-    tree: OnceCell<Option<TokenTree>>,
+    len: OnceCell<usize>,
+    first: OnceCell<Option<TokenTree>>,
     stream: OnceCell<TokenStream>,
     vec: OnceCell<Vec<TokenTree>>,
     string: OnceCell<String>,
 }
 
-impl Tokens /* for Empty */ {
-    /// Creates a new, empty, list.
+impl Tokens {
     pub fn new() -> Tokens {
         Tokens {
-            tree: OnceCell::new(),
+            len: OnceCell::new(),
+            first: OnceCell::new(),
             stream: OnceCell::new(),
-            vec: OnceCell::with_value(Vec::new()),
+            vec: OnceCell::with_value(Default::default()),
             string: OnceCell::new(),
         }
     }
-}
 
-impl Default for Tokens {
-    fn default() -> Tokens {
-        Tokens::new()
+    pub fn from_ident(ident: Ident) -> Tokens {
+        Tokens::from_tree(TokenTree::Ident(ident))
     }
-}
 
-impl Tokens /* for TokenStream */ {
+    pub fn new_ident(ident: impl AsRef<str>) -> Tokens {
+        Tokens::from_ident(Ident::new(ident.as_ref(), Span::call_site()))
+    }
+
+    pub fn new_punctuation(chars: impl AsRef<str>) -> Tokens {
+        let chars: Vec<char> = chars.as_ref().chars().collect();
+        let puncts = Vec::new();
+
+        for (index, char) in chars.into_iter().enumerate() {
+            let spacing = if index < chars.len() - 1 { Spacing::Joint } else { Spacing::Alone };
+            puncts.push(TokenTree::Punct(Punct::new(char, spacing)));
+        }
+
+        Tokens::from_vec(puncts)
+    }
+
+    pub fn from_group(group: Group) -> Tokens {
+        Tokens::from_tree(TokenTree::Group(group))
+    }
+
+    pub fn new_group(delimiter: char, body: Tokens) -> Tokens {
+        let delimiter = match delimiter {
+            '(' => Delimiter::Parenthesis,
+            '[' => Delimiter::Bracket,
+            '{' => Delimiter::Brace,
+            ' ' => Delimiter::None,
+            _ => panic!("invalid group delimiter"),
+        };
+
+        Tokens::from_group(Group::new(delimiter, body.into_stream()))
+    }
+
+    pub fn new_string(string: impl AsRef<str>) -> Tokens {
+        Tokens::from_tree(TokenTree::Literal(Literal::string(string.as_ref())))
+    }
+
+    pub fn new_compile_error(msg: impl AsRef<str>) -> Tokens {
+        let ident = Tokens::new_ident("compile_error");
+        let bang = Tokens::new_punctuation("!");
+        let message = Tokens::new_string(msg);
+        let parens = Tokens::new_group('{', message);
+        Tokens::from_iter([
+            ident,
+            bang,
+            parens,
+        ])
+    }
+
+
+
     pub fn from_stream(stream: impl Into<TokenStream>) -> Tokens {
         Tokens {
-            tree: OnceCell::new(),
+            first: OnceCell::new(),
             stream: OnceCell::with_value(stream.into()),
             vec: OnceCell::new(),
             string: OnceCell::new(),
@@ -47,7 +91,7 @@ impl Tokens /* for TokenStream */ {
 
     pub fn mut_stream(&mut self) -> &mut TokenStream {
         self.stream();
-        self.tree = OnceCell::new();
+        self.first = OnceCell::new();
         self.vec = OnceCell::new();
         self.string = OnceCell::new();
         self.stream.get_mut().unwrap()
@@ -57,36 +101,10 @@ impl Tokens /* for TokenStream */ {
         self.stream();
         self.stream.into_inner().unwrap()
     }
-}
 
-impl From<Tokens> for TokenStream {
-    fn from(tokens: Tokens) -> TokenStream {
-        tokens.into_stream()
-    }
-}
-
-impl AsRef<TokenStream> for Tokens {
-    fn as_ref(&self) -> &TokenStream {
-        self.stream()
-    }
-}
-
-impl AsMut<TokenStream> for Tokens {
-    fn as_mut(&mut self) -> &mut TokenStream {
-        self.mut_stream()
-    }
-}
-
-impl From<TokenStream> for Tokens {
-    fn from(stream: TokenStream) -> Tokens {
-        Tokens::from_stream(stream)
-    }
-}
-
-impl Tokens /* for Vec<TokenTree> */ {
     pub fn from_vec(vec: Vec<TokenTree>) -> Tokens {
         Tokens {
-            tree: OnceCell::new(),
+            first: OnceCell::new(),
             vec: OnceCell::with_value(vec),
             stream: OnceCell::new(),
             string: OnceCell::new(),
@@ -108,36 +126,10 @@ impl Tokens /* for Vec<TokenTree> */ {
         self.vec();
         self.vec.into_inner().unwrap()
     }
-}
 
-impl From<Tokens> for Vec<TokenTree> {
-    fn from(tokens: Tokens) -> Vec<TokenTree> {
-        tokens.into_vec()
-    }
-}
-
-impl AsRef<Vec<TokenTree>> for Tokens {
-    fn as_ref(&self) -> &Vec<TokenTree> {
-        self.vec()
-    }
-}
-
-impl AsMut<Vec<TokenTree>> for Tokens {
-    fn as_mut(&mut self) -> &mut Vec<TokenTree> {
-        self.mut_vec()
-    }
-}
-
-impl From<Vec<TokenTree>> for Tokens {
-    fn from(vec: Vec<TokenTree>) -> Tokens {
-        Tokens::from_vec(vec)
-    }
-}
-
-impl Tokens /* for Option<TokenTree> */ {
     pub fn from_tree(tree: TokenTree) -> Tokens {
         Tokens {
-            tree: OnceCell::with_value(Some(tree)),
+            first: OnceCell::with_value(Some(tree)),
             vec: OnceCell::new(),
             stream: OnceCell::new(),
             string: OnceCell::new(),
@@ -145,7 +137,7 @@ impl Tokens /* for Option<TokenTree> */ {
     }
 
     pub fn tree(&self) -> Option<&TokenTree> {
-        self.tree
+        self.first
             .get_or_init(
                 || if self.len() == 1 { Some(self.first().unwrap().clone()) } else { None },
             )
@@ -157,22 +149,14 @@ impl Tokens /* for Option<TokenTree> */ {
         self.vec = OnceCell::new();
         self.stream = OnceCell::new();
         self.string = OnceCell::new();
-        self.tree.get_mut().and_then(Option::as_mut)
+        self.first.get_mut().and_then(Option::as_mut)
     }
 
     pub fn into_tree(self) -> Option<TokenTree> {
         self.tree();
-        self.tree.into_inner().unwrap()
+        self.first.into_inner().unwrap()
     }
-}
 
-impl From<TokenTree> for Tokens {
-    fn from(tree: TokenTree) -> Tokens {
-        Self::from_tree(tree)
-    }
-}
-
-impl Tokens /* for String */ {
     pub fn from_string(string: &str) -> Tokens {
         Tokens::from_stream(string.parse::<TokenStream>().unwrap())
     }
@@ -185,83 +169,88 @@ impl Tokens /* for String */ {
         self.string();
         self.string.into_inner().unwrap()
     }
-}
 
-impl From<Tokens> for String {
-    fn from(tokens: Tokens) -> String {
-        tokens.into_string()
-    }
-}
-
-impl AsRef<String> for Tokens {
-    fn as_ref(&self) -> &String {
-        self.string()
-    }
-}
-
-impl From<&str> for Tokens {
-    fn from(string: &str) -> Tokens {
-        Tokens::from_string(string)
-    }
-}
-
-impl Tokens {
     pub fn is_empty(&self) -> bool {
         if let Some(vec) = self.vec.get() {
             vec.is_empty()
         } else if let Some(stream) = self.stream.get() {
             stream.is_empty()
-        } else if let Some(Some(_)) = self.tree.get() {
+        } else if let Some(Some(_)) = self.first.get() {
             true
         } else {
             unreachable!()
         }
     }
 
+    pub fn flat_map_shallow<F, I>(&self, f: F) -> Tokens
+    where
+        F: Fn(TokenTree) -> I,
+        I: IntoIterator<Item=TokenTree> {
+        self.clone().into_iter().flat_map(f).collect()
+    }
+
+    pub fn flat_map_deep<F, I>(&self, f: F) -> Tokens
+    where
+        F: Fn(TokenTree) -> I,
+        I: IntoIterator<Item=TokenTree>
+    {
+        self.clone().into_iter().flat_map(f).map(|tt| {
+            if let TokenTree::Group(group) = tt {
+                let mut tt = TokenTree::Group(
+                   Group::new(group.delimiter(), group.stream().into_iter().flat_map(f).collect()));
+                tt.set_span(group.span());
+                tt
+            } else {
+                tt
+            }
+        }).collect()
+
+    }
+
+    pub fn with_span_shallow(&self, span: Span) -> Self {
+        self.flat_map_shallow(| mut tree | {
+            tree.set_span(span);
+            Some(tree)
+        })
+    }
+
+    pub fn with_span_deep(&self, span: Span) -> Self {
+        self.flat_map_deep(| mut tree | {
+            tree.set_span(span);
+            Some(tree)
+        })
+    }
+
     pub fn replace_deep(&self, replacements: &HashMap<String, Tokens>) -> Tokens {
-        let mut output = Tokens::new();
-        for tree in self.iter() {
-            match &tree {
+        self.flat_map_deep(|tt| match tt {
                 TokenTree::Ident(ident) =>
                     if let Some(replacement) = replacements.get(&ident.to_string()) {
-                        output.extend(replacement.clone());
+                        replacement.clone()
                     } else {
-                        output.extend(tree.clone());
+                        Tokens::from_tree(tt)
                     },
-                TokenTree::Group(group) => {
-                    output.extend(Group::new(
-                        group.delimiter(),
-                        Tokens::from(group.stream()).replace_deep(replacements).into(),
-                    ));
-                }
-                _ => output.extend(tree.clone()),
-            }
-        }
-        output
+                _ => Tokens::from_tree(tt)
+            })
     }
 
     pub fn replace_shallow(&self, replacements: &HashMap<String, Tokens>) -> Tokens {
-        let mut output = Tokens::new();
-        for tree in self.iter() {
-            match &tree {
+        self.flat_map_shallow(|tt| match tt {
                 TokenTree::Ident(ident) =>
                     if let Some(replacement) = replacements.get(&ident.to_string()) {
-                        output.extend(replacement.clone().into_tokens());
+                        replacement.clone()
                     } else {
-                        output.extend(tree.clone().into_tokens());
+                        Tokens::from_tree(tt)
                     },
-                _ => output.extend(tree.clone().into_tokens()),
-            }
-        }
-        output
+                _ => Tokens::from_tree(tt)
+            })
     }
 
     pub fn len(&self) -> usize {
         self.vec().len()
     }
 
-    pub fn first(&self) -> Option<&TokenTree> {
-        self.vec().first()
+    pub fn first(&self) -> Result<&TokenTree, TokenTree> {
+        self.vec().first().ok_or_else(|| {})
     }
 
     pub fn last(&self) -> Option<&TokenTree> {
@@ -334,28 +323,6 @@ impl Tokens {
         }
     }
 
-    pub fn error<T: From<Tokens>, M: AsRef<str>>(&self, message: M) -> T {
-        let span = self.first().map_or(Span::call_site(), TokenTree::span);
-
-        let ident = Ident::new("compile_error", span);
-
-        let mut punct = Punct::new('!', Spacing::Alone);
-        punct.set_span(span);
-
-        let mut group = Group::new(
-            Delimiter::Parenthesis,
-            TokenStream::from(TokenTree::Literal(Literal::string(message.as_ref()))),
-        );
-        group.set_span(span);
-
-        Tokens::from(vec![
-            TokenTree::Ident(ident),
-            TokenTree::Punct(punct),
-            TokenTree::Group(group),
-        ])
-        .into()
-    }
-
     pub fn split_lines(&self) -> impl IntoIterator<Item = Tokens> {
         let vec = self.vec();
         let mut lines = Vec::new();
@@ -411,7 +378,7 @@ impl IntoIterator for Tokens {
     type IntoIter = Box<dyn Iterator<Item = TokenTree>>;
 
     fn into_iter(self) -> Self::IntoIter {
-        if let Some(Some(_)) = self.tree.get() {
+        if let Some(Some(_)) = self.first.get() {
             Box::new(self.into_tree().into_iter())
         } else if self.vec.get().is_some() {
             Box::new(self.into_vec().into_iter())
@@ -461,6 +428,19 @@ impl Display for Tokens {
     }
 }
 
+impl FromIterator<Tokens> for Tokens {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = Tokens>,
+    {
+        let mut vec = Vec::new();
+        for tokens in iter {
+            vec.extend(tokens.into_iter());
+        }
+        Tokens::from_vec(vec)
+    }
+}
+
 impl FromIterator<TokenTree> for Tokens {
     fn from_iter<T>(iter: T) -> Self
     where
@@ -504,15 +484,13 @@ impl From<Result<Tokens, Tokens>> for Tokens {
 }
 
 impl Tokens {
-    pub fn extend(&mut self, rhs: impl Into<Tokens>) {
-        let rhs = rhs.into_tokens();
-
+    pub fn extend(&mut self, rhs: Tokens) {
         if self.stream.get().is_none() && self.vec.get().is_none() {
             self.vec();
         }
 
         self.string = OnceCell::new();
-        self.tree = OnceCell::new();
+        self.first = OnceCell::new();
 
         match (self.stream.get_mut(), self.vec.get_mut()) {
             (None, Some(vec)) => {
@@ -530,16 +508,22 @@ impl Tokens {
     }
 }
 
-pub trait IntoTokens: Sized {
+pub type ResultTokens = Result<Tokens, Tokens>;
+
+pub trait ToTokens {
+    fn to_tokens(&self) -> Tokens;
+
+    fn span(&self) -> ResultTokens {
+        let span = self.to_tokens().first()?.span().unwrap_or_else(Span::call_site);
+
+        Ok(todo!())
+    }
+}
+
+pub trait IntoTokens: ToTokens + Sized {
     fn into_tokens(self) -> Tokens;
 
     fn error<M: AsRef<str>, R>(self, message: M) -> Result<R, Tokens> {
         Err(Tokens::error(&self.into_tokens(), message))
-    }
-}
-
-impl<T: Into<Tokens>> IntoTokens for T {
-    fn into_tokens(self) -> Tokens {
-        self.into()
     }
 }
