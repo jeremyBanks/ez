@@ -1,4 +1,5 @@
-pub trait ExtTapPipe {
+/// Extension method for all values; a subset of the `tap` crate.
+pub trait AllExt {
     fn pipe<R>(self, f: impl FnOnce(Self) -> R) -> R
     where
         Self: Sized,
@@ -29,6 +30,20 @@ pub trait ExtTapPipe {
         f(&mut self);
         self
     }
+
+    fn conv<T>(self) -> T
+    where
+        Self: Sized + Into<T>,
+    {
+        self.into()
+    }
+
+    fn try_conv<T, E>(self) -> Result<T, E>
+    where
+        Self: Sized + TryInto<T, Error = E>,
+    {
+        self.try_into()
+    }
 }
 
-impl<T> ExtTapPipe for T {}
+impl<T> AllExt for T {}

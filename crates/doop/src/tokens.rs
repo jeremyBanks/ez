@@ -1,52 +1,29 @@
-//! The `Tokens` type provides a collection of convenience methods, wrapping a
-//! [`TokenStream`] and/or equivalent .
 use crate::*;
 
 #[derive(Debug, Clone)]
 pub struct Tokens {
-    len: OnceCell<usize>,
-    first: OnceCell<Option<TokenTree>>,
-    stream: OnceCell<TokenStream>,
-    vec: OnceCell<Vec<TokenTree>>,
+    stream: TokenStream,
     string: OnceCell<String>,
 }
 
 impl Tokens {
-    pub fn new() -> Tokens {
-        Tokens {
-            len: OnceCell::new(),
-            first: OnceCell::new(),
-            stream: OnceCell::new(),
-            vec: OnceCell::with_value(Default::default()),
-            string: OnceCell::new(),
-        }
+    pub const fn new() -> Tokens {
+        Tokens { stream: TokenStream::new(), string: OnceCell::new() }
     }
 
-    pub fn from_ident(ident: Ident) -> Tokens {
-        Tokens::from_tree(TokenTree::Ident(ident))
+    pub fn new_ident(ident: impl AsRef<str>, span: impl Into<Option<Span>>) -> Tokens {
+        TokenStream::from_iter([
+            TokenTree::Ident(
+                Ident::new(ident.as_ref(), span.into().unwrap_or_else(Span::call_site))
+            )
+        ]).into_tokens()
     }
 
-    pub fn new_ident(ident: impl AsRef<str>) -> Tokens {
-        Tokens::from_ident(Ident::new(ident.as_ref(), Span::call_site()))
-    }
-
-    pub fn new_punctuation(chars: impl AsRef<str>) -> Tokens {
-        let chars: Vec<char> = chars.as_ref().chars().collect();
-        let puncts = Vec::new();
-
-        for (index, char) in chars.into_iter().enumerate() {
-            let spacing = if index < chars.len() - 1 { Spacing::Joint } else { Spacing::Alone };
-            puncts.push(TokenTree::Punct(Punct::new(char, spacing)));
-        }
-
-        Tokens::from_vec(puncts)
-    }
-
-    pub fn from_group(group: Group) -> Tokens {
-        Tokens::from_tree(TokenTree::Group(group))
-    }
-
-    pub fn new_group(delimiter: char, body: Tokens) -> Tokens {
+    pub fn new_group(
+        delimiter: char,
+        body: impl ToTokens,
+        span: impl Into<Option<Span>>,
+    ) -> Tokens {
         let delimiter = match delimiter {
             '(' => Delimiter::Parenthesis,
             '[' => Delimiter::Bracket,
@@ -55,25 +32,245 @@ impl Tokens {
             _ => panic!("invalid group delimiter"),
         };
 
-        Tokens::from_group(Group::new(delimiter, body.into_stream()))
+        let mut group = Group::new(delimiter, body.to_tokens().into_stream());
+        if let Some(span) = span.into() {
+            group.set_span(span);
+        }
+        Tokens::from_iter([TokenTree::Group(group)])
     }
 
-    pub fn new_string(string: impl AsRef<str>) -> Tokens {
-        Tokens::from_tree(TokenTree::Literal(Literal::string(string.as_ref())))
+    pub fn new_punct(char: char, last: bool, span: impl Into<Option<Span>>) -> Tokens {
+        let mut punct = TokenTree::Punct(Punct::new(char, if last { Spacing::Alone } else { Spacing::Joint }));
+        if let Some(span) = span.into() {
+            punct.set_span(span);
+        }
+        Tokens::from_iter([punct])
     }
 
-    pub fn new_compile_error(msg: impl AsRef<str>) -> Tokens {
-        let ident = Tokens::new_ident("compile_error");
-        let bang = Tokens::new_punctuation("!");
-        let message = Tokens::new_string(msg);
-        let parens = Tokens::new_group('{', message);
-        Tokens::from_iter([
-            ident,
-            bang,
-            parens,
-        ])
+    pub fn new_punctuation(chars: impl AsRef<str>, span: impl Into<Option<Span>>) -> Tokens {
+        let chars: Vec<char> = chars.as_ref().chars().collect();
+        let span = span.into();
+        let puncts = Vec::new();
+
+        for (index, char) in chars.into_iter().enumerate() {
+            let spacing = if index < chars.len() - 1 { Spacing::Joint } else { Spacing::Alone };
+            let mut punct = TokenTree::Punct(Punct::new(char, spacing));
+            if let Some(span) = span {
+                punct.set_span(span);
+            }
+            puncts.push(punct);
+        }
+
+        Tokens::from_iter(puncts)
     }
 
+    pub fn new_string_literal(string: impl AsRef<str>, span: impl Into<Option<Span>>) -> Tokens {
+        let mut literal = Literal::string(string.as_ref());
+        if let Some(span) = span.into() {
+            literal.set_span(span);
+        }
+        Tokens::from_iter([TokenTree::Literal(literal)])
+    }
+
+    pub fn new_compile_error(msg: impl AsRef<str>, span: impl Into<Option<Span>>) -> Tokens {
+        let ident = Tokens::new_ident("compile_error", span);
+        let bang = Tokens::new_punctuation("!", span);
+        let message = Tokens::new_string_literal(msg, span);
+        let parens = Tokens::new_group('{', message, span);
+        Tokens::from_iter([ident, bang, parens])
+    }
+
+    pub fn to_vec(&self) -> Vec<TokenTree> {
+        self.clone().into_iter().collect()
+    }
+
+    pub fn to_stream(&self) -> TokenStream {
+        self.stream.clone()
+    }
+
+    pub fn into_stream(self) -> TokenStream {
+        self.stream
+    }
+
+
+    pub fn first(&self) -> Option<TokenTree> {
+        self.to_vec().first().map(Clone::clone)
+    }
+
+    pub fn last(&self) -> Option<TokenTree> {
+        self.to_vec().first().map(Clone::clone)
+    }
+
+    pub fn span(&self) -> Option<Span> {
+        self.first().map(TokenTree::span)
+    }
+
+    pub fn first_span(&self) -> Option<Span> {
+        self.first().map(|tt| match tt {
+            TokenTree::Group(g) => g.span_open(),
+            _ => tt.span()
+        })
+    }
+
+    pub fn last_span(&self) -> Option<Span> {
+        self.last().map(|tt| match tt {
+            TokenTree::Group(g) => g.span_close(),
+            _ => tt.span()
+        })
+
+    }
+
+    pub fn to_error(&self, msg: impl AsRef<str>) -> Result<Tokens, Tokens> {
+        Err(Tokens::new_compile_error(msg, self.first_span()))
+    }
+
+}
+
+pub trait ToTokens {
+    fn to_tokens(&self) -> Tokens;
+}
+
+pub trait IntoTokens: ToTokens + Sized {
+    fn into_tokens(self) -> Tokens;
+}
+
+mod conversion_trait_impls {
+    use crate::*;
+
+    impl Default for Tokens {
+        fn default() -> Self {
+            Tokens { stream: TokenStream::new(), string: OnceCell::new() }
+        }
+    }
+
+
+    impl ToTokens for Tokens {
+        fn to_tokens(&self) -> Tokens {
+            self.clone()
+        }
+    }
+
+    impl IntoTokens for Tokens {
+        fn into_tokens(self) -> Tokens {
+            self
+        }
+    }
+
+    impl IntoTokens for TokenStream {
+        fn into_tokens(self) -> Tokens {
+            Tokens {
+                stream: self,
+                ..Tokens::default()
+            }
+        }
+    }
+
+    impl ToTokens for TokenStream {
+        fn to_tokens(&self) -> Tokens {
+            self.clone().into_tokens()
+        }
+    }
+
+    impl IntoTokens for TokenTree {
+        fn into_tokens(self) -> Tokens {
+            Tokens::from_iter([self])
+        }
+    }
+
+    impl ToTokens for TokenTree {
+        fn to_tokens(&self) -> Tokens {
+            self.clone().into_tokens()
+        }
+    }
+
+    impl IntoTokens for Group {
+        fn into_tokens(self) -> Tokens {
+            TokenTree::Group(self).into_tokens()
+        }
+    }
+
+    impl ToTokens for Group {
+        fn to_tokens(&self) -> Tokens {
+            self.clone().into_tokens()
+        }
+    }
+
+    impl IntoTokens for Punct {
+        fn into_tokens(self) -> Tokens {
+            TokenTree::Punct(self).into_tokens()
+        }
+    }
+
+    impl ToTokens for Punct {
+        fn to_tokens(&self) -> Tokens {
+            self.clone().into_tokens()
+        }
+    }
+
+    impl IntoTokens for Literal {
+        fn into_tokens(self) -> Tokens {
+            TokenTree::Literal(self).into_tokens()
+        }
+    }
+
+    impl ToTokens for Literal {
+        fn to_tokens(&self) -> Tokens {
+            self.clone().into_tokens()
+        }
+    }
+
+    impl IntoTokens for Ident {
+        fn into_tokens(self) -> Tokens {
+            TokenTree::Ident(self).into_tokens()
+        }
+    }
+
+    impl ToTokens for Ident {
+        fn to_tokens(&self) -> Tokens {
+            self.clone().into_tokens()
+        }
+    }
+
+    impl FromIterator<TokenTree> for Tokens {
+        fn from_iter<I: IntoIterator<Item = TokenTree>>(iter: I) -> Self {
+            TokenStream::from_iter(iter).into_tokens()
+        }
+    }
+
+    impl FromIterator<Tokens> for Tokens {
+        fn from_iter<I: IntoIterator<Item = Tokens>>(iter: I) -> Self {
+            TokenStream::from_iter(iter.into_iter().flatten()).into_tokens()
+        }
+    }
+
+    impl FromStr for Tokens {
+        type Err = proc_macro::LexError;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            Ok(TokenStream::from_str(s)?.into_tokens())
+        }
+    }
+
+    impl IntoIterator for Tokens {
+        type Item = TokenTree;
+        type IntoIter = proc_macro::token_stream::IntoIter;
+
+        fn into_iter(self) -> Self::IntoIter {
+            self.into_stream().into_iter()
+        }
+    }
+
+}
+
+
+
+macro_rules! ignore {
+    ($($tt:tt)*) => {}
+}
+
+ignore!{
+    pub struct Tokens;
+impl Tokens {
 
 
     pub fn from_stream(stream: impl Into<TokenStream>) -> Tokens {
@@ -185,37 +382,43 @@ impl Tokens {
     pub fn flat_map_shallow<F, I>(&self, f: F) -> Tokens
     where
         F: Fn(TokenTree) -> I,
-        I: IntoIterator<Item=TokenTree> {
+        I: IntoIterator<Item = TokenTree>,
+    {
         self.clone().into_iter().flat_map(f).collect()
     }
 
     pub fn flat_map_deep<F, I>(&self, f: F) -> Tokens
     where
         F: Fn(TokenTree) -> I,
-        I: IntoIterator<Item=TokenTree>
+        I: IntoIterator<Item = TokenTree>,
     {
-        self.clone().into_iter().flat_map(f).map(|tt| {
-            if let TokenTree::Group(group) = tt {
-                let mut tt = TokenTree::Group(
-                   Group::new(group.delimiter(), group.stream().into_iter().flat_map(f).collect()));
-                tt.set_span(group.span());
-                tt
-            } else {
-                tt
-            }
-        }).collect()
-
+        self.clone()
+            .into_iter()
+            .flat_map(f)
+            .map(|tt| {
+                if let TokenTree::Group(group) = tt {
+                    let mut tt = TokenTree::Group(Group::new(
+                        group.delimiter(),
+                        group.stream().into_iter().flat_map(f).collect(),
+                    ));
+                    tt.set_span(group.span());
+                    tt
+                } else {
+                    tt
+                }
+            })
+            .collect()
     }
 
     pub fn with_span_shallow(&self, span: Span) -> Self {
-        self.flat_map_shallow(| mut tree | {
+        self.flat_map_shallow(|mut tree| {
             tree.set_span(span);
             Some(tree)
         })
     }
 
     pub fn with_span_deep(&self, span: Span) -> Self {
-        self.flat_map_deep(| mut tree | {
+        self.flat_map_deep(|mut tree| {
             tree.set_span(span);
             Some(tree)
         })
@@ -223,26 +426,26 @@ impl Tokens {
 
     pub fn replace_deep(&self, replacements: &HashMap<String, Tokens>) -> Tokens {
         self.flat_map_deep(|tt| match tt {
-                TokenTree::Ident(ident) =>
-                    if let Some(replacement) = replacements.get(&ident.to_string()) {
-                        replacement.clone()
-                    } else {
-                        Tokens::from_tree(tt)
-                    },
-                _ => Tokens::from_tree(tt)
-            })
+            TokenTree::Ident(ident) =>
+                if let Some(replacement) = replacements.get(&ident.to_string()) {
+                    replacement.clone()
+                } else {
+                    Tokens::from_tree(tt)
+                },
+            _ => Tokens::from_tree(tt),
+        })
     }
 
     pub fn replace_shallow(&self, replacements: &HashMap<String, Tokens>) -> Tokens {
         self.flat_map_shallow(|tt| match tt {
-                TokenTree::Ident(ident) =>
-                    if let Some(replacement) = replacements.get(&ident.to_string()) {
-                        replacement.clone()
-                    } else {
-                        Tokens::from_tree(tt)
-                    },
-                _ => Tokens::from_tree(tt)
-            })
+            TokenTree::Ident(ident) =>
+                if let Some(replacement) = replacements.get(&ident.to_string()) {
+                    replacement.clone()
+                } else {
+                    Tokens::from_tree(tt)
+                },
+            _ => Tokens::from_tree(tt),
+        })
     }
 
     pub fn len(&self) -> usize {

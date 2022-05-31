@@ -21,6 +21,8 @@ mod tokens_list;
 mod util;
 
 pub(crate) use {
+std::str::FromStr,
+
     crate::{generate::*, parse::*, tokens::*, tokens_list::*, util::*},
     ::once_cell::unsync::OnceCell,
     proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree},
@@ -37,10 +39,10 @@ pub(crate) use {
 
 #[proc_macro]
 /// A macro for local code duplication in Rust.
-pub fn doop(input: TokenStream) -> TokenStream {
-    return input.into_tokens().error("oh noes").into_tokens().into_stream();
+pub fn doop(body: TokenStream) -> TokenStream {
+    return body.into_tokens().error("oh noes").into_tokens().into_stream();
 
-    input.pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
+    body.pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
 }
 
 #[proc_macro_attribute]
@@ -168,4 +170,21 @@ pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
     }
 
     item.error("#[doop::inherent] is not yet implemented").into_tokens().into_stream()
+}
+
+#[proc_macro]
+/// Removes the contents from the syntax tree, replacing them with nothing.
+pub fn ignore(body: TokenStream) -> TokenStream {
+    for _ in body {}
+
+    TokenStream::new()
+}
+
+#[proc_macro_attribute]
+/// Removes an item from the syntax tree, replacing it with nothing.
+pub fn ignore_item(attribute: TokenStream, item: TokenStream) -> TokenStream {
+    for _ in attribute {}
+    for _ in item {}
+
+    TokenStream::new()
 }
