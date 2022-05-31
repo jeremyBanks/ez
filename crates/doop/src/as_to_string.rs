@@ -11,8 +11,8 @@ use {
 // This should be AsRef<str> not CompareAsStr.
 
 // Two types:
-// One that adds an AsRef<str> and a Format<String> to a type, using a memoized to_string
-// on the underlying type.
+// One that adds an AsRef<str> and a Format<String> to a type, using a memoized
+// to_string on the underlying type.
 // This is non-zero-sized, of course.
 
 // One that takes an AsRef<str> type and uses it for all comparison operators
@@ -20,10 +20,18 @@ use {
 
 pub fn main() {
     let mut numbers = Vec::from_iter(b"Hello, world!".into_iter().copied());
-
 }
 
-/// Wrapper type implementing AsRef<str> and Display, memoizing the inner value's to_string().
+pub fn like_string<T: Display>(t: T) -> CompareAsStr<AsLazyStr<T>> {
+    CompareAsStr::wrap(AsLazyStr::wrap(t))
+}
+
+pub fn unlike_string<T: Display>(t: CompareAsStr<AsLazyStr<T>>) -> T {
+    t.unwrap().unwrap()
+}
+
+/// Wrapper type implementing AsRef<str> and Display, memoizing the inner
+/// value's to_string().
 pub struct AsLazyStr<Inner: Display> {
     inner: Inner,
     string: OnceCell<String>,
@@ -39,14 +47,35 @@ impl<Inner: Display> AsLazyStr<Inner> {
     }
 }
 
+impl<Inner: Display> Deref for AsLazyStr<Inner> {
+    type Target = Inner;
+
+    fn deref(&self) -> &Inner {
+        &self.inner
+    }
+}
+
 impl<Inner: Display> AsRef<str> for AsLazyStr<Inner> {
     fn as_ref(&self) -> &str {
         self.string.get_or_init(|| self.inner.to_string())
     }
 }
 
-/// Wrapper newtype implementing comparison operators `Eq`, `Ord`, `PartialEq`, PartialOrd`, and `Hash`
-/// for the inner type based on the result of its `AsRef<str>`.
+impl<Inner: Display> Display for AsLazyStr<Inner> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(self.as_ref(), f)
+    }
+}
+
+impl<Inner: Display + Debug> Debug for AsLazyStr<Inner> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(&self.inner, f)
+    }
+}
+
+/// Wrapper newtype implementing comparison operators `Eq`, `Ord`, `PartialEq`,
+/// PartialOrd`, and `Hash` for the inner type based on the result of its
+/// `AsRef<str>`.
 pub struct CompareAsStr<Inner: AsRef<str>>(Inner);
 
 impl<Inner: AsRef<str>> CompareAsStr<Inner> {
@@ -59,25 +88,21 @@ impl<Inner: AsRef<str>> CompareAsStr<Inner> {
     }
 }
 
-impl<Inner: Display> Display for AsLazyStr<Inner> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(self.as_ref(), f)
-    }
-}
+impl<Inner: AsRef<str>> Deref for CompareAsStr<Inner> {
+    type Target = Inner;
 
-impl<Inner: Display> Debug for AsLazyStr<Inner> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Debug::fmt(&self.inner, f)
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
 impl<Inner: AsRef<str>> Display for CompareAsStr<Inner> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.0, f)
+        Display::fmt(self.as_ref(), f)
     }
 }
 
-impl<Inner: AsRef<str>> Debug for CompareAsStr<Inner> {
+impl<Inner: AsRef<str> + Debug> Debug for CompareAsStr<Inner> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Debug::fmt(&self.0, f)
     }
@@ -85,7 +110,7 @@ impl<Inner: AsRef<str>> Debug for CompareAsStr<Inner> {
 
 impl<Inner: AsRef<str>> Ord for CompareAsStr<Inner> {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.as_ref().cmp(&other.0.as_ref())
+        self.as_ref().cmp(&other.as_ref())
     }
 }
 
@@ -97,7 +122,7 @@ impl<Inner: AsRef<str>> PartialOrd for CompareAsStr<Inner> {
 
 impl<Inner: AsRef<str>> PartialEq for CompareAsStr<Inner> {
     fn eq(&self, other: &Self) -> bool {
-        self.as_ref() == other.0.as_ref()
+        self.as_ref() == other.as_ref()
     }
 }
 
@@ -106,13 +131,5 @@ impl<Inner: AsRef<str>> Eq for CompareAsStr<Inner> {}
 impl<Inner: AsRef<str>> Hash for CompareAsStr<Inner> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.as_ref().hash(state)
-    }
-}
-
-impl<Inner: AsRef<str>> Deref for CompareAsStr<Inner> {
-    type Target = Inner;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
