@@ -6,6 +6,20 @@ pub struct Tokens {
     string: OnceCell<String>,
 }
 
+struct AsToString<'inner, Inner: Display>(&'inner Inner);
+
+impl Display for AsToString {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
+
+impl Ord for AsToString {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.0.to_string().cmp(&other.0.to_string())
+    }
+}
+
 impl Tokens {
     pub const fn new() -> Tokens {
         Tokens { stream: TokenStream::new(), string: OnceCell::new() }
