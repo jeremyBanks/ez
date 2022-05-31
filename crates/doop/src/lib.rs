@@ -14,16 +14,14 @@
 //! `doop!`—spelled like "loop" and pronounced like "dupe"—is a macro for local
 //! code duplication in Rust, using a loop-style syntax.
 
+mod as_to_string;
 mod generate;
 mod parse;
-mod tokens;
 mod tokens_list;
 mod util;
 
 pub(crate) use {
-std::str::FromStr,
-
-    crate::{generate::*, parse::*, tokens::*, tokens_list::*, util::*},
+    crate::{as_to_string::*, generate::*, parse::*, tokens_list::*, util::*},
     ::once_cell::unsync::OnceCell,
     proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree},
     std::{
@@ -34,6 +32,7 @@ std::str::FromStr,
         hash::{Hash, Hasher},
         ops::*,
         rc::Rc,
+        str::FromStr,
     },
 };
 
