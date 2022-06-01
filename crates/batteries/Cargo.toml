@@ -8,67 +8,6 @@ license.workspace = true
 rust-version.workspace = true
 version.workspace = true
 
-[features]
-std = ["alloc", "core"]
-alloc = ["core"]
-core = []
-
-[dependencies]
-anymap.workspace = true
-bitflags.workspace = true
-blake3.workspace = true
-bumpalo.workspace = true
-bytes.workspace = true
-cfg-if.workspace = true
-clap = { workspace = true, features = ["derive"] }
-crossbeam.workspace = true
-crossterm.workspace = true
-csv.workspace = true
-digest = { workspace = true, features = ["std"] }
-doop.workspace = true
-dpc-pariter.workspace = true
-elor.workspace = true
-euclid.workspace = true
-git2.workspace = true
-hex-literal.workspace = true
-hex.workspace = true
-home.workspace = true
-hyper.workspace = true
-indexmap.workspace = true
-itertools.workspace = true
-match_cfg.workspace = true
-mio.workspace = true
-munge.workspace = true
-nix.workspace = true
-num-traits.workspace = true
-once_cell.workspace = true
-parking_lot.workspace = true
-paste.workspace = true
-petgraph.workspace = true
-proc-macro2.workspace = true
-rand.workspace = true
-rayon.workspace = true
-rdbc.workspace = true
-regex.workspace = true
-reqwest = { workspace = true, features = ["blocking", "cookies", "gzip", "brotli", "deflate", "json", "multipart"] }
-scopeguard.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-sha-1.workspace = true
-sha2.workspace = true
-sha3.workspace = true
-socket2.workspace = true
-static_assertions.workspace = true
-strum.workspace = true
-tap.workspace = true
-tokio = { workspace = true, features = ["full"] }
-toml.workspace = true
-tracing.workspace = true
-typed-arena.workspace = true
-unicode-segmentation.workspace = true
-url = { workspace = true, features = ["serde"] }
-walkdir.workspace = true
-
 [package.metadata.release]
 consolidate-commits = true
 consolidate-pushes = true
