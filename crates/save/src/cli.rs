@@ -2,7 +2,7 @@
 
 use {
     crate::git2::*,
-    clap::{AppSettings, ArgGroup, Parser},
+    clap::{AppSettings, Parser},
     eyre::{bail, Result, WrapErr},
     git2::{
         Commit, ErrorCode, Repository, RepositoryInitOptions, RepositoryState, Signature, Time,
