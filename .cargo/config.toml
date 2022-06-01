@@ -1,2 +1,6 @@
 [env]
 RUSTC_BOOTSTRAP = "1"
+RUST_BACKTRACE = "1"
+
+[build]
+rustflags = ["-Z", "macro-backtrace"]

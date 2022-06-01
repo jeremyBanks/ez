@@ -1,3 +1,5 @@
+use crate::*;
+
 /// Extension method for all values; a subset of the `tap` crate.
 pub trait AllExt {
     fn pipe<R>(self, f: impl FnOnce(Self) -> R) -> R

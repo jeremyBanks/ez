@@ -9,7 +9,7 @@ use {
     },
 };
 
-/// The top-level `doop!{ ... }` macro invocation block.
+/// The top-level `doop!{ ... }` macro invocation block or equivalent.
 #[derive(Debug, Clone)]
 pub struct DoopBlock {
     pub items: Vec<DoopBlockItem>,

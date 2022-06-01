@@ -1,5 +1,5 @@
 #![warn(missing_docs, clippy::pedantic)]
-#![allow(unused)]
+#![allow(unused, unstable_name_collisions)]
 
 //! `doop!`—spelled like "loop" and pronounced like "dupe"—is a macro for local
 //! code duplication in Rust, using a loop-style syntax.
@@ -20,7 +20,7 @@ pub(crate) use {
     ::once_cell::unsync::OnceCell,
     proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree},
     std::{
-        borrow::Borrow,
+        borrow::{Borrow, BorrowMut},
         cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd},
         collections::{HashMap, HashSet},
         fmt::{Debug, Display},
@@ -31,14 +31,17 @@ pub(crate) use {
     },
 };
 
+pub(crate) type TokenResult<T = TokenStream> = Result<T, TokenStream>;
+pub(crate) type TokenStreamIterator = proc_macro::token_stream::IntoIter;
+
 #[proc_macro]
 /// A macro for local code duplication in Rust.
 pub fn doop(body: TokenStream) -> TokenStream {
-    fn doop(body: TokenStream) -> Result<TokenStream, TokenStream> {
+    fn doop(body: TokenStream) -> TokenResult {
         let mut output = TokenStream::new();
 
-        let only = body.only()?;
-        Ok([only].into_iter().collect())
+        let group = body.bracketed()?.first()?;
+        Ok(TokenStream::new())
     }
     match doop(body) {
         Ok(body) => body,
@@ -102,7 +105,14 @@ pub fn doop(body: TokenStream) -> TokenStream {
 /// struct LifeBytes(&'LIFETIME Vec<u8>);
 /// ```
 pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
-    return item.error("oh boy");
+    fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenResult {
+        attribute.empty()?;
+        Err(Span::call_site().error("#[doop::unwrap] not implemented"))
+    }
+    match unwrap(attribute, item) {
+        Ok(item) => item,
+        Err(err) => err,
+    }
     // let attribute = attribute.into_tokens();
     // let item = item.into_tokens();
 
@@ -142,7 +152,14 @@ pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
 /// let _: (Foo, Bar);
 /// ```
 pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
-    return item.error("oh boy");
+    fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenResult {
+        attribute.empty()?;
+        Err(Span::call_site().error("#[doop::item] not implemented"))
+    }
+    match unwrap(attribute, item) {
+        Ok(item) => item,
+        Err(err) => err,
+    }
     // return item.into_tokens().error("oh noes").into_tokens().into_stream();
 
     // let attribute = attribute.into_tokens();
@@ -163,7 +180,14 @@ pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
 /// as it simply duplicates instead of delegating, supporting fewer cases.
 #[proc_macro_attribute]
 pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
-    return item.error("oh boy");
+    fn inherent(attribute: TokenStream, item: TokenStream) -> TokenResult {
+        attribute.empty()?;
+        Err(Span::call_site().error("#[doop::inherent] not implemented"))
+    }
+    match inherent(attribute, item) {
+        Ok(item) => item,
+        Err(err) => err,
+    }
     // return item.into_tokens().error("oh noes").into_tokens().into_stream();
 
     // let attribute = attribute.into_tokens();
