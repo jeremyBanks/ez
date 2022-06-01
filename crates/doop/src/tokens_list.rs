@@ -15,7 +15,7 @@ use crate::*;
 
 #[derive(Debug, Clone, Default)]
 pub struct TokensList {
-    vec: Vec<Tokens>,
+    vec: Vec<LikeString<TokenStream>>,
 }
 
 impl TokensList {
@@ -28,8 +28,7 @@ impl TokensList {
     }
 
     pub fn union(&mut self, other: &TokensList) {
-        #[allow(clippy::mutable_key_type)]
-        let set: HashSet<Tokens> = self.vec.iter().cloned().collect();
+        let set: HashSet<LikeString<TokenStream>> = self.vec.iter().cloned().collect();
         for item in &other.vec {
             if !set.contains(item) {
                 self.vec.push(item.clone());
@@ -38,98 +37,12 @@ impl TokensList {
     }
 
     pub fn intersect(&mut self, other: &TokensList) {
-        let set: HashSet<&Tokens> = other.vec.iter().collect();
+        let set: HashSet<&LikeString<TokenStream>> = other.vec.iter().collect();
         self.vec.retain(|item| set.contains(item));
     }
 
     pub fn remove(&mut self, other: &TokensList) {
-        let set: HashSet<&Tokens> = other.vec.iter().collect();
+        let set: HashSet<&LikeString<TokenStream>> = other.vec.iter().collect();
         self.vec.retain(|item| !set.contains(item));
-    }
-}
-
-impl From<Vec<Tokens>> for TokensList {
-    fn from(vec: Vec<Tokens>) -> Self {
-        TokensList { vec }
-    }
-}
-
-impl From<TokensList> for Vec<Tokens> {
-    fn from(val: TokensList) -> Self {
-        val.vec
-    }
-}
-
-impl Deref for TokensList {
-    type Target = Vec<Tokens>;
-
-    fn deref(&self) -> &Vec<Tokens> {
-        &self.vec
-    }
-}
-
-impl AsRef<[Tokens]> for TokensList {
-    fn as_ref(&self) -> &[Tokens] {
-        &self.vec
-    }
-}
-
-impl AddAssign<&TokensList> for TokensList {
-    fn add_assign(&mut self, other: &TokensList) {
-        self.extend(other)
-    }
-}
-
-impl SubAssign<&TokensList> for TokensList {
-    fn sub_assign(&mut self, other: &TokensList) {
-        self.remove(other)
-    }
-}
-
-impl BitAndAssign<&TokensList> for TokensList {
-    fn bitand_assign(&mut self, other: &TokensList) {
-        self.intersect(other)
-    }
-}
-
-impl BitOrAssign<&TokensList> for TokensList {
-    fn bitor_assign(&mut self, other: &TokensList) {
-        self.union(other)
-    }
-}
-
-impl Add for &TokensList {
-    type Output = TokensList;
-    fn add(self, other: &TokensList) -> TokensList {
-        let mut result = self.clone();
-        result += other;
-        result
-    }
-}
-
-impl Sub for &TokensList {
-    type Output = TokensList;
-    fn sub(self, other: &TokensList) -> TokensList {
-        let mut result = self.clone();
-        result -= other;
-        result
-    }
-}
-
-impl BitAnd for &TokensList {
-    type Output = TokensList;
-    fn bitand(self, other: &TokensList) -> TokensList {
-        let mut result = self.clone();
-        result &= other;
-        result
-    }
-}
-
-impl BitOr for &TokensList {
-    type Output = TokensList;
-    fn bitor(self, other: &TokensList) -> TokensList {
-        let mut result = self.clone();
-        result |= other;
-        result
     }
 }

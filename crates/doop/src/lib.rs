@@ -1,27 +1,22 @@
 #![warn(missing_docs, clippy::pedantic)]
-#![allow(
-    unused,
-    clippy::items_after_statements,
-    clippy::wildcard_imports,
-    clippy::redundant_else,
-    clippy::from_iter_instead_of_collect,
-    clippy::semicolon_if_nothing_returned,
-    clippy::module_name_repetitions,
-    clippy::mutable_key_type,
-    clippy::let_unit_value
-)]
+#![allow(unused)]
 
 //! `doop!`—spelled like "loop" and pronounced like "dupe"—is a macro for local
 //! code duplication in Rust, using a loop-style syntax.
 
-mod as_to_string;
+mod all_ext;
 mod generate;
 mod parse;
+mod span_range;
+mod string_like;
+mod token_stream;
 mod tokens_list;
-mod util;
 
 pub(crate) use {
-    crate::{as_to_string::*, generate::*, parse::*, tokens_list::*, util::*},
+    crate::{
+        all_ext::*, generate::*, parse::*, span_range::*, string_like::*, token_stream::*,
+        tokens_list::*,
+    },
     ::once_cell::unsync::OnceCell,
     proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree},
     std::{
@@ -39,9 +34,16 @@ pub(crate) use {
 #[proc_macro]
 /// A macro for local code duplication in Rust.
 pub fn doop(body: TokenStream) -> TokenStream {
-    return body.into_tokens().error("oh noes").into_tokens().into_stream();
+    fn doop(body: TokenStream) -> Result<TokenStream, TokenStream> {
+        let mut output = TokenStream::new();
 
-    body.pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
+        let only = body.only()?;
+        Ok([only].into_iter().collect())
+    }
+    match doop(body) {
+        Ok(body) => body,
+        Err(err) => err,
+    }
 }
 
 #[proc_macro_attribute]
@@ -100,30 +102,33 @@ pub fn doop(body: TokenStream) -> TokenStream {
 /// struct LifeBytes(&'LIFETIME Vec<u8>);
 /// ```
 pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
-    let attribute = attribute.into_tokens();
-    let item = item.into_tokens();
+    return item.error("oh boy");
+    // let attribute = attribute.into_tokens();
+    // let item = item.into_tokens();
 
-    return item.error("oh noes").into_tokens().into_stream();
+    // return item.error("oh noes").into_tokens().into_stream();
 
-    if !attribute.is_empty() {
-        return attribute
-            .error("no arguments expected for #[doop::block] attribute macro")
-            .into_tokens()
-            .into_stream();
-    }
+    // if !attribute.is_empty() {
+    //     return attribute
+    //         .error("no arguments expected for #[doop::block] attribute
+    // macro")         .into_tokens()
+    //         .into_stream();
+    // }
 
-    let input = Tokens::from(TokenStream::from(item));
+    // let input = Tokens::from(TokenStream::from(item));
 
-    let braced =
-        input.iter().filter_map(|tt| (Tokens::from(tt.clone()).braced())).collect::<Vec<_>>();
-    if braced.len() != 1 {
-        return input
-            .error("expected exactly one braced block in item statement")
-            .into_tokens()
-            .into_stream();
-    }
+    // let braced =
+    //     input.iter().filter_map(|tt|
+    // (Tokens::from(tt.clone()).braced())).collect::<Vec<_>>();
+    // if braced.len() != 1 {
+    //     return input
+    //         .error("expected exactly one braced block in item statement")
+    //         .into_tokens()
+    //         .into_stream();
+    // }
 
-    braced[0].clone().pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
+    // braced[0].clone().pipe(Tokens::from).pipe_ref(parse).map(generate).
+    // into_tokens().into_stream()
 }
 
 #[proc_macro_attribute]
@@ -137,17 +142,19 @@ pub fn unwrap(attribute: TokenStream, item: TokenStream) -> TokenStream {
 /// let _: (Foo, Bar);
 /// ```
 pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
-    return item.into_tokens().error("oh noes").into_tokens().into_stream();
+    return item.error("oh boy");
+    // return item.into_tokens().error("oh noes").into_tokens().into_stream();
 
-    let attribute = attribute.into_tokens();
-    let item = item.into_tokens();
+    // let attribute = attribute.into_tokens();
+    // let item = item.into_tokens();
 
-    let mut input = TokenStream::new();
-    input.extend(attribute);
-    let group = Group::new(Delimiter::Brace, item.into());
-    input.extend(Some(TokenTree::Group(group)));
+    // let mut input = TokenStream::new();
+    // input.extend(attribute);
+    // let group = Group::new(Delimiter::Brace, item.into());
+    // input.extend(Some(TokenTree::Group(group)));
 
-    input.pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().into_stream()
+    // input.pipe(Tokens::from).pipe_ref(parse).map(generate).into_tokens().
+    // into_stream()
 }
 
 /// Duplicates a trait impl block as an inherent impl block.
@@ -156,19 +163,21 @@ pub fn item(attribute: TokenStream, item: TokenStream) -> TokenStream {
 /// as it simply duplicates instead of delegating, supporting fewer cases.
 #[proc_macro_attribute]
 pub fn inherent(attribute: TokenStream, item: TokenStream) -> TokenStream {
-    return item.into_tokens().error("oh noes").into_tokens().into_stream();
+    return item.error("oh boy");
+    // return item.into_tokens().error("oh noes").into_tokens().into_stream();
 
-    let attribute = attribute.into_tokens();
-    let item = item.into_tokens();
+    // let attribute = attribute.into_tokens();
+    // let item = item.into_tokens();
 
-    if !attribute.is_empty() {
-        return attribute
-            .error("no arguments expected for #[doop::inherent] attribute macro")
-            .into_tokens()
-            .into_stream();
-    }
+    // if !attribute.is_empty() {
+    //     return attribute
+    //         .error("no arguments expected for #[doop::inherent] attribute
+    // macro")         .into_tokens()
+    //         .into_stream();
+    // }
 
-    item.error("#[doop::inherent] is not yet implemented").into_tokens().into_stream()
+    // item.error("#[doop::inherent] is not yet
+    // implemented").into_tokens().into_stream()
 }
 
 #[proc_macro]

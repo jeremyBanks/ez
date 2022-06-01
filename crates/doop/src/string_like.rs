@@ -8,25 +8,13 @@ use {
     },
 };
 
-// This should be AsRef<str> not CompareAsStr.
+pub type LikeString<T> = CompareAsStr<AsLazyStr<T>>;
 
-// Two types:
-// One that adds an AsRef<str> and a Format<String> to a type, using a memoized
-// to_string on the underlying type.
-// This is non-zero-sized, of course.
-
-// One that takes an AsRef<str> type and uses it for all comparison operators
-// This is a zero-sized wrapper.
-
-pub fn main() {
-    let mut numbers = Vec::from_iter(b"Hello, world!".into_iter().copied());
-}
-
-pub fn like_string<T: Display>(t: T) -> CompareAsStr<AsLazyStr<T>> {
+pub fn like_string<T: Display>(t: T) -> LikeString<T> {
     CompareAsStr::wrap(AsLazyStr::wrap(t))
 }
 
-pub fn unlike_string<T: Display>(t: CompareAsStr<AsLazyStr<T>>) -> T {
+pub fn unlike_string<T: Display>(t: LikeString<T>) -> T {
     t.unwrap().unwrap()
 }
 
@@ -73,6 +61,12 @@ impl<Inner: Display + Debug> Debug for AsLazyStr<Inner> {
     }
 }
 
+impl<Inner: Display + Clone> Clone for AsLazyStr<Inner> {
+    fn clone(&self) -> Self {
+        AsLazyStr { inner: self.inner.clone(), string: self.string.clone() }
+    }
+}
+
 /// Wrapper newtype implementing comparison operators `Eq`, `Ord`, `PartialEq`,
 /// PartialOrd`, and `Hash` for the inner type based on the result of its
 /// `AsRef<str>`.
@@ -105,6 +99,12 @@ impl<Inner: AsRef<str>> Display for CompareAsStr<Inner> {
 impl<Inner: AsRef<str> + Debug> Debug for CompareAsStr<Inner> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Debug::fmt(&self.0, f)
+    }
+}
+
+impl<Inner: AsRef<str> + Clone> Clone for CompareAsStr<Inner> {
+    fn clone(&self) -> Self {
+        CompareAsStr(self.0.clone())
     }
 }
 
