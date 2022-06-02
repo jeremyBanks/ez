@@ -88,8 +88,8 @@ pub struct Args {
     /// of the current timestamp.
     ///
     /// If there is no previous commit, this uses the next available timestamp
-    /// after the current time (or value provided to `--timestamp`) rounded down to
-    /// the closest multiple of `0x1000000` (a period of ~6 months).
+    /// after the current time (or value provided to `--timestamp`) rounded down
+    /// to the closest multiple of `0x1000000` (a period of ~6 months).
     ///
     /// This can be used to help produce deterministic timestamps and commit
     /// IDs for reproducible builds.

@@ -6,7 +6,7 @@ pub(self) use git2::{
     Signature, Tag, Time, Tree,
 };
 use {
-    digest::{generic_array::GenericArray, Digest},
+    digest::{generic_array::GenericArray, typenum::U20, Digest},
     eyre::{Context, Result},
     itertools::Itertools,
     petgraph::{
@@ -29,7 +29,6 @@ use {
     tempfile::TempDir,
     thousands::Separable,
     tracing::{debug, debug_span, info, instrument, trace, warn},
-    digest::typenum::U20,
 };
 
 /// Extension methods for [`Repository`].

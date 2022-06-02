@@ -1,7 +1,4 @@
 use {eyre::Result, git2::Repository, save::git2::CommitExt};
-use bitvec::prelude::*;
-
-// I could return bits + a mask
 
 pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
     let mut hex_bytes = s.as_ref().as_bytes();
@@ -19,7 +16,7 @@ pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
             b'a'..=b'f' => byte.wrapping_sub(b'a' - 10),
             b'A'..=b'F' => byte.wrapping_sub(b'A' - 10),
             b'_' | b' ' | b'\n' | b'\t' | b',' | b';' => continue,
-            _ => panic!("Invalid byte {byte:?} ({:?}) in hex input.", *byte as char)
+            _ => panic!("Invalid byte {byte:?} ({:?}) in hex input.", *byte as char),
         };
 
         if let Some(byte) = buffer_byte.take() {
@@ -35,7 +32,7 @@ pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
         mask.push(0xF0);
     }
 
-    (bytes, mask)
+    bytes.zip(mask)
 }
 
 pub(crate) fn decode_hex_bytes(s: impl AsRef<str>) -> Vec<u8> {
@@ -65,17 +62,30 @@ fn main() -> Result<()> {
     let head = repo.head()?.peel_to_commit()?;
     let tree = head.tree()?;
     let head = &head.id().to_string()[..8];
-    let tree = &tree.id().to_string()[..4];
+    let tree = &tree.id().to_string()[..8];
 
     let revision = 409;
     let generation = 1647;
     let number = 1862;
-    println!("
-               id: {head}
-          message: {tree} at r{revision} / g{generation} / n{number}
-    ");
+    println!(
+        "
+    initial commit:
+        message: r0
 
-    let hex = hex![12345678];
+    first merge of a single parallel commit:
+        message: r4 / n5
+
+    first merge of a single commit that could be fast-forwarded instead:
+        message: r4 / g5
+
+    typical non-linear head:
+        message: r{revision} / g{generation} / n{number}
+             id: {head}
+           tree: {tree}
+    "
+    );
+
+    let hex = hex![0x123a2631311531532323524624624624375373572437331131131313131313145678];
     println!("hex: {hex:02x?}");
     let hex_masked = hex_masked![0x123456789];
     println!("hex_masked: {hex_masked:02x?}");
