@@ -116,7 +116,8 @@ pub trait TokenStreamExt: Borrow<TokenStream> + BorrowMut<TokenStream> + Sized {
     fn parenthesized(&self) -> Result<TokenStream, TokenStream> {
         match self.group() {
             Ok(group) if group.delimiter() == Delimiter::Parenthesis => Ok(group.stream()),
-            Ok(other) => Err(other.span_range().error("Expected group to be parenthesized: (...).")),
+            Ok(other) =>
+                Err(other.span_range().error("Expected group to be parenthesized: (...).")),
             Err(err) => Err(err),
         }
     }
@@ -165,10 +166,10 @@ pub trait TokenStreamExt: Borrow<TokenStream> + BorrowMut<TokenStream> + Sized {
         })
     }
 
-    fn replace_deep(&self, replacements: &HashMap<String, TokenStream>) ->
-    TokenStream {     self.flat_map_deep(|tt| match tt {
+    fn replace_deep(&self, replacements: &HashMap<String, TokenStream>) -> TokenStream {
+        self.flat_map_deep(|tt| match tt {
             TokenTree::Ident(ident) =>
-                if let Ok(replacement) = replacements.get(&ident.to_string()) {
+                if let Some(replacement) = replacements.get(&ident.to_string()) {
                     replacement.clone()
                 } else {
                     TokenStream::from_iter([tt])
@@ -177,10 +178,10 @@ pub trait TokenStreamExt: Borrow<TokenStream> + BorrowMut<TokenStream> + Sized {
         })
     }
 
-    fn replace_shallow(&self, replacements: &HashMap<String, TokenStream>) ->
-    TokenStream {     self.flat_map_shallow(|tt| match tt {
+    fn replace_shallow(&self, replacements: &HashMap<String, TokenStream>) -> TokenStream {
+        self.flat_map_shallow(|tt| match tt {
             TokenTree::Ident(ident) =>
-                if let Ok(replacement) = replacements.get(&ident.to_string()) {
+                if let Some(replacement) = replacements.get(&ident.to_string()) {
                     replacement.clone()
                 } else {
                     TokenStream::from_iter([tt])
@@ -189,7 +190,7 @@ pub trait TokenStreamExt: Borrow<TokenStream> + BorrowMut<TokenStream> + Sized {
         })
     }
 
-    fn split_lines(&self) -> TokenStreamIterator {
+    fn split_lines(&self) -> Vec<TokenStream> {
         let vec = self.to_vec();
         let mut lines = Vec::new();
         let mut next_line_start_index = 0;
@@ -201,8 +202,8 @@ pub trait TokenStreamExt: Borrow<TokenStream> + BorrowMut<TokenStream> + Sized {
                     ));
                     next_line_start_index = i + 1;
                 }
-                TokenTree::Group(group) if group.delimiter() == Delimiter::Brace
-    => {                 lines.push(TokenStream::from_iter(
+                TokenTree::Group(group) if group.delimiter() == Delimiter::Brace => {
+                    lines.push(TokenStream::from_iter(
                         vec[next_line_start_index..=i].iter().cloned(),
                     ));
                     next_line_start_index = i + 1;
@@ -210,13 +211,12 @@ pub trait TokenStreamExt: Borrow<TokenStream> + BorrowMut<TokenStream> + Sized {
                 _ => {}
             }
         }
-        lines.push(TokenStream::from_iter(vec[next_line_start_index..].iter().
-    cloned()));
+        lines.push(TokenStream::from_iter(vec[next_line_start_index..].iter().cloned()));
 
-        lines.into_iter()
+        lines
     }
 
-    fn split_commas(&self) -> TokenStreamIterator {
+    fn split_commas(&self) -> Vec<TokenStream> {
         let vec = self.to_vec();
         let mut slices = Vec::new();
         let mut next_comma_start_index = 0;
@@ -232,9 +232,8 @@ pub trait TokenStreamExt: Borrow<TokenStream> + BorrowMut<TokenStream> + Sized {
             }
         }
 
-        slices.push(TokenStream::from_iter(vec[next_comma_start_index..].iter().
-    cloned()));
+        slices.push(TokenStream::from_iter(vec[next_comma_start_index..].iter().cloned()));
 
-        slices.into_iter()
+        slices
     }
 }
