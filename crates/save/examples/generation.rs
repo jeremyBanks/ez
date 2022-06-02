@@ -3,63 +3,60 @@ use bitvec::prelude::*;
 
 // I could return bits + a mask
 
-
-pub(crate) fn hex_bits(s: impl AsRef<str>) -> BitVec<u8> {
-    let mut s = s.as_ref();
-
-    // This is an upper-bound on the actual required capacity,
-    // because it still includes spacing and other characters
-    // that we will ignore below, but should still be a lot
-    // better than requiring the Vec to grow dynamically.
-    let mut bits = BitVec::<u8>::with_capacity(s.len() * 4);
-
-    if s.starts_with("0x") || s.starts_with("0X") {
-        s = &s[2..];
+pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
+    let mut hex_bytes = s.as_ref().as_bytes();
+    if hex_bytes.get(0) == Some(&b'0') && matches!(hex_bytes.get(1), Some(b'x' | b'X')) {
+        hex_bytes = &hex_bytes[2..];
     }
+    let capacity = (hex_bytes.len() + 1) / 2;
+    let mut bytes = Vec::<u8>::with_capacity(capacity);
+    let mut mask = Vec::<u8>::with_capacity(capacity);
+    let mut buffer_byte: Option<u8> = None;
 
-    for c in s.chars() {
-        match c {
-            // ignore whitespace, underscores, and commas
-            '_' | ' ' | '\t' | '\n' | '"' | '\'' | ',' => {},
-            '0' => bits.extend([false, false, false, false]),
-            '1' => bits.extend([false, false, false, true]),
-            '2' => bits.extend([false, false, true, false]),
-            '3' => bits.extend([false, false, true, true]),
-            '4' => bits.extend([false, true, false, false]),
-            '5' => bits.extend([false, true, false, true]),
-            '6' => bits.extend([false, true, true, false]),
-            '7' => bits.extend([false, true, true, true]),
-            '8' => bits.extend([true, false, false, false]),
-            '9' => bits.extend([true, false, false, true]),
-            'a' | 'A' => bits.extend([true, false, true, false]),
-            'b' | 'B' => bits.extend([true, false, true, true]),
-            'c' | 'C' => bits.extend([true, true, false, false]),
-            'd' | 'D' => bits.extend([true, true, false, true]),
-            'e' | 'E' => bits.extend([true, true, true, false]),
-            'f' | 'F' => bits.extend([true, true, true, true]),
-            _ => panic!("invalid character {c:?} in hex string"),
+    for byte in hex_bytes {
+        let nibble = match byte {
+            b'0'..=b'9' => byte.wrapping_sub(b'0'),
+            b'a'..=b'f' => byte.wrapping_sub(b'a' - 10),
+            b'A'..=b'F' => byte.wrapping_sub(b'A' - 10),
+            b'_' | b' ' | b'\n' | b'\t' | b',' | b';' => continue,
+            _ => panic!("Invalid byte {byte:?} ({:?}) in hex input.", *byte as char)
+        };
+
+        if let Some(byte) = buffer_byte.take() {
+            bytes.push(byte | nibble);
+            mask.push(0xFF);
+        } else {
+            buffer_byte = Some(nibble << 4);
         }
     }
 
-    bits
+    if let Some(byte) = buffer_byte {
+        bytes.push(byte);
+        mask.push(0xF0);
+    }
+
+    (bytes, mask)
 }
 
-pub(crate) fn hex_bytes(s: impl AsRef<str>) -> Vec<u8> {
-    let bits = hex_bits(s.as_ref());
-    let bytes = bits.as_raw_slice();
-    dbg!(bytes);
-    bytes.iter().copied().collect()
+pub(crate) fn decode_hex_bytes(s: impl AsRef<str>) -> Vec<u8> {
+    let s = s.as_ref();
+    if s.len() % 2 != 0 {
+        panic!("Odd number of digits in hex string.");
+    }
+    decode_hex_nibbles(s).0
 }
 
-macro_rules! hex_bytes {
+#[macro_export(crate)]
+macro_rules! hex {
     [$($hex:tt)*] => {
-        crate::hex_bytes(stringify!($($hex)*))
+        crate::decode_hex_bytes(stringify!($($hex)*))
     }
 }
 
-macro_rules! hex_bits {
+#[macro_export(crate)]
+macro_rules! hex_masked {
     [$($hex:tt)*] => {
-        crate::hex_bits(stringify!($($hex)*))
+        crate::decode_hex_nibbles(stringify!($($hex)*))
     }
 }
 
@@ -78,12 +75,10 @@ fn main() -> Result<()> {
           message: {tree} at r{revision} / g{generation} / n{number}
     ");
 
-    let some_bytes = hex_bytes![0x_FF_FF_F];
-    println!("as damn bytes: {some_bytes:02x?}");
-    let some_bits = hex_bits![0xFFFFF];
-    println!("as bits: {some_bits:02x?}");
-
-
+    let hex = hex![12345678];
+    println!("hex: {hex:02x?}");
+    let hex_masked = hex_masked![0x123456789];
+    println!("hex_masked: {hex_masked:02x?}");
 
     Ok(())
 }
