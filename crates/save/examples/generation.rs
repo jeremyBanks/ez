@@ -32,7 +32,7 @@ pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
         mask.push(0xF0);
     }
 
-    bytes.zip(mask)
+    bytes.into_iter().zip(mask).into_iter()
 }
 
 pub(crate) fn decode_hex_bytes(s: impl AsRef<str>) -> Vec<u8> {
