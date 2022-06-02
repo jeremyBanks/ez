@@ -25,14 +25,15 @@ pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, impl Iterator<
         }
     }
 
-    let mask_ff = std::iter::repeat(0xFF).take(bytes.len());
+    let mask_full_bytes = std::iter::repeat(0xFF).take(bytes.len());
     let mask: Box<dyn Iterator<Item = u8>>;
 
     if let Some(byte) = buffer_byte {
         bytes.push(byte);
-        mask = Box::new(mask_ff.chain(std::iter::once(0xF0)))
+        std::iter::once(0xF0);
+        mask = Box::new(mask_full_bytes.chain(mask_half_byte))
     } else {
-        mask = Box::new(mask_ff);
+        mask = Box::new(mask_full_bytes);
     }
 
     (bytes, mask)
@@ -89,7 +90,10 @@ fn main() -> Result<()> {
     );
 
     let hex = hex![4b825dc642cb6eb9a060e54bf8d69288fbee4904];
-    println!("hex: {hex:02x?}");
+    println!(
+        "hex:
+        {hex:02x?}
+    ");
 
     let hex_masked = hex_masked![4b825dc642cb6eb9a060e54bf8d69288fbee4904];
     println!(
