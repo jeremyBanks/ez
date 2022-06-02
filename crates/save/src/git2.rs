@@ -29,7 +29,7 @@ use {
     tempfile::TempDir,
     thousands::Separable,
     tracing::{debug, debug_span, info, instrument, trace, warn},
-    typenum::U20,
+    digest::typenum::U20,
 };
 
 /// Extension methods for [`Repository`].

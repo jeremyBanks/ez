@@ -7,45 +7,36 @@ use {
     git2::{
         Commit, ErrorCode, Repository, RepositoryInitOptions, RepositoryState, Signature, Time,
     },
-    lazy_static::lazy_static,
+    once_cell::sync::Lazy,
     std::{env, fs, process::Command},
     tracing::{debug, info, instrument, trace, warn},
 };
-
-macro_rules! lazy_ref {
-    { $type:ty = $($tt:tt)+ } => {
-        {
-            lazy_static! {
-                static ref VALUE: $type = { $($tt)+ };
-            }
-            VALUE.as_ref()
-        }
-    }
-}
 
 /// Would you like to SAVE the change?
 ///
 /// Commit everything in the current Git repository, no questions asked.
 #[derive(Parser, Debug, Clone)]
 #[clap(
-    after_help = lazy_ref! { String = format!(
-        "{}\n    https://docs.rs/{name}/{semver}\n    https://crates.io/crates/{name}\n    {repository}",
-        "LINKS:",
-        name = env!("CARGO_PKG_NAME"),
-        semver = {
-            if env!("CARGO_PKG_VERSION_PRE", "").len() > 0 {
-                format!("%3C%3D{}", env!("CARGO_PKG_VERSION"))
-            } else {
-                env!("CARGO_PKG_VERSION").to_string()
-            }
-        },
-        repository = env!("CARGO_PKG_REPOSITORY"))
+    after_help = {
+        static AFTER_HELP: Lazy<String> = Lazy::new(|| { format!(
+            "{}\n    https://docs.rs/{name}/{semver}\n    https://crates.io/crates/{name}\n    {repository}",
+            "LINKS:",
+            name = env!("CARGO_PKG_NAME"),
+            semver = {
+                if env!("CARGO_PKG_VERSION_PRE", "").len() > 0 {
+                    format!("%3C%3D{}", env!("CARGO_PKG_VERSION"))
+                } else {
+                    env!("CARGO_PKG_VERSION").to_string()
+                }
+            },
+            repository = env!("CARGO_PKG_REPOSITORY"))
+        });
+        AFTER_HELP.as_ref()
     },
     max_term_width = max_term_width(),
-    setting = AppSettings::DeriveDisplayOrder
-            | AppSettings::DontCollapseArgsInUsage
-            | AppSettings::InferLongArgs
-            | AppSettings::WaitOnError,
+    dont_collapse_args_in_usage = true,
+    infer_long_args = true,
+    setting = AppSettings::DeriveDisplayOrder,
     version
 )]
 pub struct Args {
@@ -83,7 +74,7 @@ pub struct Args {
     )]
     pub squash_commits: u32,
 
-    /// The target commit hash or prefix, in hex.
+    /// The required commit hash or prefix, in hex.
     ///
     /// [default: the first four hex digits of the commit's tree hash]
     #[clap(long = "prefix", short = 'x')]
@@ -97,7 +88,7 @@ pub struct Args {
     /// of the current timestamp.
     ///
     /// If there is no previous commit, this uses the next available timestamp
-    /// after the current time (or value provided to `--now`) rounded down to
+    /// after the current time (or value provided to `--timestamp`) rounded down to
     /// the closest multiple of `0x1000000` (a period of ~6 months).
     ///
     /// This can be used to help produce deterministic timestamps and commit

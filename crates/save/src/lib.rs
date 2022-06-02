@@ -15,6 +15,7 @@
     unused_import_braces,
     unused_lifetimes,
     unused_qualifications,
+    unused_crate_dependencies,
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
     clippy::cast_possible_wrap,
