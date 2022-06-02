@@ -1,14 +1,13 @@
 cargo-features = ["workspace-inheritance"]
 
 [package]
-authors = ["Jeremy Banks <_@jeremy.ca>"]
 default-run = "save"
 description = "Would you like to SAVE the change?"
 edition.workspace = true
 license.workspace = true
 name = "save"
-repository = "https://github.com/jeremyBanks/save"
-version = "0.7.0-dev.0"
+repository.workspace = true
+version.workspace = true
 
 [dependencies]
 clap = { features = ["derive", "env", "cargo", "unicode", "wrap_help"], workspace = true }
@@ -34,6 +33,7 @@ tracing = { features = ["log"], workspace = true }
 tracing-error = { features = ["traced-error"], workspace = true }
 tracing-subscriber = { features = ["env-filter"], workspace = true }
 typenum.workspace = true
+once_cell.workspcae = true
 
 [[bench]]
 name = "criterion"
