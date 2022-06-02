@@ -1,13 +1,12 @@
 use {eyre::Result, git2::Repository, save::git2::CommitExt};
 
-pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
+pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, impl Iterator<Item = u8>) {
     let mut hex_bytes = s.as_ref().as_bytes();
     if hex_bytes.get(0) == Some(&b'0') && matches!(hex_bytes.get(1), Some(b'x' | b'X')) {
         hex_bytes = &hex_bytes[2..];
     }
     let capacity = (hex_bytes.len() + 1) / 2;
     let mut bytes = Vec::<u8>::with_capacity(capacity);
-    let mut mask = Vec::<u8>::with_capacity(capacity);
     let mut buffer_byte: Option<u8> = None;
 
     for byte in hex_bytes {
@@ -15,24 +14,28 @@ pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
             b'0'..=b'9' => byte.wrapping_sub(b'0'),
             b'a'..=b'f' => byte.wrapping_sub(b'a' - 10),
             b'A'..=b'F' => byte.wrapping_sub(b'A' - 10),
-            b'_' | b' ' | b'\n' | b'\t' | b',' | b';' => continue,
+            b'_' | b' ' | b'\n' | b'\t' | b',' | b';' | b'"' | b'\'' => continue,
             _ => panic!("Invalid byte {byte:?} ({:?}) in hex input.", *byte as char),
         };
 
         if let Some(byte) = buffer_byte.take() {
             bytes.push(byte | nibble);
-            mask.push(0xFF);
         } else {
             buffer_byte = Some(nibble << 4);
         }
     }
 
+    let mask_ff = std::iter::repeat(0xFF).take(bytes.len());
+    let mask: Box<dyn Iterator<Item = u8>>;
+
     if let Some(byte) = buffer_byte {
         bytes.push(byte);
-        mask.push(0xF0);
+        mask = Box::new(mask_ff.chain(std::iter::once(0xF0)))
+    } else {
+        mask = Box::new(mask_ff);
     }
 
-    bytes.into_iter().zip(mask).into_iter()
+    (bytes, mask)
 }
 
 pub(crate) fn decode_hex_bytes(s: impl AsRef<str>) -> Vec<u8> {
@@ -61,34 +64,52 @@ fn main() -> Result<()> {
     let repo = Repository::open_from_env()?;
     let head = repo.head()?.peel_to_commit()?;
     let tree = head.tree()?;
-    let head = &head.id().to_string()[..8];
-    let tree = &tree.id().to_string()[..8];
+    let head_str = &head.id().to_string()[..8];
+    let tree_str = &tree.id().to_string()[..8];
 
-    let revision = 409;
-    let generation = 1647;
-    let number = 1862;
+    let revision = 204;
+    let generation = head.generation_number();
+    let number = 719;
     println!(
         "
-    initial commit:
-        message: r0
+        initial commit:
+            message: r0
 
-    first merge of a single parallel commit:
-        message: r4 / n5
+        first merge of a single parallel commit:
+            message: r4 / n5
 
-    first merge of a single commit that could be fast-forwarded instead:
-        message: r4 / g5
+        first merge of a single commit that could be fast-forwarded instead:
+            message: r4 / g5
 
-    typical non-linear head:
-        message: r{revision} / g{generation} / n{number}
-             id: {head}
-           tree: {tree}
-    "
+        typical non-linear head:
+            message: r{revision} / g{generation} / n{number}
+                id: {head_str}
+              tree: {tree_str}
+        "
     );
 
-    let hex = hex![0x123a2631311531532323524624624624375373572437331131131313131313145678];
+    let hex = hex![4b825dc642cb6eb9a060e54bf8d69288fbee4904];
     println!("hex: {hex:02x?}");
-    let hex_masked = hex_masked![0x123456789];
-    println!("hex_masked: {hex_masked:02x?}");
+
+    let hex_masked = hex_masked![4b825dc642cb6eb9a060e54bf8d69288fbee4904];
+    println!(
+        "hex_masked:
+        {:02x?}
+        {:02x?}
+    ",
+        hex_masked.0,
+        hex_masked.1.collect::<Vec<_>>()
+    );
+
+    let hex_masked = hex_masked![4b825dc642cb6eb9a060e54bf8d69288fbee49045];
+    println!(
+        "hex_masked:
+        {:02x?}
+        {:02x?}
+    ",
+        hex_masked.0,
+        hex_masked.1.collect::<Vec<_>>()
+    );
 
     Ok(())
 }

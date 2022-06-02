@@ -6,7 +6,6 @@
     macro_use_extern_crate,
     missing_copy_implementations,
     missing_debug_implementations,
-    missing_docs,
     non_ascii_idents,
     noop_method_call,
     single_use_lifetimes,
