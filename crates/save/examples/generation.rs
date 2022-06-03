@@ -25,6 +25,8 @@ pub(crate) fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, impl Iterator<
         }
     }
 
+    // e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+
     let mask_full_bytes = std::iter::repeat(0xFF).take(bytes.len());
     let mask: Box<dyn Iterator<Item = u8>>;
 
