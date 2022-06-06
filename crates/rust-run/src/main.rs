@@ -1,7 +1,14 @@
-use ::{
-    eyre::bail,
-    std::{self, ffi::OsString, os::unix::prelude::OsStrExt, path::PathBuf},
+use {
+    std::fmt::Write,
+    ::{
+        eyre::bail,
+        std::{self, ffi::OsString, os::unix::prelude::OsStrExt, path::PathBuf},
+    },
 };
+
+pub(crate) use crate::hashing::*;
+
+mod hashing;
 
 fn main() -> eyre::Result<()> {
     ::color_eyre::install()?;
