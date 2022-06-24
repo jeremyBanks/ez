@@ -6,11 +6,7 @@ use {
     },
 };
 
-/// Returns the hexadecimal SHA-1 digest of bytes as git would for a blob
-/// (file).
-///
-/// This should make the file hash consistent with what you see in git.
-pub fn git_file_sha1(content: &[u8]) -> String {
+pub fn git_blob_sha1_hex(content: &[u8]) -> String {
     let mut hasher = Sha1::default();
     hasher.update(b"blob ");
     hasher.update(content.len().to_string());
