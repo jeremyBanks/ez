@@ -163,6 +163,7 @@ pub fn main(args: Args) -> Result<()> {
     let tree = repo.find_tree(tree)?;
 
     let revision_index = generation_number + 1;
+
     let message = args.message.unwrap_or_else(|| {
         let mut message = format!("r{revision_index}");
         if let Some(ref head) = head {

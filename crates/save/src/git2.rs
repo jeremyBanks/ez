@@ -190,13 +190,6 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
         body
     }
 
-    /// Finds the generation number of this commit.
-    ///
-    /// The generation index is the number of edges of the longest path between
-    /// the given commit and an initial commit (one with no parents, which
-    /// has an implicit generation index of 0). The Git documentation also
-    /// refers to this as the "topological level" of a commit
-    /// (<https://git-scm.com/docs/commit-graph>).
     #[instrument(level = "debug")]
     #[must_use]
     fn generation_number(&self) -> u32 {
@@ -369,6 +362,9 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
                 }
             }
         }
+
+        let ancestor_commits_count = graph.node_count() - 1;
+        let revision_index = global_maximum_weight;
 
         global_maximum_weight
     }
@@ -551,6 +547,12 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
             BruteForcedCommit::Incomplete { commit: brute_forced_commit }
         }
     }
+}
+
+struct GraphStats {
+    revision_index: u64,
+    generation_index: u64,
+    commits_index: u64,
 }
 
 impl<'repo, T> CommitExt<'repo> for T where T: Borrow<Commit<'repo>> + Debug {}

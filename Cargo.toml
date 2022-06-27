@@ -1,8 +1,9 @@
 cargo-features = ["workspace-inheritance"]
 
 [workspace]
-members = ["crates/*"]
-default-members = ["crates/ez", "crates/examples"]
+members = ["crates/save"]
+# members = ["crates/*"]
+# default-members = ["crates/ez", "crates/examples"]
 
 [workspace.package]
 edition = "2021"
