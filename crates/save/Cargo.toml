@@ -1,32 +1,28 @@
-cargo-features = ["workspace-inheritance"]
-
 [package]
 default-run = "save"
 description = "Would you like to SAVE the change?"
-edition.workspace = true
-license.workspace = true
+edition = "2021"
 name = "save"
-repository.workspace = true
-version.workspace = true
+version = "0.6.0"
 
 [dependencies]
-clap = { features = ["derive", "env", "cargo", "unicode", "wrap_help"], workspace = true }
-color-eyre.workspace = true
-digest.workspace = true
-eyre.workspace = true
-git2.workspace = true
-hex.workspace = true
-home.workspace = true
-itertools.workspace = true
-once_cell.workspace = true
-petgraph.workspace = true
-rayon.workspace = true
-sha-1.workspace = true
-tempfile.workspace = true
-thousands.workspace = true
-tracing = { features = ["log"], workspace = true }
-tracing-error = { features = ["traced-error"], workspace = true }
-tracing-subscriber = { features = ["env-filter"], workspace = true }
+clap = { features = ["derive", "env", "cargo", "unicode", "wrap_help"], version = "*" }
+color-eyre = "*"
+digest = "*"
+eyre = "*"
+git2 = "*"
+hex = "*"
+home = "*"
+itertools = "*"
+once_cell = "*"
+petgraph = "*"
+rayon = "*"
+sha-1 = "*"
+tempfile = "*"
+thousands = "*"
+tracing = { features = ["log"], version = "*" }
+tracing-error = { features = ["traced-error"], version = "*" }
+tracing-subscriber = { features = ["env-filter"], version = "*" }
 
 [[bench]]
 name = "criterion"
@@ -37,9 +33,9 @@ name = "iai"
 harness = false
 
 [dev-dependencies]
-criterion = { features = ["html_reports"], workspace = true }
-crossterm.workspace = true
-iai.workspace = true
+criterion = { features = ["html_reports"], version = "*" }
+crossterm = "*"
+iai = "*"
 
 [features]
 
