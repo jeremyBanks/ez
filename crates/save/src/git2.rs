@@ -229,7 +229,8 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
         }
 
         debug!(
-            "Loaded commit graph with {} nodes (commits) and {} edges (parent references of commits)",
+            "Loaded commit graph with {} nodes (commits) and {} edges (parent references of \
+             commits)",
             graph.node_count(),
             graph.edge_count()
         );
@@ -266,14 +267,9 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
                 commit = parent;
             }
             revision_index
-
         };
 
-        GraphStats {
-            revision_index,
-            generation_index,
-            commit_index,
-        }
+        GraphStats { revision_index, generation_index, commit_index }
     }
 
     // /// Returns a new [`Commit`] with the result of squashing this [`Commit`]
@@ -295,8 +291,8 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
     //     //     merged_commits.insert(first_parent.id());
     //     //     tail = first_parent;
 
-    //     //     // we need to collect all of the non-first parents, and walk all of
-    //     //     // their ancestors to see if they're merged in or not
+    //     //     // we need to collect all of the non-first parents, and walk all
+    // of     //     // their ancestors to see if they're merged in or not
     //     // }
 
     //     todo!()

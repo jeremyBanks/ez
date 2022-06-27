@@ -1,7 +1,5 @@
 //! The CLI.
 
-use std::fmt::Write;
-
 use {
     crate::git2::*,
     clap::{AppSettings, Parser},
@@ -10,7 +8,7 @@ use {
         Commit, ErrorCode, Repository, RepositoryInitOptions, RepositoryState, Signature, Time,
     },
     once_cell::sync::Lazy,
-    std::{env, fs, process::Command},
+    std::{env, fmt::Write, fs, process::Command},
     tracing::{debug, info, instrument, trace, warn},
 };
 
@@ -131,10 +129,7 @@ pub fn main(args: Args) -> Result<()> {
 
     let (user_name, user_email) = get_git_user(&args, &repo, &head)?;
 
-    let graph_stats = head
-        .as_ref()
-        .map(|commit| commit.graph_stats() )
-        .unwrap_or_default();
+    let graph_stats = head.as_ref().map(|commit| commit.graph_stats()).unwrap_or_default();
 
     let mut index = repo.working_index()?;
 
