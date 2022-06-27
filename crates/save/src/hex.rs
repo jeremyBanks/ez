@@ -18,6 +18,7 @@ pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
             b'a'..=b'f' => nibble = byte.wrapping_sub(b'a' - 10),
             b'A'..=b'F' => nibble = byte.wrapping_sub(b'A' - 10),
             b'_' => nibble_mask = 0x0,
+            b' ' | b'\n' | b'\t' | b',' | b';' | b'"' | b'\'' => continue,
             _ => panic!("Invalid byte {byte:?} ({:?}) in hex input.", *byte as char),
         };
 
@@ -40,25 +41,9 @@ pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
     (bytes, mask)
 }
 
-pub fn decode_hex_bytes(s: impl AsRef<str>) -> Vec<u8> {
-    let s = s.as_ref();
-    if s.len() % 2 != 0 {
-        panic!("Odd number of digits in hex string.");
-    }
-    decode_hex_nibbles(s).0
-}
-
-pub use crate::_hex as hex;
+pub use crate::hex;
 #[macro_export]
-macro_rules! _hex {
-    [$($hex:tt)*] => {
-        $crate::hex::decode_hex_bytes(stringify!($($hex)*))
-    }
-}
-
-pub use crate::_hex_masked as hex_masked;
-#[macro_export]
-macro_rules! _hex_masked {
+macro_rules! hex {
     [$($hex:tt)*] => {
         $crate::hex::decode_hex_nibbles(stringify!($($hex)*))
     }
