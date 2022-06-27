@@ -24,17 +24,19 @@ pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
     }
 
     let mask_full_bytes = std::iter::repeat(0xFF).take(bytes.len());
-    let mask: Box<dyn Iterator<Item = u8>>;
+    let mask: Vec<u8>;
 
     if let Some(byte) = buffer_byte {
         bytes.push(byte);
         let mask_half_byte = std::iter::once(0xF0);
-        mask = Box::new(mask_full_bytes.skip(1).chain(mask_half_byte));
+        mask = mask_full_bytes.chain(mask_half_byte).collect();
     } else {
-        mask = Box::new(mask_full_bytes);
+        mask = mask_full_bytes.collect();
     }
 
-    (bytes, mask.collect_vec())
+    assert_eq!(bytes.len(), mask.len());
+
+    (bytes, mask)
 }
 
 pub fn decode_hex_bytes(s: impl AsRef<str>) -> Vec<u8> {
@@ -52,8 +54,6 @@ macro_rules! _hex {
         $crate::hex::decode_hex_bytes(stringify!($($hex)*))
     }
 }
-
-use itertools::Itertools;
 
 pub use crate::_hex_masked as hex_masked;
 #[macro_export]
