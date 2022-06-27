@@ -147,7 +147,7 @@ pub fn main(args: Args) -> Result<()> {
             } else if args.empty {
                 info!("Committing with no changes.");
             } else {
-                info!("Nothing to commit (use --empty to commit anyway).");
+                info!("Nothing to commit (use --empty if this is intentional).");
                 return Ok(());
             }
         }
@@ -164,11 +164,11 @@ pub fn main(args: Args) -> Result<()> {
 
     let revision_index = generation_number + 1;
     let message = args.message.unwrap_or_else(|| {
-        let mut message = format!("r{}", revision_index);
+        let mut message = format!("r{revision_index}");
         if let Some(ref head) = head {
-            message += &format!("/{}/{}", tree4, &head.id().to_string()[..4]);
+            message += &format!("/{tree4}/{}", &head.id().to_string()[..4]);
         } else if tree.iter().next().is_some() {
-            message += &format!("/{}", &tree4);
+            message += &format!("/{tree4}");
         }
         message
     });
@@ -351,27 +351,37 @@ pub fn init() -> Args {
 
     let args = Args::parse();
 
-    let default_verbosity = 3;
+    let default_verbosity_self = 3;
+    let default_verbosity_other = 1;
 
     let log_env = env::var("RUST_LOG").unwrap_or_default();
 
-    let log_level = if args.verbose == 0 && args.quiet == 0 && !log_env.is_empty() {
+    let rust_log = if args.verbose == 0 && args.quiet == 0 && !log_env.is_empty() {
         log_env
     } else {
-        match default_verbosity + args.verbose - args.quiet {
-            i32::MIN..=0 => "off".into(),
-            1 => "error".into(),
-            2 => "warn".into(),
-            3 => "info".into(),
-            4 => "debug".into(),
-            5..=i32::MAX => "trace".into(),
-        }
+        let verbosity_self = match default_verbosity_self + args.verbose - args.quiet {
+            i32::MIN..=0 => "off",
+            1 => "error",
+            2 => "warn",
+            3 => "info",
+            4 => "debug",
+            5..=i32::MAX => "trace",
+        };
+        let verbosity_other = match default_verbosity_other + args.verbose - args.quiet {
+            i32::MIN..=0 => "off",
+            1 => "error",
+            2 => "warn",
+            3 => "info",
+            4 => "debug",
+            5..=i32::MAX => "trace",
+        };
+        format!("{verbosity_other},save={verbosity_self}")
     };
 
     tracing_subscriber::util::SubscriberInitExt::init(tracing_subscriber::Layer::with_subscriber(
         tracing_error::ErrorLayer::default(),
         tracing_subscriber::fmt()
-            .with_env_filter(::tracing_subscriber::EnvFilter::new(log_level))
+            .with_env_filter(::tracing_subscriber::EnvFilter::new(rust_log))
             .with_target(false)
             .with_span_events(
                 tracing_subscriber::fmt::format::FmtSpan::ENTER
