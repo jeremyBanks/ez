@@ -118,7 +118,7 @@ pub trait RepositoryExt: Borrow<Repository> {
         let tree = repo.find_tree(tree)?;
         let head = repo.head()?.peel_to_commit()?;
         let signature = repo.signature_or_fallback();
-        let message = "hmm";
+        let message = "hmm"; // XXX: ???
         let commit = repo.commit(None, &signature, &signature, message, &tree, &[&head])?;
         let commit = repo.find_commit(commit)?;
         Ok(commit)
