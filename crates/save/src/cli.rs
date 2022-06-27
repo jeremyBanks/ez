@@ -1,5 +1,7 @@
 //! The CLI.
 
+use std::fmt::Write;
+
 use {
     crate::git2::*,
     clap::{AppSettings, Parser},
@@ -129,12 +131,10 @@ pub fn main(args: Args) -> Result<()> {
 
     let (user_name, user_email) = get_git_user(&args, &repo, &head)?;
 
-    let generation_number = head
+    let graph_stats = head
         .as_ref()
-        .map(|commit| {
-            (commit.generation_number() + commit.generation_number_via_petgraph()) / 2 + 1
-        })
-        .unwrap_or(0);
+        .map(|commit| commit.graph_stats() )
+        .unwrap_or_default();
 
     let mut index = repo.working_index()?;
 
@@ -159,20 +159,18 @@ pub fn main(args: Args) -> Result<()> {
         info!("Skipping index write because this is a dry run.");
     }
 
-    let tree4 = &tree.to_string()[..4];
     let tree = repo.find_tree(tree)?;
 
-    let revision_index = generation_number + 1;
+    let mut message = String::new();
+    write!(message, "r{}", graph_stats.revision_index);
 
-    let message = args.message.unwrap_or_else(|| {
-        let mut message = format!("r{revision_index}");
-        if let Some(ref head) = head {
-            message += &format!("/{tree4}/{}", &head.id().to_string()[..4]);
-        } else if tree.iter().next().is_some() {
-            message += &format!("/{tree4}");
-        }
-        message
-    });
+    if graph_stats.generation_index != graph_stats.revision_index {
+        write!(message, " g{}", graph_stats.generation_index);
+    }
+
+    if graph_stats.commit_index != graph_stats.generation_index {
+        write!(message, " c{}", graph_stats.commit_index);
+    }
 
     let previous_seconds = head.as_ref().map(|c| c.time().seconds()).unwrap_or(0);
     let time = Signature::now(&user_name, &user_email)?.when();

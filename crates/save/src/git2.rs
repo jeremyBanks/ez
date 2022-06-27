@@ -125,7 +125,14 @@ pub trait RepositoryExt: Borrow<Repository> {
     }
 }
 
-impl<T> RepositoryExt for T where T: Borrow<Repository> {}
+#[derive(Debug, Clone, Copy, Default)]
+pub struct GraphStats {
+    pub revision_index: u32,
+    pub generation_index: u32,
+    pub commit_index: u32,
+}
+
+impl RepositoryExt for Repository {}
 
 /// A [`Repository`] in a temporary directory.
 ///
@@ -190,124 +197,10 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
         body
     }
 
-    #[instrument(level = "debug")]
-    #[must_use]
-    fn generation_number(&self) -> u32 {
-        let commit: &Commit = self.borrow();
-        let head = commit.clone();
-
-        #[derive(Debug, Clone)]
-        struct CommitNode {
-            /// Number of edges (Git children) whose distances hasn't been
-            /// accounted-for yet.
-            unaccounted_edges_in: u32,
-            /// Max distance from head of accounted-for edges.
-            max_distance_from_head: u32,
-            /// Git parents of this node.
-            edges_out: Vec<Rc<RefCell<CommitNode>>>,
-        }
-
-        let (root, _leaves) = {
-            let span = debug_span!("load_git_graph");
-            let _guard = span.enter();
-
-            let mut all_commits = HashMap::<Oid, Rc<RefCell<CommitNode>>>::new();
-            let mut initial_commits = vec![];
-
-            #[derive(Debug, Clone)]
-            struct CommitWalking<'repo> {
-                commit: Commit<'repo>,
-                from: Option<Rc<RefCell<CommitNode>>>,
-            }
-
-            let mut walks = vec![CommitWalking { commit: head.clone(), from: None }];
-
-            while let Some(CommitWalking { commit, from }) = walks.pop() {
-                let from = &from;
-                all_commits
-                    .entry(commit.id())
-                    .and_modify(|node| {
-                        if let Some(from) = from {
-                            from.borrow_mut().edges_out.push(Rc::clone(node));
-                            node.borrow_mut().unaccounted_edges_in += 1;
-                        }
-                    })
-                    .or_insert_with(|| {
-                        let node = Rc::new(RefCell::new(CommitNode {
-                            edges_out: vec![],
-                            unaccounted_edges_in: 1,
-                            max_distance_from_head: 0,
-                        }));
-
-                        if let Some(from) = from {
-                            from.borrow_mut().edges_out.push(Rc::clone(&node));
-                        }
-
-                        if commit.parents().len() == 0 {
-                            debug!("Found an initial commit: {:?}", commit);
-                            initial_commits.push(Rc::clone(&node));
-                        } else {
-                            for parent in commit.parents() {
-                                walks.push(CommitWalking {
-                                    commit: parent,
-                                    from: Some(Rc::clone(&node)),
-                                });
-                            }
-                        }
-
-                        node
-                    });
-            }
-
-            info!(
-                "Loaded {} commits, containing {} initial commits.",
-                all_commits.len().separate_with_underscores(),
-                initial_commits.len(),
-            );
-
-            let head = Rc::clone(all_commits.get(&head.id()).unwrap());
-            (head, initial_commits)
-        };
-
-        let generation_number = {
-            let span = debug_span!("measure_git_graph");
-            let _guard = span.enter();
-
-            let mut generation_number = 0;
-
-            let mut live = vec![root];
-
-            while let Some(commit) = live.pop() {
-                let commit = commit.borrow_mut();
-
-                if commit.edges_out.is_empty() {
-                    generation_number = max(generation_number, commit.max_distance_from_head);
-                } else {
-                    for parent in commit.edges_out.iter() {
-                        let mut parent_mut = parent.borrow_mut();
-                        parent_mut.max_distance_from_head = max(
-                            parent_mut.max_distance_from_head,
-                            commit.max_distance_from_head + 1,
-                        );
-                        parent_mut.unaccounted_edges_in -= 1;
-
-                        if parent_mut.unaccounted_edges_in == 0 {
-                            live.push(Rc::clone(parent));
-                        }
-                    }
-                }
-            }
-
-            generation_number
-        };
-
-        generation_number
-    }
-
     /// Testing a different implementation of [`CommitExt::generation_number`].
     #[instrument(level = "debug")]
     #[must_use]
-    fn generation_number_via_petgraph(&self) -> u32 {
+    fn graph_stats(&self) -> GraphStats {
         let commit: &Commit = self.borrow();
 
         // Git commit graph as petgraph:
@@ -335,8 +228,8 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
             }
         }
 
-        info!(
-            "Constructed graph with {} nodes and {} edges",
+        debug!(
+            "Loaded commit graph with {} nodes (commits) and {} edges (parent references of commits)",
             graph.node_count(),
             graph.edge_count()
         );
@@ -363,37 +256,51 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
             }
         }
 
-        let ancestor_commits_count = graph.node_count() - 1;
-        let revision_index = global_maximum_weight;
+        let commit_index: u32 = (graph.node_count() - 1).try_into().unwrap();
+        let generation_index = global_maximum_weight;
+        let revision_index = {
+            let mut revision_index = 0;
+            let mut commit: Commit = self.borrow().clone();
+            while let Some(parent) = commit.parents().next() {
+                revision_index += 1;
+                commit = parent;
+            }
+            revision_index
 
-        global_maximum_weight
-    }
+        };
 
-    /// Returns a new [`Commit`] with the result of squashing this [`Commit`]
-    /// with its `depth` first-parent ancestors, and any merged-in
-    /// descendant branches.
-    #[instrument(level = "debug")]
-    #[must_use]
-    fn squashed(&self, depth: u32) -> Commit<'repo> {
-        let commit: &Commit<'repo> = self.borrow();
-        if depth == 0 {
-            return commit.clone();
+        GraphStats {
+            revision_index,
+            generation_index,
+            commit_index,
         }
-
-        let _merged_commits: HashSet<Oid> = [commit.id()].into();
-
-        // let mut tail: Commit = commit.clone();
-        // for _ in 0..depth {
-        //     let mut first_parent = tail.parents().next().unwrap().clone();
-        //     merged_commits.insert(first_parent.id());
-        //     tail = first_parent;
-
-        //     // we need to collect all of the non-first parents, and walk all of
-        //     // their ancestors to see if they're merged in or not
-        // }
-
-        todo!()
     }
+
+    // /// Returns a new [`Commit`] with the result of squashing this [`Commit`]
+    // /// with its `depth` first-parent ancestors, and any merged-in
+    // /// descendant branches.
+    // #[instrument(level = "debug")]
+    // #[must_use]
+    // fn squashed(&self, depth: u32) -> Commit<'repo> {
+    //     let commit: &Commit<'repo> = self.borrow();
+    //     if depth == 0 {
+    //         return commit.clone();
+    //     }
+
+    //     let _merged_commits: HashSet<Oid> = [commit.id()].into();
+
+    //     // let mut tail: Commit = commit.clone();
+    //     // for _ in 0..depth {
+    //     //     let mut first_parent = tail.parents().next().unwrap().clone();
+    //     //     merged_commits.insert(first_parent.id());
+    //     //     tail = first_parent;
+
+    //     //     // we need to collect all of the non-first parents, and walk all of
+    //     //     // their ancestors to see if they're merged in or not
+    //     // }
+
+    //     todo!()
+    // }
 
     /// Modifies the committer and author timestamps on a commit to produce a
     /// commit ID as close as possible to a given target, within a timestamp
@@ -549,13 +456,7 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
     }
 }
 
-struct GraphStats {
-    revision_index: u64,
-    generation_index: u64,
-    commits_index: u64,
-}
-
-impl<'repo, T> CommitExt<'repo> for T where T: Borrow<Commit<'repo>> + Debug {}
+impl<'repo> CommitExt<'repo> for Commit<'repo> {}
 
 /// The commit resulting from a [`CommitExt::brute_force_timestamps`] call,
 /// wrapped to indicate whether the target prefix was complete or incompletely
@@ -661,4 +562,4 @@ pub trait OidExt: Borrow<Oid> + Debug {
     }
 }
 
-impl<T> OidExt for T where T: Borrow<Oid> + Debug {}
+impl OidExt for Oid {}
