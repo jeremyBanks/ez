@@ -114,11 +114,8 @@ pub struct Args {
 /// For other fatal errors.
 #[instrument(level = "debug", skip(args))]
 pub fn main(args: Args) -> Result<()> {
-    let (target_hash, target_mask) = args
-        .prefix_hex
-        .as_ref()
-        .map(|s| crate::hex::decode_hex_nibbles(s))
-        .unwrap_or((vec![], vec![]));
+    let target =
+        args.prefix_hex.as_ref().map(|s| crate::hex::decode_hex_nibbles(s)).unwrap_or_default();
 
     let repo = open_or_init_repo(&args)?;
 
@@ -210,8 +207,8 @@ pub fn main(args: Args) -> Result<()> {
 
     let commit = base_commit.brute_force_timestamps(
         &repo,
-        &target_hash,
-        Some(&target_mask.as_ref()),
+        &target.bytes,
+        Some(&target.mask),
         min_timestamp,
         max_timestamp,
     );

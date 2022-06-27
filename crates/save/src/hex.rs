@@ -1,4 +1,4 @@
-pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
+pub fn decode_hex_nibbles(s: impl AsRef<str>) -> MaskedBytes {
     let mut hex_bytes = s.as_ref().as_bytes();
     if hex_bytes.get(0) == Some(&b'0') && matches!(hex_bytes.get(1), Some(b'x' | b'X')) {
         hex_bytes = &hex_bytes[2..];
@@ -15,8 +15,8 @@ pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
 
         match byte {
             b'0'..=b'9' => nibble = byte.wrapping_sub(b'0'),
-            b'a'..=b'f' => nibble = byte.wrapping_sub(b'a' - 10),
-            b'A'..=b'F' => nibble = byte.wrapping_sub(b'A' - 10),
+            b'a'..=b'f' => nibble = byte.wrapping_sub(b'a' - 0xa),
+            b'A'..=b'F' => nibble = byte.wrapping_sub(b'A' - 0xA),
             b'_' => nibble_mask = 0x0,
             b' ' | b'\n' | b'\t' | b',' | b';' | b'"' | b'\'' => continue,
             _ => panic!("Invalid byte {byte:?} ({:?}) in hex input.", *byte as char),
@@ -38,7 +38,22 @@ pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
 
     assert_eq!(bytes.len(), mask.len());
 
-    (bytes, mask)
+    MaskedBytes { bytes, mask }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct MaskedBytes {
+    pub bytes: Vec<u8>,
+    pub mask: Vec<u8>,
+}
+
+impl IntoIterator for MaskedBytes {
+    type Item = (u8, u8);
+    type IntoIter = std::iter::Zip<std::vec::IntoIter<u8>, std::vec::IntoIter<u8>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.bytes.into_iter().zip(self.mask.into_iter())
+    }
 }
 
 pub use crate::hex;
