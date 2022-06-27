@@ -156,7 +156,7 @@ pub fn main(args: Args) -> Result<()> {
     if !args.dry_run {
         index.write()?;
     } else {
-        info!("Skipping index write because this is a dry run.");
+        debug!("Skipping index write because this is a dry run.");
     }
 
     let tree = repo.find_tree(tree)?;
