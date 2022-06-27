@@ -490,8 +490,9 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
                             .as_bytes()
                             .iter()
                             .zip(target_prefix.iter())
+                            .map(|(a, b)| (a ^ b))
                             .zip(target_mask.iter())
-                            .map(|((a, b), m)| (a ^ b) & m)
+                            .map(|(score, mask)| score & mask)
                             .collect::<Vec<u8>>();
 
                         (
