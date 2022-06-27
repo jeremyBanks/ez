@@ -114,12 +114,11 @@ pub struct Args {
 /// For other fatal errors.
 #[instrument(level = "debug", skip(args))]
 pub fn main(args: Args) -> Result<()> {
-    // TODO: support single 4-bit hex digits, instead of requiring 8-bit pairs
-    let mut target_hash = args
+    let (target_hash, target_mask) = args
         .prefix_hex
         .as_ref()
-        .map(|s| hex::decode(s).wrap_err("target hash must be hex").unwrap())
-        .unwrap_or_default();
+        .map(|s| crate::hex::decode_hex_nibbles(s))
+        .unwrap_or((vec![], vec![]));
 
     let repo = open_or_init_repo(&args)?;
 
@@ -199,8 +198,6 @@ pub fn main(args: Args) -> Result<()> {
     let min_timestamp = seconds;
     let max_timestamp = seconds + step_seconds - 1;
 
-    target_hash.append(&mut tree.id().as_bytes().to_vec());
-
     let base_commit = repo.commit(
         None,
         &Signature::new(&user_name, &user_email, &Time::new(min_timestamp, offset)).unwrap(),
@@ -211,8 +208,13 @@ pub fn main(args: Args) -> Result<()> {
     )?;
     let base_commit = repo.find_commit(base_commit)?;
 
-    let commit =
-        base_commit.brute_force_timestamps(&repo, &target_hash, None, min_timestamp, max_timestamp);
+    let commit = base_commit.brute_force_timestamps(
+        &repo,
+        &target_hash,
+        Some(&target_mask.as_ref()),
+        min_timestamp,
+        max_timestamp,
+    );
 
     let commit = commit.commit();
 

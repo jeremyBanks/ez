@@ -50,8 +50,7 @@ fn main() -> ::eyre::Result<()> {
         {:02x?}
         {:02x?}
     ",
-        hex_masked.0,
-        hex_masked.1.collect::<Vec<_>>()
+        hex_masked.0, hex_masked.1
     );
 
     let hex_masked = hex_masked![4b825dc642cb6eb9a060e54bf8d69288fbee49045];
@@ -60,8 +59,7 @@ fn main() -> ::eyre::Result<()> {
         {:02x?}
         {:02x?}
     ",
-        hex_masked.0,
-        hex_masked.1.collect::<Vec<_>>()
+        hex_masked.0, hex_masked.1
     );
 
     Ok(())

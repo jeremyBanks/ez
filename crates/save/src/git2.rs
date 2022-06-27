@@ -425,11 +425,14 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
         &self,
         repo: &'repo Repository,
         target_prefix: &[u8],
-        target_mask: impl Into<Option<Box<[u8]>>>,
+        target_mask: Option<&[u8]>,
         min_timestamp: impl Into<Option<i64>>,
         max_timestamp: impl Into<Option<i64>>,
     ) -> BruteForcedCommit<'repo> {
-        let target_mask = target_mask.into().unwrap_or_else(|| Box::new([0xFF; 20]));
+        let target_mask = target_mask.unwrap_or(&{
+            static DEFAULT: &[u8] = &[0xFF; 20];
+            DEFAULT
+        });
         let commit = self.borrow();
         let min_timestamp =
             min_timestamp.into().unwrap_or_else(|| commit.author().when().seconds());

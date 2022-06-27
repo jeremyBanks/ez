@@ -1,4 +1,4 @@
-pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, impl Iterator<Item = u8>) {
+pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
     let mut hex_bytes = s.as_ref().as_bytes();
     if hex_bytes.get(0) == Some(&b'0') && matches!(hex_bytes.get(1), Some(b'x' | b'X')) {
         hex_bytes = &hex_bytes[2..];
@@ -34,7 +34,7 @@ pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, impl Iterator<Item = 
         mask = Box::new(mask_full_bytes);
     }
 
-    (bytes, mask)
+    (bytes, mask.collect_vec())
 }
 
 pub fn decode_hex_bytes(s: impl AsRef<str>) -> Vec<u8> {
@@ -52,6 +52,8 @@ macro_rules! _hex {
         $crate::hex::decode_hex_bytes(stringify!($($hex)*))
     }
 }
+
+use itertools::Itertools;
 
 pub use crate::_hex_masked as hex_masked;
 #[macro_export]
