@@ -33,7 +33,6 @@ use {
         });
         AFTER_HELP.as_ref()
     },
-    max_term_width = max_term_width(),
     dont_collapse_args_in_usage = true,
     infer_long_args = true,
     setting = AppSettings::DeriveDisplayOrder,
@@ -55,24 +54,6 @@ pub struct Args {
     /// This commit will have the same tree hash as its parent.
     #[clap(long = "empty", short = 'e', conflicts_with = "all")]
     pub empty: bool,
-
-    /// Squash/amend previous commit(s), instead of adding a new one.
-    ///
-    /// By default, `--squash` will behave like `git commit --amend`, only
-    /// replacing the most recent commit. However, specifying a larger number
-    /// such as `--squash=2` will squash that many recent first-parents (and
-    /// any current changes) into a single commit. If any of those commits are
-    /// merges, any non-squashed parents will be added as parents of the
-    /// squashed commit. Any additional authors will be included in
-    /// Co-Authored-By footers. Commit messages will be discarded.
-    #[clap(
-        long = "squash",
-        alias = "amend",
-        short = 's',
-        default_value = "0",
-        default_missing_value = "1"
-    )]
-    pub squash_commits: u32,
 
     /// The required commit hash or prefix, in hex.
     ///
@@ -120,16 +101,6 @@ pub struct Args {
     /// Increase log verbosity. May be used multiple times.
     #[clap(long, short = 'v', parse(from_occurrences), conflicts_with = "quiet")]
     pub verbose: i32,
-}
-
-/// Used to override the `max_term_width` of our derived [`Args`]
-/// using the **build time** environment variable `MAX_TERM_WIDTH`.
-///
-/// This is hacky and bad for the build cache, only meant for internal use in
-/// generating the `--help` text for `README.md`, which needs to be
-/// tightly wrapped to fit in available space on crates.io.
-fn max_term_width() -> usize {
-    option_env!("MAX_TERM_WIDTH").unwrap_or("100").parse().unwrap()
 }
 
 /// CLI entry point.
@@ -241,7 +212,7 @@ pub fn main(args: Args) -> Result<()> {
     let base_commit = repo.find_commit(base_commit)?;
 
     let commit =
-        base_commit.brute_force_timestamps(&repo, &target_hash, min_timestamp, max_timestamp);
+        base_commit.brute_force_timestamps(&repo, &target_hash, None, min_timestamp, max_timestamp);
 
     let commit = commit.commit();
 

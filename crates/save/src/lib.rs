@@ -62,3 +62,4 @@
 
 pub mod cli;
 pub mod git2;
+pub mod hex;
