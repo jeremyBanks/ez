@@ -162,14 +162,14 @@ pub fn main(args: Args) -> Result<()> {
     let tree = repo.find_tree(tree)?;
 
     let mut message = String::new();
-    write!(message, "r{}", graph_stats.revision_index);
+    write!(message, "r{}", graph_stats.revision_index)?;
 
     if graph_stats.generation_index != graph_stats.revision_index {
-        write!(message, " g{}", graph_stats.generation_index);
+        write!(message, " / g{}", graph_stats.generation_index)?;
     }
 
     if graph_stats.commit_index != graph_stats.generation_index {
-        write!(message, " c{}", graph_stats.commit_index);
+        write!(message, " / c{}", graph_stats.commit_index)?;
     }
 
     let previous_seconds = head.as_ref().map(|c| c.time().seconds()).unwrap_or(0);
