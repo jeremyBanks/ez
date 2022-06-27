@@ -429,9 +429,9 @@ pub trait CommitExt<'repo>: Borrow<Commit<'repo>> + Debug {
         min_timestamp: impl Into<Option<i64>>,
         max_timestamp: impl Into<Option<i64>>,
     ) -> BruteForcedCommit<'repo> {
-        let target_mask = target_mask.unwrap_or(&{
+        let target_mask = target_mask.unwrap_or({
             static DEFAULT: &[u8] = &[0xFF; 20];
-            DEFAULT
+            &DEFAULT[..target_prefix.len().min(DEFAULT.len())]
         });
         trace!("Brute forcing a timestamp for {target_prefix:2x?} with mask {target_mask:2x?}");
         let commit = self.borrow();
