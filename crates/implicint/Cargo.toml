@@ -1,0 +1,30 @@
+cargo-features = ["workspace-inheritance"]
+
+[package]
+name = "implicint"
+description = "internal"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[dependencies]
+derive_more.workspace = true
+doop.workspace = true
+ez-core.workspace = true
+num-derive.workspace = true
+num-traits.workspace = true
+serde = { workspace = true, features = ["derive"]}
+thiserror.workspace = true
+
+[package.metadata.release]
+consolidate-commits = true
+consolidate-pushes = true
+dev-version = true
+dev-version-ext = "dev"
+post-release-commit-message = "v{{next_version}}"
+pre-release-commit-message = "v{{version}}"
+shared-version = true
+tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
+tag-name = "{{version}}"

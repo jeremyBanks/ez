@@ -1,0 +1,21 @@
+cargo-features = ["workspace-inheritance"]
+
+[package]
+name = "run-example"
+publish = false
+edition.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "run-example"
+doc = false
+
+[dependencies]
+ez.workspace = true
+
+[dev-dependencies]
+eyre.workspace = true
+tokio = { workspace = true, features = ["full"] }
+
+[package.metadata.release]
+release = false

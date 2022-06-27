@@ -1,36 +1,70 @@
 #![doc = include_str!("../README.md")]
 
-#[doc(hidden)]
-pub use ez_impl::internal as __;
-use ez_impl::publish;
-
-publish! {
-    pub use ez_impl::throw;
-    prose from "throw.md";
-    failing example throw;
-}
-
-publish! {
-    pub use ez_proc_macro::main;
-    prose from "main.md";
-    example main_noop;
-    example home;
-    example tokio;
-}
-
-publish! {
-    pub use ez_proc_macro::try_throws;
-    prose from "try_throws.md";
-    failing example try_throws;
-}
-
-publish! {
-    pub use ez_proc_macro::throws;
-    prose from "throws.md";
-}
-
-/// (from [`eyre`]) A dynamic error reporting type.
-///
-/// ---
 #[doc(inline)]
-pub use eyre::Report as Error;
+pub use ::ez_core::{throw, throws, try_throws, Error};
+#[doc(hidden)]
+pub use ::ez_main::ly;
+#[doc(inline)]
+pub use ::ez_main::main;
+pub use ::implicint::{int, Int};
+
+pub mod prelude {
+    #[doc(inline)]
+    pub use ::batteries::prelude::*;
+    pub use ::ez_main::main;
+}
+
+pub use ::batteries::batteries;
+
+#[doc(hidden)]
+pub mod __ {
+    //! **⚠️ INTERNAL! DO NOT USE!**
+    //!
+    //! This should not be considered part of this crate's public API.
+    //!
+    //! The contents are public only due to internal implementation
+    //! requirements.
+    #[doc(inline)]
+    pub use ::ez_core::__::*;
+    #[doc(inline)]
+    pub use ::ez_main::__::*;
+}
+
+#[cfg(doc)]
+pub mod r#pub {
+    //! Documents and posts, for reading by humans.
+    //!
+    //! This module only contains documentation and can not be imported.
+
+    macro_rules! docs {
+        ($( $ident:ident ),* $(,)?) => {
+            $(
+                pub mod $ident {
+                    #![doc = concat!("[🔗 _", stringify!($ident), "_][self#!]")]
+                    //!
+                    //! <details>
+                    //! <summary>&nbsp;</summary>
+                    //! <br />
+                    //! <div id="!"></div>
+                    //!
+                    #![doc = include_str!(concat!("../pub/", stringify!($ident), ".md"))]
+                    //!
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! <br /><br /><br /><br /><br /><br /><br /><br />
+                    //! </details>
+                    use super::*;
+                    use super::super::*;
+                }
+            )*
+        }
+    }
+
+    docs! {
+        introducing_doop,
+        introducing_erro,
+        introducing_ez,
+        proposed_batteries,
+    }
+}

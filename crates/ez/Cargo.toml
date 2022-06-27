@@ -1,24 +1,26 @@
+cargo-features = ["workspace-inheritance"]
+
 [package]
-authors = ["Jeremy Banks <_@jeremy.ca>"]
-autoexamples = false
-description = "A collection of easy-to-use, beginner-friendly utilities for Rust."
-edition = "2021"
-license = "MIT OR Apache-2.0"
 name = "ez"
-repository = "https://github.com/jeremyBanks/ez"
-rust-version = "1.59.0"
-version = "0.0.4-dev"
+description = "easily"
+autoexamples = false
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[features]
+default = ["int", "batteries", "main"]
+int = ["implicint"]
+main = ["ez-main"]
 
 [dependencies]
-eyre = "0.6.6"
-ez-impl = { path = "../ez-impl", version = "=0.0.4-dev"}
-ez-proc-macro = { path = "../ez-proc-macro", version = "=0.0.4-dev"}
-inherent = "1.0.0"
-
-[dev-dependencies]
-eyre = "0.6.6"
-tokio = { version = "1.16.0", features = ["full"] }
-trybuild = "1.0.56"
+ez-core.workspace = true
+batteries = { workspace = true, optional = true }
+implicint = { workspace = true, optional = true }
+ez-main = { workspace = true , optional = true }
+paste.workspace = true
 
 [package.metadata.release]
 consolidate-commits = true

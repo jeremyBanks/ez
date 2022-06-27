@@ -1,0 +1,28 @@
+cargo-features = ["workspace-inheritance"]
+
+[package]
+name = "ez-macros"
+description = "internal"
+autobins = false
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[lib]
+doc = false
+
+[dependencies]
+ez-proc-macro.workspace = true
+
+[package.metadata.release]
+consolidate-commits = true
+consolidate-pushes = true
+dev-version = true
+dev-version-ext = "dev"
+post-release-commit-message = "v{{next_version}}"
+pre-release-commit-message = "v{{version}}"
+shared-version = true
+tag-message = "https://crates.io/crates/ez/{{version}}"
+tag-name = "{{version}}"

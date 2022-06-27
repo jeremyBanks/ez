@@ -19,7 +19,7 @@ fn fallible_dynamic(n: i32) -> i32 {
         1 => {
             // explicit return
             return 2;
-        },
+        }
         2 => {
             #[allow(clippy::all)]
             [3, 4, 5]
@@ -32,7 +32,7 @@ fn fallible_dynamic(n: i32) -> i32 {
                 .last()
                 .unwrap()
                 .clone()
-        },
+        }
         3 => {
             #[allow(clippy::all)]
             fn double(x: i32) -> i32 {
@@ -41,20 +41,20 @@ fn fallible_dynamic(n: i32) -> i32 {
                 return double;
             }
             double(4)
-        },
+        }
         4 => {
             // errors can be propagated with ?
             "what".parse()?
-        },
+        }
         5 => {
             // error messages can be returned with throw!;
             throw!("this is an error");
-        },
+        }
         _ => {
             // or specific error types
             let e: std::num::ParseIntError = "what".parse::<i32>().unwrap_err();
             throw!(e)
-        },
+        }
     }
 }
 
@@ -66,7 +66,7 @@ fn fallible_concrete(n: i32) -> i32 {
         1 => {
             // explicit return
             return 2;
-        },
+        }
         2 => {
             #[allow(clippy::all)]
             [3, 4, 5]
@@ -79,7 +79,7 @@ fn fallible_concrete(n: i32) -> i32 {
                 .last()
                 .unwrap()
                 .clone()
-        },
+        }
         3 => {
             #[allow(clippy::all)]
             fn double(x: i32) -> i32 {
@@ -88,16 +88,16 @@ fn fallible_concrete(n: i32) -> i32 {
                 return double;
             }
             double(4)
-        },
+        }
         4 => {
             // errors can be propagated with ?
             "what".parse()?
-        },
+        }
         _ => {
             // errors can be returned with throw! (but plain error messages aren't permitted
             // because they don't satisfy the concrete error type)
             let e: std::num::ParseIntError = "what".parse::<i32>().unwrap_err();
             throw!(e)
-        },
+        }
     }
 }

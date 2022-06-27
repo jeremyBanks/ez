@@ -1,0 +1,17 @@
+cargo-features = ["workspace-inheritance"]
+
+[package]
+name = "cargo-merk"
+publish = false
+edition.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "cargo-merk"
+doc = false
+
+[dependencies]
+ez.workspace = true
+
+[package.metadata.release]
+release = false

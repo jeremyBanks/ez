@@ -1,0 +1,53 @@
+[package]
+default-run = "save"
+description = "Would you like to SAVE the change?"
+edition = "2021"
+name = "save"
+version = "0.20220627.0"
+
+[dependencies]
+clap = { features = ["derive", "env", "cargo", "unicode", "wrap_help"], version = "*" }
+color-eyre = "*"
+digest = "*"
+eyre = "*"
+git2 = "*"
+home = "*"
+itertools = "*"
+once_cell = "*"
+petgraph = "*"
+rayon = "*"
+sha-1 = "*"
+tempfile = "*"
+thousands = "*"
+tracing = { features = ["log"], version = "*" }
+tracing-error = { features = ["traced-error"], version = "*" }
+tracing-subscriber = { features = ["env-filter"], version = "*" }
+
+[[bench]]
+name = "criterion"
+harness = false
+
+[[bench]]
+name = "iai"
+harness = false
+
+[dev-dependencies]
+criterion = { features = ["html_reports"], version = "*" }
+crossterm = "*"
+iai = "*"
+
+[features]
+
+[package.metadata.release]
+allow-branch = ["trunk"]
+dev-version = true
+dev-version-ext = "dev"
+post-release-commit-message = "v{{next_version}}"
+pre-release-commit-message = "v{{version}}"
+pre-release-hook = ["scripts/pre-release"]
+tag-message = "https://crates.io/crates/{{crate_name}}/{{version}}"
+tag-name = "{{version}}"
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--document-private-items"]
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples=all"]

@@ -1,0 +1,97 @@
+{
+    "dockerFile": "Dockerfile",
+    "extensions": [
+        "akamud.vscode-theme-onelight",
+        "denoland.vscode-deno",
+        "eamodio.gitlens",
+        "GitHub.github-vscode-theme",
+        "github.github-vscode-theme",
+        "matklad.rust-analyzer",
+        "ms-vscode.theme-1337",
+        "tamasfe.even-better-toml",
+        "Tyriar.sort-lines",
+        "usernamehw.errorlens",
+        "vadimcn.vscode-lldb",
+        "streetsidesoftware.code-spell-checker"
+    ],
+    "settings": {
+        "editor.tokenColorCustomizations": {
+            "[1337]": {
+                "textMateRules": [
+                    {
+                        "scope": "comment",
+                        "settings": {
+                            "foreground": "#FFF"
+                        }
+                    }
+                ]
+            },
+            "[Atom One Dark]": {
+                "textMateRules": [
+                    {
+                        "scope": "comment",
+                        "settings": {
+                            "foreground": "#FFF"
+                        }
+                    }
+                ]
+            },
+            "[Atom One Light]": {
+                "textMateRules": [
+                    {
+                        "scope": "comment",
+                        "settings": {
+                            "foreground": "#000"
+                        }
+                    }
+                ]
+            },
+            "[GitHub Dark Default]": {
+                "textMateRules": [
+                    {
+                        "scope": "comment",
+                        "settings": {
+                            "foreground": "#FFF"
+                        }
+                    }
+                ]
+            },
+            "[GitHub Light Default]": {
+                "textMateRules": [
+                    {
+                        "scope": "comment",
+                        "settings": {
+                            "foreground": "#000"
+                        }
+                    }
+                ]
+            },
+            "textMateRules": [
+                {
+                    "scope": "punctuation.definition.comment",
+                    "settings": {
+                        "fontStyle": "bold",
+                        "foreground": "#0A44"
+                    }
+                },
+                {
+                    "scope": "comment",
+                    "settings": {
+                        "fontStyle": ""
+                    }
+                }
+            ]
+        },
+        "rust-analyzer.checkOnSave.allTargets": false,
+        "rust-analyzer.inlayHints.lifetimeElisionHints": "skip_trivial",
+        "rust-analyzer.inlayHints.lifetimeElisionHints.useParameterNames": true,
+        "workbench.colorCustomizations": {
+            "editorInlayHint.foreground": "#898a60",
+            "editorInlayHint.parameterBackground": "#60303010",
+            "editorInlayHint.parameterForeground": "#968383",
+            "editorInlayHint.typeBackground": "#30603010",
+            "editorInlayHint.typeForeground": "#808080"
+        },
+        "workbench.colorTheme": "1337"
+    }
+}
