@@ -29,7 +29,7 @@ pub fn decode_hex_nibbles(s: impl AsRef<str>) -> (Vec<u8>, Vec<u8>) {
     if let Some(byte) = buffer_byte {
         bytes.push(byte);
         let mask_half_byte = std::iter::once(0xF0);
-        mask = Box::new(mask_full_bytes.chain(mask_half_byte))
+        mask = Box::new(mask_full_bytes.skip(1).chain(mask_half_byte));
     } else {
         mask = Box::new(mask_full_bytes);
     }
