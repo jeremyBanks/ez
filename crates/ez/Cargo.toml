@@ -17,7 +17,7 @@ inherent = "1.0.0"
 
 [dev-dependencies]
 eyre = "0.6.6"
-tokio = { version = "1.16.0", features = ["full"] }
+tokio = { version = "1.18.5", features = ["full"] }
 trybuild = "1.0.56"
 
 [package.metadata.release]
