@@ -1,0 +1,15 @@
+[package]
+name = "doop"
+version = "0.1.0"
+edition = "2024"
+authors = ["Jeremy Banks <_@jeremy.ca>"]
+license = "MIT OR Apache-2.0"
+description = "A macro for local code duplication using loop-style syntax"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", features = ["full", "extra-traits"] }
