@@ -119,9 +119,8 @@ pub fn entry_point<
         Some((name, value))
     });
 
-    let exit_status = main(args.collect(), env.collect()).map_err(|err| {
+    let exit_status = main(args.collect(), env.collect()).inspect_err(|_err| {
         tracing::error!(target: "ez", "exiting with error status code due to an unhandled error");
-        err
     })?.to_i32();
 
     if exit_status != 0 {
