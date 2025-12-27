@@ -4,10 +4,9 @@ pub extern crate std;
 
 mod dysfunctional;
 mod macro_rules;
+#[expect(special_module_name, reason = "main.rs is used as a module for entry_point function")]
 mod main;
 pub mod proc_macros;
-
-pub use crate::macro_rules::*;
 
 pub mod internal {
     //! **⚠️ INTERNAL! DO NOT USE!**
