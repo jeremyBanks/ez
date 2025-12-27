@@ -15,12 +15,11 @@ type Function = ImplItemMethod;
 fn trailing_block(tokens: &TokenStream) -> Result<Option<Block>, eyre::Report> {
     let mut tokens = Vec::from_iter(tokens.clone());
 
-    if let Some(trailing) = tokens.last_mut() {
-        if let TokenTree::Group(group) = &trailing {
-            if group.delimiter() == Delimiter::Brace {
-                return Ok(Some(syn::parse2(trailing.into_token_stream())?));
-            }
-        }
+    if let Some(trailing) = tokens.last_mut()
+        && let TokenTree::Group(group) = &trailing
+        && group.delimiter() == Delimiter::Brace
+    {
+        return Ok(Some(syn::parse2(trailing.into_token_stream())?));
     }
 
     Ok(None)
@@ -59,20 +58,19 @@ fn wrap_returns_in_ok(block: Block) -> Block {
 fn tryify_trailing_block(tokens: TokenStream) -> Result<TokenStream, eyre::Report> {
     let mut tokens = Vec::from_iter(tokens);
 
-    if let Some(last) = tokens.last_mut() {
-        if let proc_macro2::TokenTree::Group(group) = last {
-            if group.delimiter() == proc_macro2::Delimiter::Brace {
-                let block: syn::Block = syn::parse2(last.clone().into_token_stream())?;
-                let block = wrap_returns_in_ok(block);
-                *last = parse_quote_spanned! { block.span() => {
-                    #[allow(unused_imports)]
-                    use ::ez::throw;
-                    let _ez_inner = #block;
-                    #[allow(unreachable_code)]
-                    ::ez::__::Ok(_ez_inner)
-                } };
-            }
-        };
+    if let Some(last) = tokens.last_mut()
+        && let proc_macro2::TokenTree::Group(group) = last
+        && group.delimiter() == proc_macro2::Delimiter::Brace
+    {
+        let block: syn::Block = syn::parse2(last.clone().into_token_stream())?;
+        let block = wrap_returns_in_ok(block);
+        *last = parse_quote_spanned! { block.span() => {
+            #[allow(unused_imports)]
+            use ::ez::throw;
+            let _ez_inner = #block;
+            #[allow(unreachable_code)]
+            ::ez::__::Ok(_ez_inner)
+        } };
     }
 
     Ok(tokens.into_iter().collect())

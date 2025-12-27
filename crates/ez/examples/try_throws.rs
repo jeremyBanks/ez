@@ -1,4 +1,5 @@
 #[ez::try_throws]
+#[allow(clippy::let_unit_value)] // false positive: macro transforms this into Result-returning fn
 fn something_that_fails() {
     throw!("oh no!");
 }

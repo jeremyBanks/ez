@@ -39,12 +39,18 @@ pub fn entry_point<
 
     if std::env::var("RUST_LOG").unwrap_or_default().is_empty() {
         if cfg!(debug_assertions) {
-            std::env::set_var(
-                "RUST_LOG",
-                format!("warn,{main_package_name}=debug,ez=debug"),
-            );
+            // SAFETY: We're at the entry point, no other threads exist yet
+            unsafe {
+                std::env::set_var(
+                    "RUST_LOG",
+                    format!("warn,{main_package_name}=debug,ez=debug"),
+                );
+            }
         } else {
-            std::env::set_var("RUST_LOG", format!("warn,{main_package_name}=info,ez=info"));
+            // SAFETY: We're at the entry point, no other threads exist yet
+            unsafe {
+                std::env::set_var("RUST_LOG", format!("warn,{main_package_name}=info,ez=info"));
+            }
         }
     }
 
@@ -52,7 +58,10 @@ pub fn entry_point<
         .unwrap_or_default()
         .is_empty()
     {
-        std::env::set_var("RUST_SPANTRACE", "1");
+        // SAFETY: We're at the entry point, no other threads exist yet
+        unsafe {
+            std::env::set_var("RUST_SPANTRACE", "1");
+        }
     }
 
     color_eyre::install().unwrap();
@@ -110,9 +119,8 @@ pub fn entry_point<
         Some((name, value))
     });
 
-    let exit_status = main(args.collect(), env.collect()).map_err(|err| {
+    let exit_status = main(args.collect(), env.collect()).inspect_err(|_err| {
         tracing::error!(target: "ez", "exiting with error status code due to an unhandled error");
-        err
     })?.to_i32();
 
     if exit_status != 0 {
