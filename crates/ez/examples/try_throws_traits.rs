@@ -1,3 +1,5 @@
+#![allow(dead_code)] // this is a demonstration/test file
+
 use ez::{main, throws, try_throws};
 
 #[main]
@@ -31,6 +33,7 @@ trait TraitB: Sized {
     fn fallible(self);
 
     #[try_throws]
+    #[allow(clippy::let_unit_value)] // false positive: macro transforms this
     fn also_fallible(self);
 }
 
